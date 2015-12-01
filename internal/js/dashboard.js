@@ -150,11 +150,13 @@ function make_queue_plot(target, max, now, subtext){
             series: {
                 pointPadding: 0,
                 groupPadding: 0,
-                color: col
+                color: col,
+                states: { hover: { enabled: false } }
             },
         },
         legend: { enabled: false },
         credits: { enabled: false },
+        tooltip: { enabled: false },
         series: [{
             name: 'Queue',
             data: [now]
@@ -238,6 +240,7 @@ function make_proj_open_close_plot(target, opened, closed, categories){
         },
         title: { text: null },
         credits: { enabled: false },
+        tooltip: { enabled: false },
         xAxis: [{
             categories: categories,
             reversed: false,
@@ -252,7 +255,8 @@ function make_proj_open_close_plot(target, opened, closed, categories){
         },
         plotOptions: {
             series: {
-                stacking: 'normal'
+                stacking: 'normal',
+                states: { hover: { enabled: false } }
             }
         },
         legend: {
