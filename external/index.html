@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NGI Stockholm Internal Dashboard">
+  <meta name="author" content="Phil Ewels">
+  <title>NGI Stockholm External Dashboard</title>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/styles.css" rel="stylesheet">
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+
+<body>
+
+<header class="container-fluid">
+  <div class="row">
+    <div class="col-xs-2">
+      <img src="img/NGI_logo.png">
+    </div>
+    <div class="col-xs-7">
+      <h1>NGI Stockholm - System Status</h1>
+    </div>
+    <div class="col-xs-3 text-right">
+      <span id="clock_time">00:00</span>
+      <span id="clock_date">Monday 01<sup>st</sup> January</span>
+      <div class="hero-circle">
+        <div class="hero-face">
+          <div id="hour" class="hero-hour"></div><div id="minute" class="hero-minute"></div><div id="second" class="hero-second"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container-fluid">
+
+  <div class="row">
+    <div class="col-xs-4">
+      <h3>Library Prep Queue</h3>
+      <div class="queue_plot" id="lp_queue"></div>
+    </div>
+    <div class="col-xs-4">
+      <h3>Sequencing Queue</h3>
+      <div class="queue_plot" id="seq_queue"></div>
+    </div>
+    <div class="col-xs-4">
+      <h3>Analysis Queue</h3>
+      <div class="queue_plot" id="analysis_queue"></div>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-xs-3">
+      <h3>User Affiliations</h3>
+      <div class="throughput_plot" id="user_affiliations"></div>
+    </div>
+    <div class="col-xs-3">
+      <h3>Throughput</h3>
+      <div class="throughput_plot" id="throughput_plot"></div>
+    </div>
+    <div class="col-xs-3">
+      <h3>Delivery Times</h3>
+      <div id="delivery_times"></div>
+    </div>
+    <div class="col-xs-3">
+      <h3>Sequencing Yield</h3>
+      <div id="seq_yield"></div>
+    </div>
+  </div>
+
+</div><!-- /.container -->
+
+<footer class="container-fluid">
+  <img class="pull-right" src="img/SLL_logo.png">
+</footer>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/moment.js"></script>
+<script src="js/chroma.min.js"></script>
+<script src="js/highcharts.js"></script>
+<script src="js/highcharts-more.js"></script>
+<script src="js/solid-gauge.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>
