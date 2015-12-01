@@ -92,6 +92,25 @@ footer img {
 .server-statuses li.danger { background-color: #f7c8c4; }
 .server-statuses li.danger .glyphicon { color: #a94442; }
 
+.balance_plot {
+    height: 80px;
+}
+#rc_finished_balance_wrapper {
+    border: 1px solid #999;
+    padding: 5px 5px 5px 15px;
+}
+#rc_finished_balance_wrapper span {
+    display:inline-block;
+    position: absolute;
+    left: 5px;
+    line-height: 70px;
+    -webkit-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+}
+.queue_plot {
+    padding: 5px 0 8px;
+}
+
 /* Header Clock */
 .hero-circle {
     width: 80px;

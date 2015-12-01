@@ -26,12 +26,12 @@ $(function () {
     make_proj_open_close_plot('#proj_openclose', [110,63,14,19], [-29,-16,-94,-43], ['Oct-26','Nov-02','Nov-09','Nov-16']);
     
     // Middle Row - Queue plots
-    make_queue_plot('#rc_queue', 100, 26, 26+' projects');
     make_queue_plot('#lp_queue', 100, 48, 48+' samples');
     make_queue_plot('#seq_queue', 100, 94, 94+' lanes');
     make_queue_plot('#bioinfo_queue', 100, 57, 57+' lanes');
     
     // Middle Row - Balance plots
+    make_balance_plot('#rc_finished_balance', 200, 626, 426, 626+' samples');
     make_balance_plot('#rc_balance', 200, 326, 452, 326+' samples');
     make_balance_plot('#lp_balance', 200, 178, 332, 178+' samples');
     make_balance_plot('#seq_balance', 50, 121, 128, 121+' lanes');
