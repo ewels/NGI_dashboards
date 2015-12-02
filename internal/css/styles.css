@@ -98,11 +98,12 @@ footer img {
 #rc_finished_balance_wrapper {
     border: 1px solid #999;
     padding: 5px 5px 5px 15px;
+    margin-left: -15px;
 }
 #rc_finished_balance_wrapper span {
     display:inline-block;
     position: absolute;
-    left: 5px;
+    left: -10px;
     line-height: 70px;
     -webkit-transform: rotate(-90deg);
     transform: rotate(-90deg);

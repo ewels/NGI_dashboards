@@ -15,8 +15,8 @@ $(function () {
     updateClock();
     
     // Top row
-    make_tat_plot('#finished_proj_tat', 14, 12, 'Finished<br>Libraries');
-    make_tat_plot('#lp_proj_tats', 28, 28, 'Library Preps');
+    make_tat_plot('#finished_proj_tat', 21, 12, 'Finished<br>Libraries');
+    make_tat_plot('#lp_proj_tats', 42, 28, 'Prep Projects');
     make_tat_plot('#rc_tat', 14, 9, 9+' days');
     make_tat_plot('#lp_tat', 19, 18, 18+' days');
     make_tat_plot('#seq_tat', 13, 31, 31+' days');
@@ -26,16 +26,17 @@ $(function () {
     make_proj_open_close_plot('#proj_openclose', [110,63,14,19], [-29,-16,-94,-43], ['Oct-26','Nov-02','Nov-09','Nov-16']);
     
     // Middle Row - Queue plots
-    make_queue_plot('#lp_queue', 100, 48, 48+' samples');
-    make_queue_plot('#seq_queue', 100, 94, 94+' lanes');
-    make_queue_plot('#bioinfo_queue', 100, 57, 57+' lanes');
+    // Max - 5 * pulse
+    make_queue_plot('#lp_queue', 200, 470, 48+' samples');
+    make_queue_plot('#seq_queue', 80, 162, 94+' lanes');
+    make_queue_plot('#bioinfo_queue', 64, 120, 57+' lanes');
     
     // Middle Row - Balance plots
-    make_balance_plot('#rc_finished_balance', 200, 626, 426, 626+' samples');
+    make_balance_plot('#rc_finished_balance', 200, 626, 426, 626+' lanes');
     make_balance_plot('#rc_balance', 200, 326, 452, 326+' samples');
     make_balance_plot('#lp_balance', 200, 178, 332, 178+' samples');
-    make_balance_plot('#seq_balance', 50, 121, 128, 121+' lanes');
-    make_balance_plot('#bioinfo_balance', 50, 57, 92, 57+' lanes');
+    make_balance_plot('#seq_balance', 80, 121, 128, 121+' lanes');
+    make_balance_plot('#bioinfo_balance', 64, 57, 92, 57+' lanes');
     
     // Bottom row
     make_success_plot('#rc_success', 73);
@@ -71,7 +72,7 @@ function make_tat_plot(target, aim, now, title){
             max: aim * 2.5,
             minorTickWidth: 0,
             tickPosition: 'outside',
-            tickInterval: aim,
+            tickPositions: [0, aim],
             labels: {
                 rotation: 'auto',
                 distance: 20
@@ -111,8 +112,9 @@ function make_tat_plot(target, aim, now, title){
     });
 }
 
-function make_queue_plot(target, max, now, subtext){
+function make_queue_plot(target, aim, now, subtext){
     var f = chroma.scale('PuBu');
+    var max = aim * 5;
     var col = f(now/max).css();
     $(target).highcharts({
         chart: {
@@ -131,7 +133,8 @@ function make_queue_plot(target, max, now, subtext){
         },
         yAxis: [{
             min: 0,
-            max: 100,
+            max: max,
+            tickInterval: aim,
             title: { text: null },
             opposite: true,
             labels: {
