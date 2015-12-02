@@ -32,7 +32,7 @@ $(function () {
     make_queue_plot('#bioinfo_queue', 64, 120, 57+' lanes');
     
     // Middle Row - Balance plots
-    make_balance_plot('#rc_finished_balance', 200, 626, 426, 626+' lanes');
+    make_balance_plot('#rc_finished_balance', 64, 118, 146, 118+' lanes');
     make_balance_plot('#rc_balance', 200, 326, 452, 326+' samples');
     make_balance_plot('#lp_balance', 200, 178, 332, 178+' samples');
     make_balance_plot('#seq_balance', 80, 121, 128, 121+' lanes');
