@@ -27,9 +27,9 @@ $(function () {
     
     // Middle Row - Queue plots
     // Max - 5 * pulse
-    make_queue_plot('#lp_queue', 200, 470, 48+' samples');
-    make_queue_plot('#seq_queue', 80, 162, 94+' lanes');
-    make_queue_plot('#bioinfo_queue', 64, 120, 57+' lanes');
+    make_queue_plot('#lp_queue', 200, 470, 470+' samples');
+    make_queue_plot('#seq_queue', 80, 162, 162+' lanes');
+    make_queue_plot('#bioinfo_queue', 64, 120, 120+' lanes');
     
     // Middle Row - Balance plots
     make_balance_plot('#rc_finished_balance', 64, 118, 146, 118+' lanes');
