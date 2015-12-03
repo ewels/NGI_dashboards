@@ -29,14 +29,14 @@ $(function () {
     // Max - 5 * pulse
     make_queue_plot('#lp_queue', 200, 470, 470+' samples');
     make_queue_plot('#seq_queue', 80, 162, 162+' lanes');
-    make_queue_plot('#bioinfo_queue', 64, 120, 120+' lanes');
+    make_queue_plot('#bioinfo_queue', 80, 120, 120+' lanes');
     
     // Middle Row - Balance plots
-    make_balance_plot('#rc_finished_balance', 64, 118, 146, 118+' lanes');
+    make_balance_plot('#rc_finished_balance', 80, 118, 146, 118+' lanes');
     make_balance_plot('#rc_balance', 200, 326, 452, 326+' samples');
     make_balance_plot('#lp_balance', 200, 178, 332, 178+' samples');
     make_balance_plot('#seq_balance', 80, 121, 128, 121+' lanes');
-    make_balance_plot('#bioinfo_balance', 64, 57, 92, 57+' lanes');
+    make_balance_plot('#bioinfo_balance', 80, 57, 92, 57+' lanes');
     
     // Bottom row
     make_success_plot('#rc_success', 73);
