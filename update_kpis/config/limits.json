@@ -1,0 +1,17 @@
+{
+    "limits": {
+       "process_load": {
+           "initial_qc_samples": 200,
+           "initial_qc_lanes": 80,
+           "library_prep_samples": 200,
+           "sequencing_lanes": 80,
+           "bioinformatics_lanes": 80
+       },
+       "turnaround_times": {
+           "initial_qc_days": 14,
+           "library_prep_days": 19,
+           "sequencing_days": 13,
+           "bioinformatics_days": 10
+       }
+    }
+}
