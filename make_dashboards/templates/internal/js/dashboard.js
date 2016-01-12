@@ -1,6 +1,8 @@
 
 // Javascript for the NGI Stockholm Internal Dashboard
 
+setTimeout(function(){ location.reload(); }, 300000); // 300 seconds - 5 minutes
+
 $(function () {
     
     Highcharts.setOptions({
@@ -15,107 +17,127 @@ $(function () {
     updateClock();
     
     // Top row
-    make_tat_plot('#finished_proj_tat', 21, 12, 'Finished<br>Libraries');
-    make_tat_plot('#lp_proj_tats', 42, 28, 'Prep Projects');
-    make_tat_plot('#rc_tat', 14, 9, 9+' days');
-    make_tat_plot('#lp_tat', 19, 18, 18+' days');
-    make_tat_plot('#seq_tat', 13, 31, 31+' days');
-    make_tat_plot('#bioinfo_tat', 10, 8, 8+' days');
+    tat = data['turnaround_times']
+    tat_l = data['limits']['turnaround_times'];
+    make_tat_plot('#finished_proj_tat', tat_l['finished_library_project'],  tat['finished_library_project'],  'Finished<br>Libraries');
+    make_tat_plot('#lp_proj_tats',      tat_l['library_prep_project'],      tat['library_prep_project'],      'Prep Projects');
+    make_tat_plot('#rc_tat',            tat_l['initial_qc'],     tat['initial_qc'],     tat['initial_qc']+' days');
+    make_tat_plot('#lp_tat',            tat_l['library_prep'],   tat['library_prep'],   tat['library_prep']+' days');
+    make_tat_plot('#seq_tat',           tat_l['sequencing'],     tat['sequencing'],     tat['sequencing']+' days');
+    make_tat_plot('#bioinfo_tat',       tat_l['bioinformatics'], tat['bioinformatics'], tat['bioinformatics']+' days');
     
     // Middle row, projects openend / closed
-    make_proj_open_close_plot('#proj_openclose', [110,63,14,19], [-29,-16,-94,-43], ['Oct-26','Nov-02','Nov-09','Nov-16']);
+    p_opened = data['projects']['opened_n_weeks_ago']
+    p_closed = data['projects']['closed_n_weeks_ago']
+    oc_labels = data['projects']['labels']
+    make_proj_open_close_plot(
+        '#proj_openclose',
+        [ p_opened['3'], p_opened['2'], p_opened['1'], p_opened['0'] ],
+        [ p_closed['3']*-1, p_closed['2']*-1, p_closed['1']*-1, p_closed['0']*-1 ],
+        // [ oc_labels['3'], oc_labels['2'], oc_labels['1'], oc_labels['0'] ]
+        [ '3 weeks ago', '2 weeks ago', '1 week ago', 'this week' ]
+    );
     
     // Middle Row - Queue plots
     // Max - 5 * pulse
-    make_queue_plot('#lp_queue', 200, 470, 470+' samples');
-    make_queue_plot('#seq_queue', 80, 162, 162+' lanes');
-    make_queue_plot('#bioinfo_queue', 80, 120, 120+' lanes');
+    pl = data['process_load']
+    pl_l = data['limits']['process_load']
+    make_queue_plot('#lp_queue',      pl_l['library_prep'],   pl['library_prep_queue'],   pl['library_prep_queue']+' samples');
+    make_queue_plot('#seq_queue',     pl_l['sequencing'],     pl['sequencing_queue'],     pl['sequencing_queue']+' lanes');
+    make_queue_plot('#bioinfo_queue', pl_l['bioinformatics'], pl['bioinformatics_queue'], pl['bioinformatics_queue']+' lanes');
     
     // Middle Row - Balance plots
-    make_balance_plot('#rc_finished_balance', 80, 118, 146, 118+' lanes');
-    make_balance_plot('#rc_balance', 200, 326, 452, 326+' samples');
-    make_balance_plot('#lp_balance', 200, 178, 332, 178+' samples');
-    make_balance_plot('#seq_balance', 80, 121, 128, 121+' lanes');
-    make_balance_plot('#bioinfo_balance', 80, 57, 92, 57+' lanes');
+    make_balance_plot('#rc_finished_balance', pl_l['initial_qc_lanes'],   pl['initial_qc_lanes'],   undefined, pl['initial_qc_lanes']+' lanes');
+    make_balance_plot('#rc_balance',          pl_l['initial_qc_samples'], pl['initial_qc_samples'], undefined, pl['initial_qc_samples']+' samples');
+    make_balance_plot('#lp_balance',          pl_l['library_prep'],       pl['library_prep'],       undefined, pl['library_prep']+' samples');
+    make_balance_plot('#seq_balance',         pl_l['sequencing'],         pl['sequencing'],         undefined, pl['sequencing']+' lanes');
+    make_balance_plot('#bioinfo_balance',     pl_l['bioinformatics'],     pl['bioinformatics'],     undefined, pl['bioinformatics']+' lanes');
     
     // Bottom row
-    make_success_plot('#rc_success', 73);
-    make_success_plot('#lp_success', 65);
-    make_success_plot('#seq_success', 87);
+    suc = data['success_rate']
+    make_success_plot('#rc_success', suc['initial_qc']*100);
+    make_success_plot('#lp_success', suc['library_prep']*100);
+    make_success_plot('#seq_success', suc['sequencing']*100);
+    make_success_plot('#bioinfo_success', suc['bioinformatics']*100);
 });
 
 
 // Make a speedometer plot to show turnaround times
 function make_tat_plot(target, aim, now, title){
-    $(target).highcharts({
-        chart: {
-            type: 'gauge',
-            height: 100,
-            backgroundColor:'rgba(255, 255, 255, 0.1)'
-        },
-        title: {
-            text: title,
-            floating: true,
-            y: 60
-        },
-        pane: {
-            startAngle: -45,
-            endAngle: 45,
-            background: null,
-            center: ['50%', '200%'],
-            size: 250
-        },
-        tooltip: { enabled: false },
-        credits: { enabled: false },
-        yAxis: {
-            min: 0,
-            max: aim * 2.5,
-            minorTickWidth: 0,
-            tickPosition: 'outside',
-            tickPositions: [0, aim],
-            labels: {
-                rotation: 'auto',
-                distance: 20
+    try {
+        if(target === undefined){ throw 'Target missing'; }
+        if(aim === undefined){ throw 'aim missing'; }
+        if(now === undefined){ throw 'now missing'; }
+        $(target).highcharts({
+            chart: {
+                type: 'gauge',
+                height: 100,
+                backgroundColor:'rgba(255, 255, 255, 0.1)'
             },
-            plotBands: [{
-                from: 0,
-                to: aim,
-                color: '#55BF3B',
-                innerRadius: '100%',
-                outerRadius: '105%'
+            title: {
+                text: title,
+                floating: true,
+                y: 60
             },
-            {
-                from: aim,
-                to: aim * 2,
-                color: '#DDDF0D',
-                innerRadius: '100%',
-                outerRadius: '105%'
+            pane: {
+                startAngle: -45,
+                endAngle: 45,
+                background: null,
+                center: ['50%', '200%'],
+                size: 250
             },
-            {
-                from: aim * 2,
-                to: aim * 3,
-                color: '#DF5353',
-                innerRadius: '100%',
-                outerRadius: '105%'
+            tooltip: { enabled: false },
+            credits: { enabled: false },
+            yAxis: {
+                min: 0,
+                max: aim * 2.5,
+                minorTickWidth: 0,
+                tickPosition: 'outside',
+                tickPositions: [0, aim],
+                labels: {
+                    rotation: 'auto',
+                    distance: 20
+                },
+                plotBands: [{
+                    from: 0,
+                    to: aim,
+                    color: '#55BF3B',
+                    innerRadius: '100%',
+                    outerRadius: '105%'
+                },
+                {
+                    from: aim,
+                    to: aim * 2,
+                    color: '#DDDF0D',
+                    innerRadius: '100%',
+                    outerRadius: '105%'
+                },
+                {
+                    from: aim * 2,
+                    to: aim * 3,
+                    color: '#DF5353',
+                    innerRadius: '100%',
+                    outerRadius: '105%'
+                }]
+            },
+            plotOptions: {
+                gauge: {
+                    dataLabels: { enabled: false },
+                    dial: { radius: '100%' }
+                }
+            },
+            series: [{
+                name: 'Turn Around Time',
+                data: [now],
             }]
-        },
-        plotOptions: {
-            gauge: {
-                dataLabels: { enabled: false },
-                dial: { radius: '100%' }
-            }
-        },
-        series: [{
-            name: 'Turn Around Time',
-            data: [now],
-        }]
-    });
+        });
+    } catch(err) {
+        $(target).addClass('success_plot').text('coming soon');
+    }
 }
 
 function make_queue_plot(target, aim, now, subtext){
-    var f = chroma.scale('PuBu');
     var max = aim * 5;
-    var col = f(now/max).css();
     $(target).highcharts({
         chart: {
             type: 'bar',
@@ -153,7 +175,7 @@ function make_queue_plot(target, aim, now, subtext){
             series: {
                 pointPadding: 0,
                 groupPadding: 0,
-                color: col,
+                color: '#7cb5ec',
                 states: { hover: { enabled: false } }
             },
         },
