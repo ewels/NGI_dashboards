@@ -38,7 +38,7 @@
   </div>
 </header>
 
-<div class="container-fluid">
+<div class="container-fluid main-page">
 
   <div class="row">
     <div class="col-xs-2">
@@ -70,8 +70,8 @@
   
   <div class="row middle-row">
     <div class="col-xs-2 mid-left">
-      <p>Projects open in Production: <span class="pull-right">182</span></p>
-      <p>Projects open in Applications: <span class="pull-right">14</span></p>
+      <p>Projects open in Production: <span class="pull-right" id="projects-open-production">??</span></p>
+      <p>Projects open in Applications: <span class="pull-right" id="projects-open-applications">??</span></p>
       <div class="openclose_plot" id="proj_openclose"></div>
     </div>
     <div class="col-xs-10 mainrow">
@@ -138,7 +138,7 @@
 </div><!-- /.container -->
 
 <footer class="container-fluid">
-  <ul class="pull-left">
+  <ul class="dashboard-timestamps">
     <li>Fetched: {{ d.date_rendered }}</li>
     <li>Generated: {{ d.date_generated }}</li>
   </ul>

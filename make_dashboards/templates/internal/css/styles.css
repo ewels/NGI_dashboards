@@ -32,6 +32,17 @@ header {
 }
 footer img {
     padding: 15px;
+    margin-top: 10px;
+}
+
+.dashboard-timestamps {
+    list-style-type: none;
+    margin: 40px 20px;
+    padding: 0;
+    float:left;
+}
+.dashboard-timestamps li {
+    padding: 3px;
 }
 
 .coming_soon {

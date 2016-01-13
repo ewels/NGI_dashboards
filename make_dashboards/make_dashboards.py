@@ -51,8 +51,12 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
         # Connect to the database
         couch = couchdb.Server("http://{}:{}@{}".format(couch_user, password, couch_server))
         data = couch["kpi"].view('dashboard/by_time', limit=1, descending=True).rows[0].value
-    data['date_rendered'] = datetime.now().strftime("%Y-%m-%d, %H:%M")
-    data['date_generated'] = datetime.strptime(data['time_created'], "%Y-%m-%dT%H:%M:%S.%f+0000").strftime("%Y-%m-%d, %H:%M")
+    try:
+        data['date_rendered'] = datetime.now().strftime("%Y-%m-%d, %H:%M")
+        data['date_generated'] = datetime.strptime(data['time_created'], "%Y-%m-%dT%H:%M:%S.%f+0000").strftime("%Y-%m-%d, %H:%M")
+    except KeyError:
+        data['date_rendered'] = 'Error'
+        data['date_generated'] = 'Error'
     data['json'] = json.dumps(data, indent=4)
 
     ### RENDER THE TEMPLATES
