@@ -1,0 +1,64 @@
+{
+    "limits": {
+        "turnaround_times": {
+            "library_prep_project": 42, 
+            "initial_qc": 14, 
+            "finished_library_project": 21, 
+            "bioinformatics": 10, 
+            "sequencing": 13, 
+            "library_prep": 19
+        }, 
+        "process_load": {
+            "sequencing": 80, 
+            "initial_qc_samples": 200, 
+            "initial_qc_lanes": 80, 
+            "bioinformatics": 80, 
+            "library_prep": 200
+        }
+    },
+    "success_rate": {
+        "sequencing": 0.95, 
+        "initial_qc": 0.75, 
+        "bioinformatics": 0.69, 
+        "library_prep": 0.87
+    }, 
+    "time_created": "2016-01-11T07:55:57.799364+0000", 
+    "process_load": {
+        "library_prep_queue": 20, 
+        "bioinformatics": 50, 
+        "bioinformatics_queue": 32, 
+        "library_prep": 89, 
+        "sequencing": 32, 
+        "initial_qc_samples": 188, 
+        "initial_qc_lanes": 16, 
+        "sequencing_queue": 8
+    },
+    "turnaround_times": {
+        "library_prep_project": 36, 
+        "initial_qc": 5, 
+        "finished_library_project": 4, 
+        "bioinformatics": 7, 
+        "sequencing": 14, 
+        "library_prep": 21
+    },
+    "projects": {
+        "closed_last_7_days": 10, 
+        "opened_n_weeks_ago": {
+            "1": 6, 
+            "0": 5, 
+            "3": 2, 
+            "2": 1
+        },
+        "finished_libraries": 12, 
+        "closed_n_weeks_ago": {
+            "1": 2, 
+            "0": 10, 
+            "3": 3, 
+            "2": 3
+        },
+        "in_applications": 11, 
+        "in_production": 160, 
+        "opened_last_7_days": 8, 
+        "library_prep": 33
+    }
+}
