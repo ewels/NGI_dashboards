@@ -16,7 +16,7 @@ import json
 import os
 import yaml
 
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(level=logging.WARNING,
                     format='[%(levelname)s] [%(asctime)s]: %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S')
 
