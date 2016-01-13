@@ -308,7 +308,8 @@ function make_proj_open_close_plot(target, opened, closed, categories){
                 categories: categories,
                 reversed: false,
                 labels: {
-                    step: 1
+                    step: 1,
+                    rotation: -45,
                 }
             }],
             yAxis: {
@@ -353,7 +354,7 @@ function make_success_plot(target, now){
             chart: {
                 type: 'solidgauge',
                 backgroundColor:'rgba(255, 255, 255, 0.1)',
-                height: 180
+                height: 140
             },
             title: null,
             pane: {
@@ -365,7 +366,7 @@ function make_success_plot(target, now){
                     outerRadius: '100%',
                     shape: 'arc'
                 },
-                center: ['50%', '70%'],
+                center: ['50%', '88%'],
                 size: 200
             },
             tooltip: { enabled: false },
