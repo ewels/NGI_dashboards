@@ -20,6 +20,11 @@ logging.basicConfig(level=logging.INFO,
                     format='[%(levelname)s] [%(asctime)s]: %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S')
 
+# Get package version
+script_dir = os.path.dirname(os.path.realpath(__file__))
+with open (os.path.join(os.path.dirname(script_dir), 'version.txt')) as f:
+    p_version = f.read()
+
 # Command line options
 @click.command( context_settings = dict( help_option_names = ['-h', '--help'] ))
 @click.option('--couch_user', '-u', required=True)
@@ -27,14 +32,14 @@ logging.basicConfig(level=logging.INFO,
 @click.option('--couch_server', '-s', required=True)
 @click.option('--outdir', '-o', required=True, help = "Create dashboards in the specified output directory.")
 @click.option('--demo', is_flag=True)
-@click.version_option('0.1')
+@click.version_option(p_version)
 def make_dashboards(outdir, demo, couch_user, password, couch_server):
     """
     Function to get data from KPI database and render dashboard HTML files.
     """
 
     ### CONFIGURATION VARS
-    templates_dir = os.path.join(os.path.dirname(__file__), 'templates')
+    templates_dir = os.path.join(script_dir, 'templates')
     outdir = os.path.realpath(outdir)
     logging.info("Making reports in {}".format(outdir))
     # Paths relative to make_dashboards/templates/
@@ -45,18 +50,18 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
     ### GET THE DATA
     if demo:
         logging.warn("Using demo data")
-        with open (os.path.join(os.path.dirname(__file__), 'demo_data.json')) as f:
+        with open (os.path.join(script_dir, 'demo_data.json')) as f:
             data = json.loads(f.read())
     else:
         # Connect to the database
         couch = couchdb.Server("http://{}:{}@{}".format(couch_user, password, couch_server))
         data = couch["kpi"].view('dashboard/by_time', limit=1, descending=True).rows[0].value
     try:
-        data['date_rendered'] = datetime.now().strftime("%Y-%m-%d, %H:%M")
         data['date_generated'] = datetime.strptime(data['time_created'], "%Y-%m-%dT%H:%M:%S.%f+0000").strftime("%Y-%m-%d, %H:%M")
     except KeyError:
-        data['date_rendered'] = 'Error'
         data['date_generated'] = 'Error'
+    data['date_rendered'] = datetime.now().strftime("%Y-%m-%d, %H:%M")
+    data['p_version'] = p_version
     data['json'] = json.dumps(data, indent=4)
 
     ### RENDER THE TEMPLATES

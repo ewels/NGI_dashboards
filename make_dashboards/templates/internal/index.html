@@ -105,11 +105,14 @@
   <div class="row">
     <div class="col-xs-2">
       <ul class="server-statuses">
-        <li class="danger">Milou <span class="glyphicon glyphicon-remove-circle"></span></li>
-        <li class="warning">Nestor <span class="glyphicon glyphicon glyphicon-remove-circle"></span></li>
-        <li>Hugin <span class="glyphicon glyphicon-ok-circle"></span></li>
-        <li>LIMS <span class="glyphicon glyphicon-ok-circle"></span></li>
-        <li>Genstat <span class="glyphicon glyphicon-ok-circle"></span></li>
+        <!-- <li class="danger">Milou <span class="glyphicon glyphicon-remove-circle"></span></li> -->
+        <!-- <li class="warning">Nestor <span class="glyphicon glyphicon glyphicon-remove-circle"></span></li> -->
+        <!-- <li>Hugin <span class="glyphicon glyphicon-ok-circle"></span></li> -->
+        <li class="">Milou <span class="glyphicon glyphicon-question-sign"></span></li>
+        <li class="">Nestor <span class="glyphicon glyphicon-question-sign"></span></li>
+        <li class="">Hugin <span class="glyphicon glyphicon-question-sign"></span></li>
+        <li class="">LIMS <span class="glyphicon glyphicon-question-sign"></span></li>
+        <li class="">Genstat <span class="glyphicon glyphicon-question-sign"></span></li>
       </ul>
     </div>
     <div class="col-xs-10 mainrow">
@@ -139,8 +142,9 @@
 
 <footer class="container-fluid">
   <ul class="dashboard-timestamps">
-    <li>Fetched: {{ d.date_rendered }}</li>
-    <li>Generated: {{ d.date_generated }}</li>
+    <li>Fetched: <span>{{ d.date_rendered }}</span></li>
+    <li>Generated: <span>{{ d.date_generated }}</span></li>
+    <li>Package Version: <span>v{{ d.p_version }}</span></li>
   </ul>
   <img class="pull-right" src="img/SLL_logo.png">
 </footer>
