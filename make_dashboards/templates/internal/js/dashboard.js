@@ -229,7 +229,7 @@ function make_balance_plot(target, aim, now, prev, subtext){
                 spacingBottom: 0,
                 spacingTop: 0,
                 backgroundColor:'rgba(255, 255, 255, 0.1)',
-                plotBackgroundColor:'#E67E77',
+                plotBackgroundColor:'#ed8c83',
             },
             xAxis: {
                 categories: ['Queue'],
@@ -247,7 +247,7 @@ function make_balance_plot(target, aim, now, prev, subtext){
                 },
                 tickPositions: [ 0, aim, aim * 4, aim * 5 ],
                 plotBands: [{
-                    color: '#A0DE6D',
+                    color: '#8ad88b',
                     from: aim,
                     to: aim * 4
                 }],
@@ -298,7 +298,7 @@ function make_proj_open_close_plot(target, opened, closed, categories){
             chart: {
                 type: 'column',
                 backgroundColor:'rgba(255, 255, 255, 0.1)',
-                height: 200,
+                height: 240,
                 spacingBottom: 0,
             },
             title: { text: null },
@@ -326,7 +326,7 @@ function make_proj_open_close_plot(target, opened, closed, categories){
             legend: {
                 reversed: true,
                 floating: true,
-                layout: 'vertical',
+                layout: 'horizontal',
                 align: 'right',
                 verticalAlign: 'top',
                 labelFormat: '<span style="font-weight: 300;">{name}</span>',

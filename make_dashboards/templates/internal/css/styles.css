@@ -70,7 +70,7 @@ footer img {
 }
 
 .mid-left p {
-    font-size: 18px;
+    font-size: 16px;
 }
 .container-fluid > .row {
     border-bottom: 1px solid #999;
@@ -90,7 +90,7 @@ footer img {
     padding: 5px;
     margin: 3px;
     float: right;
-    width: 100px;
+    width: 120px;
     display: inline-block;
 }
 .server-statuses li .glyphicon {
@@ -103,8 +103,12 @@ footer img {
 .server-statuses li.danger { background-color: #f7c8c4; }
 .server-statuses li.danger .glyphicon { color: #a94442; }
 
+.queue_plot {
+    padding: 5px 0 8px;
+    height: 102px;
+}
 .balance_plot {
-    height: 80px;
+    height: 90px;
 }
 #rc_finished_balance_wrapper {
     border: 1px solid #ccc;
@@ -116,12 +120,9 @@ footer img {
     display:inline-block;
     position: absolute;
     left: -10px;
-    line-height: 70px;
+    line-height: 90px;
     -webkit-transform: rotate(-90deg);
     transform: rotate(-90deg);
-}
-.queue_plot {
-    padding: 5px 0 8px;
 }
 
 /* Header Clock */
