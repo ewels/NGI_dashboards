@@ -32,19 +32,15 @@ header {
 }
 footer img {
     padding: 15px;
-    margin-top: 10px;
+    margin-top: 5px;
+    height: 100px;
 }
 
 .dashboard-timestamps {
-    list-style-type: none;
-    margin: 30px 20px;
-    padding: 0;
+    margin: 40px 0 0 20px;
     float:left;
 }
-.dashboard-timestamps li {
-    padding: 3px;
-}
-.dashboard-timestamps li span {
+.dashboard-timestamps span {
     margin-left: 10px;
 }
 
