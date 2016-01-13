@@ -1,12 +1,15 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+import numpy as np
 import json
 import re
 
 class KPIGenerator(object):
 
-    def __init__(self, project_summary, project_samples, worksets_name):
+    def __init__(self, project_summary, project_samples, project_dates, worksets_name):
+        #TODO: reduce these three views to a single dictionary
         self.project_summary = project_summary
         self.project_samples = project_samples
+        self.project_dates = project_dates
         self.worksets_name = worksets_name
 
     def process_load(self, start="2014-07-01"):
@@ -15,10 +18,6 @@ class KPIGenerator(object):
                 "initial_qc_lanes": 0,
                 "library_prep_queue": 0,
                 "library_prep": 0
-                #"sequencing_queue": 0,
-                #"sequencing": 0,
-                #"bioinformatics": 0,
-                #"bioinformatics_queue": 0
         }
         sample_ongoing = {} #samples either in queue or ongoing
         start_date = datetime.strptime(start, "%Y-%m-%d")
@@ -59,6 +58,7 @@ class KPIGenerator(object):
                             if "library_prep" not in sample.keys():
                                 sample_ongoing[sample_key] = False
                             # The latest library prep failed and its probably ongoing
+                            # TODO: Replace with library pooling information when available
                             else:
                                 prep_re = re.compile('^[A-Z]$')
                                 preps = sorted([m for m in sample["library_prep"].keys() if prep_re.match(m)])
@@ -86,8 +86,114 @@ class KPIGenerator(object):
         return pldict
 
 
-    def turnaround(self, days=30):
-        pass
+    def turnaround(self, max_days=30):
+        qc_list = []
+        libprep_list = []
+        seq_list = []
+        prep_projs = []
+        finlib_projs = []
+
+        start_date = datetime(datetime.now().year, datetime.now().month, datetime.now().day) - timedelta(max_days)
+
+        for project in self.project_summary:
+            proj_key = project["key"][1]
+            value = project["value"]
+            details = value.get("details", {})
+            open_date = value.get("open_date")
+            queued = details.get("queued")
+            close_date = value.get("close_date")
+            aborted = details.get("aborted")
+            sample_type = details.get("sample_type")
+            if details.get("type") == "Production" and aborted is None:
+
+                # Projects TaT
+                try:
+                    proj_dates = self.project_dates[[proj_key]].rows[0].value
+                except:
+                    proj_dates = None
+
+                try:
+                    seq_date = proj_dates.get("sequencing_start_date")
+                    prep_date = proj_dates.get("library_prep_start")
+                    proj_end = datetime.strptime(close_date, "%Y-%m-%d")
+                    if proj_end > start_date: 
+                        if sample_type == "Finished Library":
+                            seq_start = datetime.strptime(seq_date, "%Y-%m-%d")
+                            finlib_days = (proj_end - seq_start).days
+                            finlib_projs.append(finlib_days)
+                        else:
+                            prep_start = datetime.strptime(prep_date, "%Y-%m-%d")
+                            prepped_days = (proj_end - prep_start).days
+                            prep_projs.append(prepped_days)
+                except TypeError:
+                    pass
+                except AttributeError:
+                    pass
+
+                # Intial QC TaT
+                try:
+                    qc_start = datetime.strptime(open_date, "%Y-%m-%d")
+                    qc_end = datetime.strptime(queued, "%Y-%m-%d")
+                    qc_days = (qc_end - qc_start).days
+                    if qc_end > start_date and qc_days >= 0:
+                        qc_list.append(qc_days)
+                except TypeError:
+                    pass
+                except ValueError:
+                    pass
+
+                # Library prep TaT
+                try:
+                    samples = self.project_samples[proj_key].rows[0].value
+                except IndexError:
+                    continue
+
+                if samples is None:
+                    continue
+
+                for sample_key, sample in samples.items():
+                    # TODO: Replace with library pooling information when available
+                    first_prep_start = sample.get("first_prep_start_date")
+                    if sample.get("library_prep") is None or first_prep_start is None:
+                        continue
+
+                    prep_re = re.compile('^[A-Z]$')
+                    preps = sorted([m for m in sample["library_prep"].keys() if prep_re.match(m)])
+                    for prep in preps:
+                        final_prep_ends = []
+                        if sample["library_prep"][preps[-1]].get("prep_status") == "PASSED":
+                            for val_key, lib_val in sample["library_prep"][preps[-1]].get("library_validation", {}).items():
+                                final_prep_ends.append(lib_val.get("finish_date"))
+                        try:
+                            valid_preps = [datetime.strptime(i, "%Y-%m-%d") for i in final_prep_ends if i is not None]
+                            prep_end = max(valid_preps)
+                            prep_start = datetime.strptime(first_prep_start, "%Y-%m-%d")
+                            prep_days = (prep_end - prep_start).days
+                            if prep_end > start_date and prep_days >= 0:
+                                libprep_list.append(prep_days)
+                        except TypeError:
+                            continue
+                        except ValueError:
+                            continue
+        return({
+            "library_prep": self._ninetypct_mean(libprep_list)
+            "initial_qc": self._ninetypct_mean(qc_list),
+            "finished_library_project": self._ninetypct_mean(finlib_projs),
+            "library_prep_project": self._ninetypct_mean(prep_projs)
+        })
+
+    def _ninetypct_mean(self, vector):
+        """
+        Get mean of list, excluding the top 10 % 
+        TODO: Should we discard bottom 10% to make it statistically correct?
+        """
+        if len(vector) > 0:
+            ninety_pct = np.percentile(np.array(vector), 90)
+            trimmed_vector = np.array([i for i in vector if i <= ninety_pct])
+            return round(trimmed_vector.mean(), 2)
+        else:
+            return None
+
 
     def projects(self, max_weeks=4):
         projdict = {
@@ -103,18 +209,18 @@ class KPIGenerator(object):
 
         dnow = datetime.now()
         dweekend = datetime.strptime("{0}-{1}-0".format(*dnow.isocalendar()),"%Y-%W-%w")
-        for project in self.projects_view:
+        for project in self.project_summary:
             key = project["key"]
             value = project["value"]
             details = value.get("details", {})
-            if key[0] == "open":
-                #opened project types
+            if "open_date" in value.keys() and "close_date" not in value.keys() and "aborted" not in details.keys():
+                #open project types
                 ptype = details.get("type", "")
                 if ptype == "Production":
                     projdict["in_production"] += 1
                 elif ptype == "Application":
                     projdict["in_applications"] += 1
-                if "isFinishedLib" in value.keys():
+                if details.get("sample_type") == "Finished Library":
                     projdict["finished_libraries"] += 1
                 else:
                     projdict["library_prep"] += 1
@@ -127,7 +233,7 @@ class KPIGenerator(object):
                     projdict["opened_n_weeks_ago"][d_weeks] += 1
                 if (dnow - open_date).days < 7:
                     projdict["opened_last_7_days"] += 1
-            elif key[0] == "closed":
+            elif "open_date" in value.keys() and "close_date" in value.keys() and "aborted" not in details.keys():
                 #closed project stats
                 close_value = value.get("close_date", "2001-01-01")
                 close_date = datetime.strptime(close_value, "%Y-%m-%d")
@@ -139,6 +245,8 @@ class KPIGenerator(object):
 
         return projdict
 
+    def success_rate(self):
+        pass
 
 class KPIDocument(object):
     """
