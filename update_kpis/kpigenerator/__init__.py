@@ -1,7 +1,11 @@
-from datetime import datetime, timedelta
 import numpy as np
 import json
 import re
+from genologics.entities import *
+from genologics.lims import *
+from genologics.config import BASEURI, USERNAME, PASSWORD
+lims = Lims(BASEURI, USERNAME, PASSWORD)
+from datetime import datetime, timedelta
 
 class KPIGenerator(object):
 
@@ -17,21 +21,25 @@ class KPIGenerator(object):
                 "initial_qc_samples": 0,
                 "initial_qc_lanes": 0,
                 "library_prep_queue": 0,
-                "library_prep": 0
+                "library_prep": 0,
+                "sequencing": 0
         }
         sample_ongoing = {} #samples either in queue or ongoing
-        start_date = datetime.strptime(start, "%Y-%m-%d")
 
         # projectsDB
         for project in self.project_summary:
             key = project["key"]
-            value = project["value"]
-            open_date = datetime.strptime(value.get("open_date", "2001-01-01"), "%Y-%m-%d")
+            value = project["value"] 
+            details = value.get("details", {})
+            aborted = details.get("aborted")
 
-            if key[0] == "open" and open_date > start_date:
-                details = value.get("details", {})
+            if "open_date" in value.keys() and aborted is None and "close_date" not in value.keys():
+                open_date = datetime.strptime(value.get("open_date"), "%Y-%m-%d")
                 ptype = details.get("type", "")
-                queued = details.get("queued")
+                try:
+                    queued = details["queued"]
+                except KeyError:
+                    queued = value.get("project_summary", {}).get("queued")
                 samples = self.project_samples[key[1]]
                 if not len(samples.rows) == 1:
                     continue
@@ -46,9 +54,10 @@ class KPIGenerator(object):
                             pass #TODO maybe log. But there are some "special" projects with no lanes ordered
                     else: 
                         try:
-                            pldict["initial_qc_samples"] += value.get("no_of_samples")
+                            pldict["initial_qc_samples"] += value.get("no_samples")
                         except TypeError:
                             pldict["initial_qc_samples"] += details.get("sample_units_ordered", 0)
+
                 # Library prep
                 elif ptype == "Production" and queued is not None and not details.get("sample_type") == "Finished Library":
                     for sample_key, sample in samples.value.items():
@@ -83,6 +92,19 @@ class KPIGenerator(object):
                 pldict["library_prep"] += 1
             else:
                 pldict["library_prep_queue"] += 1
+
+        # Sequencing (Thanks @Galithil)
+        # TODO move LIMS connection specific code to script
+        weekAgo = datetime.now() - timedelta(days=7)
+        process_types = ["Illumina Sequencing (Illumina SBS) 4.0",
+                "MiSeq Run (MiSeq) 4.0",
+                "Illumina Sequencing (HiSeq X) 1.0"]
+        seq = lims.get_processes(type=process_types, 
+            last_modified=weekAgo.strftime("%Y-%m-%dT00:00:00Z"))
+
+        for pro in seq:
+            if not "Finish Date" in pro.udf or not pro.udf['Finish Date']:
+                pldict["sequencing"] += len(pro.all_inputs())
         return pldict
 
 
@@ -100,7 +122,10 @@ class KPIGenerator(object):
             value = project["value"]
             details = value.get("details", {})
             open_date = value.get("open_date")
-            queued = details.get("queued")
+            try:
+                queued = details["queued"]
+            except KeyError:
+                queued = value.get("project_summary", {}).get("queued")
             close_date = value.get("close_date")
             aborted = details.get("aborted")
             sample_type = details.get("sample_type")
@@ -176,21 +201,17 @@ class KPIGenerator(object):
                         except ValueError:
                             continue
         return({
-            "library_prep": self._ninetypct_mean(libprep_list)
-            "initial_qc": self._ninetypct_mean(qc_list),
-            "finished_library_project": self._ninetypct_mean(finlib_projs),
-            "library_prep_project": self._ninetypct_mean(prep_projs)
+            "library_prep": self._get_percentile(libprep_list, 90),
+            "initial_qc": self._get_percentile(qc_list, 90),
+            "finished_library_project": self._get_percentile(finlib_projs, 90),
+            "library_prep_project": self._get_percentile(prep_projs, 90)
         })
 
-    def _ninetypct_mean(self, vector):
-        """
-        Get mean of list, excluding the top 10 % 
-        TODO: Should we discard bottom 10% to make it statistically correct?
-        """
+
+    def _get_percentile(self, vector, percentile):
         if len(vector) > 0:
-            ninety_pct = np.percentile(np.array(vector), 90)
-            trimmed_vector = np.array([i for i in vector if i <= ninety_pct])
-            return round(trimmed_vector.mean(), 2)
+            pct = np.percentile(np.array(vector), percentile)
+            return round(pct, 2)
         else:
             return None
 
@@ -245,8 +266,47 @@ class KPIGenerator(object):
 
         return projdict
 
-    def success_rate(self):
-        pass
+    def success_rate(self, max_days=30):
+        start_date = datetime(datetime.now().year, datetime.now().month, datetime.now().day) - timedelta(max_days)
+
+        initial_qc_fails = 0
+        prep_started = 0
+        prep_finished = 0
+        prep_passed = 0
+
+
+        for ws_doc in self.worksets_name:
+            ws = ws_doc.get("value")
+            ws_start = ws.get("date_run")
+            last_agg = ws.get("last_aggregate")
+
+            if ws_start is not None:
+                ws_start = datetime.strptime(ws_start, "%Y-%m-%d")
+            else:
+                continue
+
+            if last_agg is not None:
+                last_agg = datetime.strptime(last_agg, "%Y-%m-%d")
+
+            for proj in ws.get("projects", {}).keys():
+                for s_key, sample in ws["projects"][proj].get("samples", {}).items():
+                    rec_ctrl = sample.get("rec_ctrl", {}).get("status")
+                    if rec_ctrl is not None and ws_start > start_date:
+                        prep_started += 1.0
+                        if rec_ctrl == "FAILED":
+                            initial_qc_fails += 1.0
+                    prep_status = sample.get("library_status")
+                    if prep_status is not None and prep_status != "UNKNOWN" and last_agg is not None and last_agg > start_date:
+                        prep_finished += 1.0
+                        if prep_status == "PASSED":
+                            prep_passed += 1.0
+
+        return({
+            "initial_qc": round(1 - (initial_qc_fails / prep_started), 2),
+            "library_prep": round(prep_passed / prep_finished, 2)
+        })
+
+            
 
 class KPIDocument(object):
     """
@@ -256,10 +316,11 @@ class KPIDocument(object):
     """
     def __init__(self, time_created, limit_file):
         self.time_created = time_created
-        with open(limit_file, "rU") as f: #TODO: This path is relative
+        with open(limit_file, "rU") as f: 
             self.limits = json.load(f)
         self.process_load = {}
         self.projects = {}
         self.success_rate = {}
         self.turnaround_times = {}
+        self.version = None
 
