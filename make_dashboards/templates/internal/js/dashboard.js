@@ -31,10 +31,10 @@ $(function () {
         // Top row
         make_tat_plot('#finished_proj_tat', tat_l['finished_library_project'], tat['finished_library_project'],  'Finished<br>Libraries');
         make_tat_plot('#lp_proj_tats',      tat_l['library_prep_project'], tat['library_prep_project'],      'Prep Projects');
-        make_tat_plot('#rc_tat',            tat_l['initial_qc'],     tat['initial_qc'],     tat['initial_qc']+' days');
-        make_tat_plot('#lp_tat',            tat_l['library_prep'],   tat['library_prep'],   tat['library_prep']+' days');
-        make_tat_plot('#seq_tat',           tat_l['sequencing'],     tat['sequencing'],     tat['sequencing']+' days');
-        make_tat_plot('#bioinfo_tat',       tat_l['bioinformatics'], tat['bioinformatics'], tat['bioinformatics']+' days');
+        make_tat_plot('#rc_tat',            tat_l['initial_qc'],     tat['initial_qc'],     Math.round(tat['initial_qc'])+' days');
+        make_tat_plot('#lp_tat',            tat_l['library_prep'],   tat['library_prep'],   Math.round(tat['library_prep'])+' days');
+        make_tat_plot('#seq_tat',           tat_l['sequencing'],     tat['sequencing'],     Math.round(tat['sequencing'])+' days');
+        make_tat_plot('#bioinfo_tat',       tat_l['bioinformatics'], tat['bioinformatics'], Math.round(tat['bioinformatics'])+' days');
         
         // Middle row, projects openend / closed
         try {
@@ -90,7 +90,7 @@ function make_tat_plot(target, aim, now, title){
         $(target).highcharts({
             chart: {
                 type: 'gauge',
-                height: 100,
+                height: 120,
                 backgroundColor:'rgba(255, 255, 255, 0.1)'
             },
             title: {
@@ -102,8 +102,8 @@ function make_tat_plot(target, aim, now, title){
                 startAngle: -45,
                 endAngle: 45,
                 background: null,
-                center: ['50%', '200%'],
-                size: 250
+                center: ['50%', '170%'],
+                size: 270
             },
             tooltip: { enabled: false },
             credits: { enabled: false },
@@ -315,7 +315,9 @@ function make_proj_open_close_plot(target, opened, closed, categories){
             yAxis: {
                 title: {
                     text: '#Projects'
-                }
+                },
+                allowDecimals: false,
+                // minorTickInterval: 1
             },
             plotOptions: {
                 series: {
