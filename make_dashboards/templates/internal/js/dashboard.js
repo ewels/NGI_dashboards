@@ -164,7 +164,7 @@ function make_queue_plot(target, aim, now, subtext){
         $(target).highcharts({
             chart: {
                 type: 'bar',
-                height: 85,
+                height: 95,
                 spacingBottom: 10,
                 spacingTop: 0,
                 backgroundColor:'rgba(255, 255, 255, 0.1)',
@@ -225,7 +225,7 @@ function make_balance_plot(target, aim, now, prev, subtext){
         $(target).highcharts({
             chart: {
                 type: 'bar',
-                height: 85,
+                height: 95,
                 spacingBottom: 10,
                 spacingTop: 0,
                 backgroundColor:'rgba(255, 255, 255, 0.1)',
