@@ -57,16 +57,16 @@ $(function () {
         
         // Middle Row - Queue plots
         // Max - 5 * pulse
-        make_queue_plot('#lp_queue',      pl_l['library_prep'],   pl['library_prep_queue'],   pl['library_prep_queue']+' samples');
-        make_queue_plot('#seq_queue',     pl_l['sequencing'],     pl['sequencing_queue'],     pl['sequencing_queue']+' lanes');
-        make_queue_plot('#bioinfo_queue', pl_l['bioinformatics'], pl['bioinformatics_queue'], pl['bioinformatics_queue']+' lanes');
+        make_queue_plot('#lp_queue',      pl_l['library_prep'],   pl['library_prep_queue'],   pl['library_prep_queue']+' samples in queue');
+        make_queue_plot('#seq_queue',     pl_l['sequencing'],     pl['sequencing_queue'],     pl['sequencing_queue']+' lanes in queue');
+        make_queue_plot('#bioinfo_queue', pl_l['bioinformatics'], pl['bioinformatics_queue'], pl['bioinformatics_queue']+' lanes in queue');
         
         // Middle Row - Balance plots
-        make_balance_plot('#rc_finished_balance', pl_l['initial_qc_lanes'],   pl['initial_qc_lanes'],   undefined, pl['initial_qc_lanes']+' lanes');
-        make_balance_plot('#rc_balance',          pl_l['initial_qc_samples'], pl['initial_qc_samples'], undefined, pl['initial_qc_samples']+' samples');
-        make_balance_plot('#lp_balance',          pl_l['library_prep'],       pl['library_prep'],       undefined, pl['library_prep']+' samples');
-        make_balance_plot('#seq_balance',         pl_l['sequencing'],         pl['sequencing'],         undefined, pl['sequencing']+' lanes');
-        make_balance_plot('#bioinfo_balance',     pl_l['bioinformatics'],     pl['bioinformatics'],     undefined, pl['bioinformatics']+' lanes');
+        make_balance_plot('#rc_finished_balance', pl_l['initial_qc_lanes'],   pl['initial_qc_lanes'],   undefined, pl['initial_qc_lanes']+' lanes in progress');
+        make_balance_plot('#rc_balance',          pl_l['initial_qc_samples'], pl['initial_qc_samples'], undefined, pl['initial_qc_samples']+' samples in progress');
+        make_balance_plot('#lp_balance',          pl_l['library_prep'],       pl['library_prep'],       undefined, pl['library_prep']+' samples in progress');
+        make_balance_plot('#seq_balance',         pl_l['sequencing'],         pl['sequencing'],         undefined, pl['sequencing']+' lanes in progress');
+        make_balance_plot('#bioinfo_balance',     pl_l['bioinformatics'],     pl['bioinformatics'],     undefined, pl['bioinformatics']+' lanes in progress');
         
         // Bottom row
         make_success_plot('#rc_success', suc['initial_qc']*100);
@@ -164,8 +164,8 @@ function make_queue_plot(target, aim, now, subtext){
         $(target).highcharts({
             chart: {
                 type: 'bar',
-                height: 75,
-                spacingBottom: 0,
+                height: 85,
+                spacingBottom: 10,
                 spacingTop: 0,
                 backgroundColor:'rgba(255, 255, 255, 0.1)',
                 plotBackgroundColor:'#f2f2f2',
@@ -225,8 +225,8 @@ function make_balance_plot(target, aim, now, prev, subtext){
         $(target).highcharts({
             chart: {
                 type: 'bar',
-                height: 75,
-                spacingBottom: 0,
+                height: 85,
+                spacingBottom: 10,
                 spacingTop: 0,
                 backgroundColor:'rgba(255, 255, 255, 0.1)',
                 plotBackgroundColor:'#ed8c83',
