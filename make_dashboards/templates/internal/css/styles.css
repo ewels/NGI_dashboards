@@ -46,13 +46,21 @@ footer img {
 
 .coming_soon {
     background-color: #f2f2f2;
-    height: 140px;
-    line-height: 140px;
+    border: 1px dashed #ccc;
+    /*height: 140px;
+    line-height: 140px;*/
+    height: auto !important;
+    padding: 20px !important;
+    margin: auto 0;
     text-align: center;
     font-weight: 700;
     color: rgba(0,0,0,0.2);
     font-size: 26px;
 }
+.tat_plot.coming_soon { margin: 15px 0; }
+.queue_plot.coming_soon { margin: 22px 0; }
+.balance_plot.coming_soon { margin: 22px 0; }
+.success_plot.coming_soon { margin: 35px 0; }
 
 #clock_time, #clock_date {
     float:right;
@@ -105,10 +113,10 @@ footer img {
 
 .queue_plot {
     padding: 5px 0 8px;
-    height: 102px;
+    height: 112px;
 }
 .balance_plot {
-    height: 90px;
+    height: 100px;
 }
 #rc_finished_balance_wrapper {
     border: 1px solid #ccc;
@@ -157,8 +165,10 @@ footer img {
     width: 0;
     height: 0;
     position: absolute;
-    top: calc(50% - 2px);
-    left: calc(50% + 1px);
+    /*top: calc(50% - 2px);
+    left: calc(50% + 1px);*/
+    top: 37px;
+    left: 40px;
     margin: 1px 0 -1px -25%;
     padding: 1px 0 1px 25%;
     background: #666;
