@@ -131,15 +131,16 @@ class KPIGenerator(object):
             sample_type = details.get("sample_type")
             if details.get("type") == "Production" and aborted is None:
 
+                try:
+                    proj_dates = self.project_dates[[proj_key]].rows[0]["value"]
+                except:
+                    proj_dates = {}
+                seq_date = proj_dates.get("sequencing_start_date")
+                prep_date = proj_dates.get("library_prep_start")
+                prep_finished = proj_dates.get("qc_library_finished")
+
                 # Projects TaT
                 try:
-                    proj_dates = self.project_dates[[proj_key]].rows[0].value
-                except:
-                    proj_dates = None
-
-                try:
-                    seq_date = proj_dates.get("sequencing_start_date")
-                    prep_date = proj_dates.get("library_prep_start")
                     proj_end = datetime.strptime(close_date, "%Y-%m-%d")
                     if proj_end > start_date: 
                         if sample_type == "Finished Library":
@@ -148,11 +149,19 @@ class KPIGenerator(object):
                             finlib_projs.append(finlib_days)
                         else:
                             prep_start = datetime.strptime(prep_date, "%Y-%m-%d")
-                            prepped_days = (proj_end - prep_start).days
-                            prep_projs.append(prepped_days)
+                            proj_days = (proj_end - prep_start).days
+                            prep_projs.append(proj_days)
                 except TypeError:
                     pass
-                except AttributeError:
+                
+                # Library prep TaT
+                try:
+                    prep_start = datetime.strptime(prep_date, "%Y-%m-%d")
+                    prep_end = datetime.strptime(prep_finished, "%Y-%m-%d")
+                    prep_days = (prep_end - prep_start).days
+                    if prep_end > start_date and prep_days >= 0:
+                        libprep_list.append(prep_days)
+                except TypeError:
                     pass
 
                 # Intial QC TaT
@@ -164,42 +173,7 @@ class KPIGenerator(object):
                         qc_list.append(qc_days)
                 except TypeError:
                     pass
-                except ValueError:
-                    pass
 
-                # Library prep TaT
-                try:
-                    samples = self.project_samples[proj_key].rows[0].value
-                except IndexError:
-                    continue
-
-                if samples is None:
-                    continue
-
-                for sample_key, sample in samples.items():
-                    # TODO: Replace with library pooling information when available
-                    first_prep_start = sample.get("first_prep_start_date")
-                    if sample.get("library_prep") is None or first_prep_start is None:
-                        continue
-
-                    prep_re = re.compile('^[A-Z]$')
-                    preps = sorted([m for m in sample["library_prep"].keys() if prep_re.match(m)])
-                    for prep in preps:
-                        final_prep_ends = []
-                        if sample["library_prep"][preps[-1]].get("prep_status") == "PASSED":
-                            for val_key, lib_val in sample["library_prep"][preps[-1]].get("library_validation", {}).items():
-                                final_prep_ends.append(lib_val.get("finish_date"))
-                        try:
-                            valid_preps = [datetime.strptime(i, "%Y-%m-%d") for i in final_prep_ends if i is not None]
-                            prep_end = max(valid_preps)
-                            prep_start = datetime.strptime(first_prep_start, "%Y-%m-%d")
-                            prep_days = (prep_end - prep_start).days
-                            if prep_end > start_date and prep_days >= 0:
-                                libprep_list.append(prep_days)
-                        except TypeError:
-                            continue
-                        except ValueError:
-                            continue
         return({
             "library_prep": self._get_percentile(libprep_list, 90),
             "initial_qc": self._get_percentile(qc_list, 90),
