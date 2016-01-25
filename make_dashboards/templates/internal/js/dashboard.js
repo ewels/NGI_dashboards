@@ -29,8 +29,8 @@ $(function () {
         suc = data['success_rate']
         
         // Top row
-        make_tat_plot('#finished_proj_tat', tat_l['finished_library_project'], tat['finished_library_project'],  'Finished<br>Libraries');
-        make_tat_plot('#lp_proj_tats',      tat_l['library_prep_project'], tat['library_prep_project'],      'Prep Projects');
+        make_tat_plot('#finished_proj_tat', tat_l['finished_library_project'], tat['finished_library_project'],  'Finished Lib<br>'+Math.round(tat['finished_library_project'])+' days');
+        make_tat_plot('#lp_proj_tats',      tat_l['library_prep_project'], tat['library_prep_project'],      'Prep Projects<br>'+Math.round(tat['library_prep_project'])+' days');
         make_tat_plot('#rc_tat',            tat_l['initial_qc'],     tat['initial_qc'],     Math.round(tat['initial_qc'])+' days');
         make_tat_plot('#lp_tat',            tat_l['library_prep'],   tat['library_prep'],   Math.round(tat['library_prep'])+' days');
         make_tat_plot('#seq_tat',           tat_l['sequencing'],     tat['sequencing'],     Math.round(tat['sequencing'])+' days');
@@ -84,9 +84,14 @@ $(function () {
 // Make a speedometer plot to show turnaround times
 function make_tat_plot(target, aim, now, title){
     try {
+        var overTop = false;
         if(target === undefined){ throw 'Target missing'; }
         if(aim === undefined){ throw 'aim missing'; }
         if(now === undefined){ throw 'now missing'; }
+        if(now > aim * 2.5){
+            now = aim * 2.6;
+            overTop = true;
+        }
         $(target).highcharts({
             chart: {
                 type: 'gauge',
@@ -149,6 +154,18 @@ function make_tat_plot(target, aim, now, title){
                 name: 'Turn Around Time',
                 data: [now],
             }]
+        },
+        // Move needle if over limit
+        function (chart) {
+            if(overTop){
+                var mul = 2.6
+                setInterval(function () {
+                    if(mul == 2.6){ mul = 2.52; }
+                    else { mul = 2.6; }
+                    chart.series[0].points[0].update(aim * mul, false);
+                    chart.redraw();
+                }, 200);
+            }
         });
     } catch(err) {
         $(target).addClass('coming_soon').text('coming soon');
