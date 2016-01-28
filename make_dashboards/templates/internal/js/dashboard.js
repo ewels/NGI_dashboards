@@ -420,7 +420,7 @@ function make_success_plot(target, now){
             series: [{
                 name: 'Success Rate',
                 data: [now],
-                dataLabels: { format: '<div style="text-align:center; font-size:25px; color:black; font-weight: normal;">{y}%</div>' },
+                dataLabels: { format: '<div style="text-align:center; font-size:25px; color:black; font-weight: normal;">{y:,.0f}%</div>' },
             }]
         });
     } catch(err) {
