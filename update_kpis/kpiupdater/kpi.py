@@ -136,19 +136,27 @@ class ProjectsInApplications(KPIBase):
 
 class ProjectsOpenedLastSeven(KPIBase):
     """ Number of projects opened in the last seven days """
-    def __call__(self, doc):
-        dnow = datetime.now()
+
+    def __init__(self):
+        super(ProjectsOpenedLastSeven, self).__init__()
+        self.dnow = datetime.now()
+
+    def __call__(self, doc): 
         open_date = datetime.strptime(doc.get("open_date", "2001-01-01"), "%Y-%m-%d")            
-        if (dnow - open_date).days < 7:
+        if (self.dnow - open_date).days < 7:
             self.state += 1
 
 
 class ProjectsClosedLastSeven(KPIBase):
     """ Number of projects closed in the last seven days """
+
+    def __init__(self):
+        super(ProjectsClosedLastSeven, self).__init__()
+        self.dnow = datetime.now()
+
     def __call__(self, doc):
-        dnow = datetime.now()
         close_date = datetime.strptime(doc.get("close_date", "2001-01-01"), "%Y-%m-%d")            
-        if (dnow - close_date).days < 7:
+        if (self.dnow - close_date).days < 7:
             self.state += 1
 
 
@@ -158,12 +166,12 @@ class ProjectsOpenedNWeeks(KPIBase):
     weeks ago. E.g. self.state = {0: 1, 2: 4, 3: 0, 4: 5}
     """
     def __init__(self):
+        self.dnow = datetime.now()
         self.max_weeks = 4
         self.state = {key: 0 for key in range(0, self.max_weeks)}
 
     def __call__(self, doc):
-        dnow = datetime.now()
-        dweekend = datetime.strptime("{0}-{1}-0".format(*dnow.isocalendar()),"%Y-%W-%w")
+        dweekend = datetime.strptime("{0}-{1}-0".format(*self.dnow.isocalendar()),"%Y-%W-%w")
         open_date = datetime.strptime(doc.get("open_date", "2001-01-01"), "%Y-%m-%d") 
         d_weeks = (dweekend - open_date).days / 7
         if d_weeks < self.max_weeks:
@@ -176,12 +184,12 @@ class ProjectsClosedNWeeks(KPIBase):
     weeks ago. E.g. self.state = {0: 1, 2: 4, 3: 0, 4: 5}
     """
     def __init__(self):
+        self.dnow = datetime.now()
         self.max_weeks = 4
         self.state = {key: 0 for key in range(0, self.max_weeks)}
 
     def __call__(self, doc):
-        dnow = datetime.now()
-        dweekend = datetime.strptime("{0}-{1}-0".format(*dnow.isocalendar()),"%Y-%W-%w")
+        dweekend = datetime.strptime("{0}-{1}-0".format(*self.dnow.isocalendar()),"%Y-%W-%w")
         close_date = datetime.strptime(doc.get("close_date", "2001-01-01"), "%Y-%m-%d") 
         d_weeks = (dweekend - close_date).days / 7
         if d_weeks < self.max_weeks:
