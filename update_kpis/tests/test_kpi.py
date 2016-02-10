@@ -47,7 +47,6 @@ class TestProjectsKPI(unittest.TestCase):
             p_cseven(doc)
         self.assertEqual(1, p_cseven.summary())
 
-
     def test_openedseven(self):
         p_oseven = ProjectsOpenedLastSeven()
         p_oseven.dnow = datetime(2016, 2, 8, 0, 0)
@@ -68,4 +67,28 @@ class TestProjectsKPI(unittest.TestCase):
         for doc in self.p_iter:
             p_onweeks(doc)
         self.assertEqual({0: 0, 1: 1, 2: 0, 3: 1}, p_onweeks.summary())
+
+
+class TestSuccessKPI(unittest.TestCase):
+
+    def setUp(self):
+        with open("data/success.yaml") as f:
+            projs = yaml.load(f)
+        self.p_iter = projs.itervalues()
+
+    def test_initialqc(self):
+        s_initqc = SuccessInitialQC()
+        s_initqc.start_date = datetime(2016, 1, 1, 0, 0)
+        for doc in self.p_iter:
+            s_initqc(doc)
+        self.assertEqual(1, len(s_initqc.initial_qc_fails))
+        self.assertEqual(3, len(s_initqc.samples_started))
+
+    def test_libraryprep(self):
+        s_libprep =  SuccessLibraryPrep()
+        s_libprep.start_date = datetime(2016, 1, 1, 0, 0)
+        for doc in self.p_iter:
+            s_libprep(doc)
+        self.assertEqual(3.0, s_libprep.prep_finished)
+        self.assertEqual(2.0, s_libprep.prep_passed)
 
