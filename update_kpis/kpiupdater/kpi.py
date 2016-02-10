@@ -45,8 +45,8 @@ class SuccessInitialQC(KPIBase):
     """
     def __init__(self):
         super(SuccessInitialQC, self).__init__()
-        self.initial_qc_fails = 0
-        self.prep_started = 0
+        self.initial_qc_fails = set()
+        self.samples_started = set()
 
     def __call__(self, doc):
         # TODO: Include finished libraries
@@ -62,12 +62,12 @@ class SuccessInitialQC(KPIBase):
             for sample_key, sample in ws.get("samples").items():
                 rec_ctrl = sample.get("rec_ctrl", {}).get("status")
                 if rec_ctrl is not None and ws_start > self.start_date:
-                    self.prep_started += 1.0
+                    self.samples_started.add(sample_key) 
                     if rec_ctrl == "FAILED":
-                        self.initial_qc_fails += 1.0
+                        self.initial_qc_fails.add(sample_key)
 
     def summary(self):
-        return round(1 - (self.initial_qc_fails / self.prep_started), 2)
+        return round(1 - (float(len(self.initial_qc_fails)) / float(len(self.prep_started))), 2)
 
 
 class SuccessLibraryPrep(KPIBase):
