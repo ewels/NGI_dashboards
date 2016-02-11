@@ -92,3 +92,71 @@ class TestSuccessKPI(unittest.TestCase):
         self.assertEqual(3.0, s_libprep.prep_finished)
         self.assertEqual(2.0, s_libprep.prep_passed)
 
+
+class TestProcessLoad(unittest.TestCase):
+   
+    def setUp(self):
+        with open("data/processload.yaml") as f:
+            projs = yaml.load(f)
+        self.p_iter = projs.itervalues()
+
+    def test_initialqc_samples(self):
+        pl_initqc_samples = LoadInitialQCSamples()
+        for doc in self.p_iter:
+            pl_initqc_samples(doc)
+        self.assertEqual(65, pl_initqc_samples.summary())
+
+    def test_initialqc_lanes(self):
+        pl_initqc_lanes = LoadInitialQCLanes()
+        for doc in self.p_iter:
+            pl_initqc_lanes(doc)
+        self.assertEqual(8, pl_initqc_lanes.summary())
+
+    def test_libraryprep_queue(self):
+        pl_libprepq = LoadLibraryPrepQueue()
+        for doc in self.p_iter:
+            pl_libprepq(doc)
+        self.assertEqual(1, pl_libprepq.summary())
+
+    def test_libraryprep(self):
+        pl_libprep = LoadLibraryPrep()
+        for doc in self.p_iter:
+            pl_libprep(doc)
+        self.assertEqual(1, pl_libprep.summary())
+
+
+class TestTurnAroundTimes(unittest.TestCase):
+
+    def setUp(self):
+        with open("data/turnaround.yaml") as f:
+            projs = yaml.load(f)
+        self.p_iter = projs.itervalues()
+
+    def test_initialqc(self):
+        tat_initqc = TaTInitialQC()
+        tat_initqc.start_date = datetime(2016, 1, 1, 0, 0)
+        for doc in self.p_iter:
+            tat_initqc(doc)
+        self.assertEqual([2,2], tat_initqc.state)
+
+    def test_libraryprep(self):
+        tat_libprep = TaTLibprep()
+        tat_libprep.start_date = datetime(2016, 1, 1, 0, 0)
+        for doc in self.p_iter:
+            tat_libprep(doc)
+        self.assertEqual([2], tat_libprep.state)
+
+    def test_libprep_project(self):
+        tat_libprep_proj = TaTLibprepProj()
+        tat_libprep_proj.start_date = datetime(2016, 1, 1, 0, 0)
+        for doc in self.p_iter:
+            tat_libprep_proj(doc)
+        self.assertEqual([6], tat_libprep_proj.state)
+
+    def test_finlib_project(self):
+        tat_finlib_proj = TaTFinlibProj()
+        tat_finlib_proj.start_date = datetime(2016, 1, 1, 0, 0)
+        for doc in self.p_iter:
+            tat_finlib_proj(doc)
+        self.assertEqual([5], tat_finlib_proj.state)
+
