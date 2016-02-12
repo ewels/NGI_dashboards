@@ -87,6 +87,7 @@ class TestSuccessKPI(unittest.TestCase):
             s_initqc(doc)
         self.assertEqual(1, len(s_initqc.initial_qc_fails))
         self.assertEqual(3, len(s_initqc.samples_started))
+        self.assertIsInstance(s_initqc.summary(), float)
 
     def test_libraryprep(self):
         s_libprep =  SuccessLibraryPrep()
@@ -95,6 +96,7 @@ class TestSuccessKPI(unittest.TestCase):
             s_libprep(doc)
         self.assertEqual(3.0, s_libprep.prep_finished)
         self.assertEqual(2.0, s_libprep.prep_passed)
+        self.assertIsInstance(s_libprep.summary(), float)
 
 
 class TestProcessLoad(unittest.TestCase):
@@ -142,6 +144,7 @@ class TestTurnAroundTimes(unittest.TestCase):
         for doc in self.p_iter:
             tat_initqc(doc)
         self.assertEqual([2,2], tat_initqc.state)
+        self.assertIsInstance(tat_initqc.summary(), float)
 
     def test_libraryprep(self):
         tat_libprep = TaTLibprep()
@@ -149,6 +152,7 @@ class TestTurnAroundTimes(unittest.TestCase):
         for doc in self.p_iter:
             tat_libprep(doc)
         self.assertEqual([2], tat_libprep.state)
+        self.assertIsInstance(tat_libprep.summary(), float)
 
     def test_libprep_project(self):
         tat_libprep_proj = TaTLibprepProj()
@@ -156,6 +160,7 @@ class TestTurnAroundTimes(unittest.TestCase):
         for doc in self.p_iter:
             tat_libprep_proj(doc)
         self.assertEqual([6], tat_libprep_proj.state)
+        self.assertIsInstance(tat_libprep_proj.summary(), float)
 
     def test_finlib_project(self):
         tat_finlib_proj = TaTFinlibProj()
@@ -163,4 +168,5 @@ class TestTurnAroundTimes(unittest.TestCase):
         for doc in self.p_iter:
             tat_finlib_proj(doc)
         self.assertEqual([5], tat_finlib_proj.state)
+        self.assertIsInstance(tat_finlib_proj.summary(), float)
 
