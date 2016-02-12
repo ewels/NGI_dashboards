@@ -67,7 +67,7 @@ class SuccessInitialQC(KPIBase):
                         self.initial_qc_fails.add(sample_key)
 
     def summary(self):
-        return round(1 - (float(len(self.initial_qc_fails)) / float(len(self.prep_started))), 2)
+        return round(1 - (float(len(self.initial_qc_fails)) / float(len(self.samples_started))), 2)
 
 
 class SuccessLibraryPrep(KPIBase):

@@ -2,7 +2,7 @@ import numpy as np
 import json
 import re
 from genologics.entities import *
-from genologics.lims import *
+from genologics.lims import Lims
 from genologics.config import BASEURI, USERNAME, PASSWORD
 lims = Lims(BASEURI, USERNAME, PASSWORD)
 from datetime import datetime, timedelta
