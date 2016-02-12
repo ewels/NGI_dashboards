@@ -1,3 +1,7 @@
+import sys
+from mock import Mock
+fakes = ["genologics", "genologics.entities", "genologics.lims", "genologics.config"]
+sys.modules.update((fake, Mock()) for fake in fakes)
 from kpiupdater.kpi import *
 import yaml
 import unittest
