@@ -15,9 +15,6 @@ $(function () {
             }
         });
         
-        // Header clock
-        updateClock();
-        
         // Collect data into shorter variable names
         tat = data['turnaround_times']
         tat_l = data['limits']['turnaround_times'];
@@ -77,6 +74,48 @@ $(function () {
     } catch(err){
         $('.main-page').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Error loading dashboard data</strong></p></div><pre style="margin: 100px 50px;"><code>'+err+'</code></pre>');
         console.log(err);
+    }
+    
+    ///////////
+    // Hack the clock to make it work
+    // Report rendered date and time
+    var renderedDate = moment(data['date_rendered'], "YYYY-MM-DD, HH:mm");
+    var startDate = moment(data['date_rendered'], "YYYY-MM-DD, HH:mm");
+    try {
+        // System last modified time of the file
+        var lastModified;
+        $.ajax({
+            type: 'POST',
+            url: document.location,
+            success: function(data, textStatus, request){
+                lastModified = moment(request.getResponseHeader('Last-Modified'));
+            },
+            error: function (request, textStatus, errorThrown) {
+                lastModified = moment(request.getResponseHeader('Last-Modified'));
+            }
+        });
+        // Calculate system time since last modified
+        var sinceLastModified = moment() - lastModified;
+        // So guess the real time now
+        startDate = renderedDate.add(sinceLastModified);
+    } catch(e){
+        console.log(e);
+    }
+    
+    // Header clock
+    updateClock();
+    function updateClock(){
+        var now = startDate.add(1, 's'),
+            second = now.seconds() * 6,
+            minute = now.minutes() * 6 + second / 60,
+            hour = ((now.hours() % 12) / 12) * 360 + 90 + minute / 12;
+
+        $('#hour').css("transform", "rotate(" + hour + "deg)");
+        $('#minute').css("transform", "rotate(" + minute + "deg)");
+        $('#second').css("transform", "rotate(" + second + "deg)");
+        $('#clock_time').text( moment().format('HH:mm') );
+        $('#clock_date').text( moment().format('dddd Do MMMM') );
+        setTimeout(updateClock, 1000);
     }
 });
 
@@ -439,32 +478,3 @@ function make_success_plot(target, now){
         $(target).addClass('coming_soon').text('coming soon');
     }
 }
-
-var startDate = moment(data['date_rendered'], "YYYY-MM-DD, HH:mm");
-function updateClock(){
-    var now = startDate.add(1, 's'),
-        second = now.seconds() * 6,
-        minute = now.minutes() * 6 + second / 60,
-        hour = ((now.hours() % 12) / 12) * 360 + 90 + minute / 12;
-
-    $('#hour').css("transform", "rotate(" + hour + "deg)");
-    $('#minute').css("transform", "rotate(" + minute + "deg)");
-    $('#second').css("transform", "rotate(" + second + "deg)");
-    $('#clock_time').text( moment().format('HH:mm') );
-    $('#clock_date').text( moment().format('dddd Do MMMM') );
-    setTimeout(updateClock, 1000);
-}
-
-
-
-// Get the last modified time of the file
-$.ajax({
-    type: 'POST',
-    url: document.location,
-    success: function(data, textStatus, request){
-        console.log(request.getResponseHeader('Last-Modified'));
-    },
-    error: function (request, textStatus, errorThrown) {
-        console.log(request.getResponseHeader('Last-Modified'));
-    }
-});
