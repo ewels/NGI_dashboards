@@ -329,7 +329,6 @@ class TaTBase(KPIBase):
 
     def summary(self):
         return _get_median(self.state)
-        #return _get_percentile(self.state, 90)
 
 
 class TaTLibprepProj(TaTBase):
