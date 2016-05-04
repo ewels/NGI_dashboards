@@ -15,9 +15,6 @@ $(function () {
             }
         });
         
-        // Header clock
-        updateClock();
-        
         // Collect data into shorter variable names
         tat = data['turnaround_times']
         tat_l = data['limits']['turnaround_times'];
@@ -29,12 +26,12 @@ $(function () {
         suc = data['success_rate']
         
         // Top row
-        make_tat_plot('#finished_proj_tat', tat_l['finished_library_project'], tat['finished_library_project'],  'Finished Lib<br>'+Math.round(tat['finished_library_project'])+' days');
-        make_tat_plot('#lp_proj_tats',      tat_l['library_prep_project'], tat['library_prep_project'],      'Prep Projects<br>'+Math.round(tat['library_prep_project'])+' days');
-        make_tat_plot('#rc_tat',            tat_l['initial_qc'],     tat['initial_qc'],     Math.round(tat['initial_qc'])+' days');
-        make_tat_plot('#lp_tat',            tat_l['library_prep'],   tat['library_prep'],   Math.round(tat['library_prep'])+' days');
-        make_tat_plot('#seq_tat',           tat_l['sequencing'],     tat['sequencing'],     Math.round(tat['sequencing'])+' days');
-        make_tat_plot('#bioinfo_tat',       tat_l['bioinformatics'], tat['bioinformatics'], Math.round(tat['bioinformatics'])+' days');
+        make_tat_plot('#finished_proj_tat', 'finished_library_project', tat_l, tat, 'Finished Lib<br>'+Math.round(tat['finished_library_project'])+' days');
+        make_tat_plot('#lp_proj_tats', 'library_prep_project', tat_l, tat, 'Prep Projects<br>'+Math.round(tat['library_prep_project'])+' days');
+        make_tat_plot('#rc_tat', 'initial_qc', tat_l, tat);
+        make_tat_plot('#lp_tat', 'library_prep', tat_l, tat);
+        make_tat_plot('#seq_tat', 'sequencing', tat_l, tat);
+        make_tat_plot('#bioinfo_tat', 'bioinformatics', tat_l, tat);
         
         // Middle row, projects openend / closed
         try {
@@ -78,16 +75,67 @@ $(function () {
         $('.main-page').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Error loading dashboard data</strong></p></div><pre style="margin: 100px 50px;"><code>'+err+'</code></pre>');
         console.log(err);
     }
+    
+    ///////////
+    // Hack the clock to make it work
+    // Report rendered date and time
+    var renderedDate = moment(data['date_rendered'], "YYYY-MM-DD, HH:mm");
+    var startDate = moment(data['date_rendered'], "YYYY-MM-DD, HH:mm");
+    try {
+        // System last modified time of the file
+        var lastModified;
+        $.ajax({
+            type: 'POST',
+            url: document.location,
+            success: function(data, textStatus, request){
+                lastModified = moment(request.getResponseHeader('Last-Modified'));
+            },
+            error: function (request, textStatus, errorThrown) {
+                lastModified = moment(request.getResponseHeader('Last-Modified'));
+            }
+        });
+        // Calculate system time since last modified
+        var sinceLastModified = moment() - lastModified;
+        // So guess the real time now
+        startDate = renderedDate.add(sinceLastModified);
+    } catch(e){
+        console.log(e);
+    }
+    
+    // Header clock
+    updateClock();
+    function updateClock(){
+        var now = startDate.add(1, 's'),
+            second = now.seconds() * 6,
+            minute = now.minutes() * 6 + second / 60,
+            hour = ((now.hours() % 12) / 12) * 360 + 90 + minute / 12;
+
+        $('#hour').css("transform", "rotate(" + hour + "deg)");
+        $('#minute').css("transform", "rotate(" + minute + "deg)");
+        $('#second').css("transform", "rotate(" + second + "deg)");
+        $('#clock_time').text( moment().format('HH:mm') );
+        $('#clock_date').text( moment().format('dddd Do MMMM') );
+        setTimeout(updateClock, 1000);
+    }
 });
 
 
 // Make a speedometer plot to show turnaround times
-function make_tat_plot(target, aim, now, title){
+function make_tat_plot(target, k, tat_l, tat, title){
     try {
         var overTop = false;
         if(target === undefined){ throw 'Target missing'; }
+        if(k === undefined){ throw 'Key missing'; }
+        if(tat_l === undefined){ throw 'tat_l missing'; }
+        if(tat === undefined){ throw 'tat missing'; }
+        aim = tat_l[k];
+        now = tat[k];
+        ninetieth = tat[k+'_90th'];
         if(aim === undefined){ throw 'aim missing'; }
         if(now === undefined){ throw 'now missing'; }
+        if(title === undefined){
+            title = Math.round(now)+' days'
+        }
         if(now > aim * 2.5){
             now = aim * 2.6;
             overTop = true;
@@ -151,6 +199,9 @@ function make_tat_plot(target, aim, now, title){
                 }
             },
             series: [{
+                name: '90th Percentile',
+                data: [ninetieth],
+            },{
                 name: 'Turn Around Time',
                 data: [now],
             }]
@@ -426,18 +477,4 @@ function make_success_plot(target, now){
     } catch(err) {
         $(target).addClass('coming_soon').text('coming soon');
     }
-}
-
-function updateClock(){
-    var now = moment(),
-        second = now.seconds() * 6,
-        minute = now.minutes() * 6 + second / 60,
-        hour = ((now.hours() % 12) / 12) * 360 + 90 + minute / 12;
-
-    $('#hour').css("transform", "rotate(" + hour + "deg)");
-    $('#minute').css("transform", "rotate(" + minute + "deg)");
-    $('#second').css("transform", "rotate(" + second + "deg)");
-    $('#clock_time').text( moment().format('HH:mm') );
-    $('#clock_date').text( moment().format('dddd Do MMMM') );
-    setTimeout(updateClock, 1000);
 }
