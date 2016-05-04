@@ -1,0 +1,36 @@
+P0001:
+    worksets:
+        WS160116:
+            date_run: "2016-01-16"
+            last_aggregate: "2016-01-18"
+            samples:
+                P0001_101:
+                    rec_ctrl:
+                        status: "FAILED"
+                    library_status: "FAILED"
+        WS160120:
+            date_run: "2016-01-20"
+            last_aggregate: "2016-01-22"
+            samples:
+                P0001_101:
+                    rec_ctrl:
+                        status: "FAILED"
+                    library_status: "PASSED"
+P0002:
+    worksets:
+        WS160105:
+            date_run: "2016-01-05"
+            last_aggregate: "2016-01-10"
+            samples:
+                P0002_102:
+                    rec_ctrl:
+                        status: "PASSED"
+                    library_status: "PASSED"
+P0003:
+    worksets:
+        WS160122:
+            date_run: "2016-01-22"
+            samples:
+                P0003_101:
+                    rec_ctrl:
+                        status: "PASSED" 
