@@ -11,6 +11,14 @@ def _get_percentile(vector, percentile):
     else:
         return None
 
+def _get_median(vector):
+    """Helper function to get the median"""
+    if len(vector) > 0:
+        med = np.median(np.array(vector))
+        return round(med, 2)
+    else:
+        return None
+
 
 def _is_ongoing(doc):
     details = doc.get("details", {})
@@ -320,11 +328,12 @@ class TaTBase(KPIBase):
             self.queued = doc.get("project_summary", {}).get("queued")
 
     def summary(self):
-        return _get_percentile(self.state, 90)
+        return _get_median(self.state)
+        #return _get_percentile(self.state, 90)
 
 
 class TaTLibprepProj(TaTBase):
-    """Definition: library prep start to project closed"""
+    """Definition: median days, library prep start to project closed"""
     def __call__(self, doc):
         super(TaTLibprepProj, self).__call__(doc)
         if self.ptype == "Production" and self.aborted is None:
@@ -339,8 +348,14 @@ class TaTLibprepProj(TaTBase):
                 pass
 
 
+class TaTLibprepProj_90th(TaTLibprepProj):
+    
+    def summary(self):
+        return _get_percentile(self.state, 90) 
+
+
 class TaTFinlibProj(TaTBase):
-    """Definition:  sequencing start to project closed"""
+    """Definition:  median days, sequencing start to project closed"""
     def __call__(self, doc):
         super(TaTFinlibProj, self).__call__(doc)
         if self.ptype == "Production" and self.aborted is None:
@@ -355,8 +370,14 @@ class TaTFinlibProj(TaTBase):
                 pass
 
 
+class TaTFinlibProj_90th(TaTFinlibProj):
+
+    def summary(self):
+        return _get_percentile(self.state, 90) 
+
+
 class TaTInitialQC(TaTBase):
-    """ Definition: open date to queue date  in production"""
+    """ Definition: median days, open date to queue date  in production"""
     def __call__(self, doc):
         super(TaTInitialQC, self).__call__(doc)
         if self.ptype == "Production" and self.aborted is None:
@@ -370,8 +391,14 @@ class TaTInitialQC(TaTBase):
                 pass
 
 
+class TaTInitialQC_90th(TaTInitialQC):
+
+    def summary(self):
+        return _get_percentile(self.state, 90) 
+
+
 class TaTLibprep(TaTBase):
-    """Definition: library prep start - in queue library pooling"""
+    """Definition: median days, library prep start - in queue library pooling"""
     def __call__(self, doc):
         super(TaTLibprep, self).__call__(doc)
         if self.ptype == "Production" and self.aborted is None:
@@ -386,4 +413,7 @@ class TaTLibprep(TaTBase):
                 pass
 
 
+class TaTLibprep_90th(TaTLibprep):
 
+    def summary(self):
+        return _get_percentile(self.state, 90) 

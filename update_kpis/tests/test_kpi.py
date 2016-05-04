@@ -137,36 +137,62 @@ class TestTurnAroundTimes(unittest.TestCase):
         with open("data/turnaround.yaml") as f:
             projs = yaml.load(f)
         self.p_iter = projs.itervalues()
+        self.start_date = datetime(2016, 1, 1, 0, 0)
 
     def test_initialqc(self):
         tat_initqc = TaTInitialQC()
-        tat_initqc.start_date = datetime(2016, 1, 1, 0, 0)
+        tat_initqc.start_date = self.start_date
+        tat_initqc_90th = TaTInitialQC_90th()
+        tat_initqc_90th.start_date = self.start_date
+
         for doc in self.p_iter:
             tat_initqc(doc)
+            tat_initqc_90th(doc)
+
         self.assertEqual([2,2], tat_initqc.state)
         self.assertIsInstance(tat_initqc.summary(), float)
+        self.assertIsInstance(tat_initqc_90th.summary(), float)
 
     def test_libraryprep(self):
         tat_libprep = TaTLibprep()
-        tat_libprep.start_date = datetime(2016, 1, 1, 0, 0)
+        tat_libprep.start_date = self.start_date
+        tat_libprep_90th = TaTLibprep_90th()
+        tat_libprep_90th.start_date = self.start_date
+
         for doc in self.p_iter:
             tat_libprep(doc)
+            tat_libprep_90th(doc)
+
         self.assertEqual([2], tat_libprep.state)
         self.assertIsInstance(tat_libprep.summary(), float)
+        self.assertIsInstance(tat_libprep_90th.summary(), float)
 
     def test_libprep_project(self):
         tat_libprep_proj = TaTLibprepProj()
-        tat_libprep_proj.start_date = datetime(2016, 1, 1, 0, 0)
+        tat_libprep_proj.start_date = self.start_date
+        tat_libprep_proj_90th = TaTLibprepProj_90th()
+        tat_libprep_proj_90th.start_date = self.start_date
+
         for doc in self.p_iter:
             tat_libprep_proj(doc)
+            tat_libprep_proj_90th(doc)
+
         self.assertEqual([6], tat_libprep_proj.state)
         self.assertIsInstance(tat_libprep_proj.summary(), float)
+        self.assertIsInstance(tat_libprep_proj_90th.summary(), float)
 
     def test_finlib_project(self):
         tat_finlib_proj = TaTFinlibProj()
-        tat_finlib_proj.start_date = datetime(2016, 1, 1, 0, 0)
+        tat_finlib_proj.start_date = self.start_date
+        tat_finlib_proj_90th = TaTFinlibProj_90th()
+        tat_finlib_proj_90th.start_date = self.start_date
+
         for doc in self.p_iter:
             tat_finlib_proj(doc)
+            tat_finlib_proj_90th(doc)
+
         self.assertEqual([5], tat_finlib_proj.state)
         self.assertIsInstance(tat_finlib_proj.summary(), float)
+        self.assertIsInstance(tat_finlib_proj_90th.summary(), float)
+
 

@@ -66,6 +66,10 @@ def update_kpi(couch_user, password, couch_server):
     kpis["t_initqc"] = TaTInitialQC()
     kpis["t_libproj"] = TaTLibprepProj()
     kpis["t_finproj"] = TaTFinlibProj()
+    kpis["t_libprep_90th"] = TaTLibprep_90th()
+    kpis["t_initqc_90th"] = TaTInitialQC_90th()
+    kpis["t_libproj_90th"] = TaTLibprepProj_90th()
+    kpis["t_finproj_90th"] = TaTFinlibProj_90th()
     
     logging.info("Generating KPIs")
     for proj_key, doc in ProjectViewsIter(p_summary, p_samples, p_dates, w_proj):
@@ -104,7 +108,12 @@ def update_kpi(couch_user, password, couch_server):
             "library_prep": kpis["t_libprep"].summary(),
             "initial_qc": kpis["t_initqc"].summary(),
             "finished_library_project": kpis["t_finproj"].summary(),
-            "library_prep_project": kpis["t_libproj"].summary()
+            "library_prep_project": kpis["t_libproj"].summary(),
+            "library_prep_90th": kpis["t_libprep_90th"].summary(),
+            "initial_qc_90th": kpis["t_initqc_90th"].summary(),
+            "finished_library_project_90th": kpis["t_finproj_90th"].summary(),
+            "library_prep_project_90th": kpis["t_libproj_90th"].summary()
+            
     }
     out["projects"] = {
             "opened_last_7_days": kpis["p_oseven"].summary(),
