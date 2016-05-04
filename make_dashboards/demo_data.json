@@ -12,53 +12,56 @@
             "sequencing": 80, 
             "initial_qc_samples": 200, 
             "initial_qc_lanes": 80, 
-            "bioinformatics": 80, 
-            "library_prep": 200
+            "library_prep": 200, 
+            "bioinformatics": 80
         }
-    },
-    "success_rate": {
-        "sequencing": 0.95, 
-        "initial_qc": 0.75, 
-        "bioinformatics": 0.69, 
-        "library_prep": 0.87
     }, 
-    "time_created": "2016-01-11T07:55:57.799364+0000", 
+    "_rev": "1-496f8abe0a7939a36c03ebe73e1860bd", 
+    "date_rendered": "2016-05-04, 11:40", 
     "process_load": {
-        "library_prep_queue": 20, 
-        "bioinformatics": 50, 
-        "bioinformatics_queue": 32, 
-        "library_prep": 89, 
-        "sequencing": 32, 
-        "initial_qc_samples": 188, 
-        "initial_qc_lanes": 16, 
-        "sequencing_queue": 8
-    },
+        "sequencing": 16, 
+        "initial_qc_samples": 1030, 
+        "initial_qc_lanes": 1, 
+        "library_prep": 103, 
+        "library_prep_queue": 572
+    }, 
+    "version": "0.1.2dev\n", 
+    "date_generated": "2016-05-04, 09:28", 
+    "success_rate": {
+        "initial_qc": 0.62, 
+        "library_prep": 0.65
+    }, 
+    "time_created": "2016-05-04T09:28:19.998823+0000", 
+    "_id": "419712eb3026992f772c995ea91ee9b8", 
+    "p_version": "0.1.1dev", 
     "turnaround_times": {
-        "library_prep_project": 36, 
-        "initial_qc": 5, 
-        "finished_library_project": 4, 
-        "bioinformatics": 7, 
-        "sequencing": 14, 
-        "library_prep": 21
-    },
+        "library_prep_project_90th": 87.6, 
+        "initial_qc_90th": 22.9, 
+        "library_prep_project": 48, 
+        "initial_qc": 5.5, 
+        "finished_library_project_90th": 30.6, 
+        "finished_library_project": 14, 
+        "library_prep_90th": 28, 
+        "library_prep": 14
+    }, 
     "projects": {
-        "closed_last_7_days": 10, 
+        "closed_last_7_days": 9, 
         "opened_n_weeks_ago": {
-            "1": 6, 
-            "0": 5, 
-            "3": 2, 
-            "2": 1
-        },
-        "finished_libraries": 12, 
+            "1": 5, 
+            "0": 3, 
+            "3": 27, 
+            "2": 18
+        }, 
+        "finished_libraries": 22, 
         "closed_n_weeks_ago": {
-            "1": 2, 
-            "0": 10, 
-            "3": 3, 
-            "2": 3
-        },
-        "in_applications": 11, 
-        "in_production": 160, 
-        "opened_last_7_days": 8, 
-        "library_prep": 33
+            "1": 6, 
+            "0": 6, 
+            "3": 11, 
+            "2": 13
+        }, 
+        "in_applications": 22, 
+        "in_production": 116, 
+        "opened_last_7_days": 4, 
+        "library_prep": 116
     }
 }
