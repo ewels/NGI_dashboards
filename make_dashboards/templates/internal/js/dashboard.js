@@ -79,33 +79,20 @@ $(function () {
     ///////////
     // Hack the clock to make it work
     // Report rendered date and time
-    var renderedDate = moment(data['date_rendered'], "YYYY-MM-DD, HH:mm");
-    var startDate = moment(data['date_rendered'], "YYYY-MM-DD, HH:mm");
+    var clockdate = moment(data['date_rendered'], "YYYY-MM-DD, HH:mm");
     try {
-        // System last modified time of the file
-        var lastModified;
-        $.ajax({
-            type: 'POST',
-            url: document.location,
-            success: function(data, textStatus, request){
-                lastModified = moment(request.getResponseHeader('Last-Modified'));
-            },
-            error: function (request, textStatus, errorThrown) {
-                lastModified = moment(request.getResponseHeader('Last-Modified'));
-            }
+        $.get( "date.php", function( data ) {
+            clockdate = moment(data);
+            updateClock();
         });
-        // Calculate system time since last modified
-        var sinceLastModified = moment() - lastModified;
-        // So guess the real time now
-        startDate = renderedDate.add(sinceLastModified);
     } catch(e){
         console.log(e);
+        updateClock();
     }
     
     // Header clock
-    updateClock();
     function updateClock(){
-        var now = startDate.add(1, 's'),
+        var now = clockdate.add(1, 's'),
             second = now.seconds() * 6,
             minute = now.minutes() * 6 + second / 60,
             hour = ((now.hours() % 12) / 12) * 360 + 90 + minute / 12;
@@ -113,8 +100,9 @@ $(function () {
         $('#hour').css("transform", "rotate(" + hour + "deg)");
         $('#minute').css("transform", "rotate(" + minute + "deg)");
         $('#second').css("transform", "rotate(" + second + "deg)");
-        $('#clock_time').text( moment().format('HH:mm') );
-        $('#clock_date').text( moment().format('dddd Do MMMM') );
+        $('#clock_time').text( clockdate.format('HH:mm') );
+        $('#clock_date').text( clockdate.format('dddd Do MMMM') );
+        $('#report_age').text( clockdate.from(moment(data['date_generated']), true) );
         setTimeout(updateClock, 1000);
     }
 });
