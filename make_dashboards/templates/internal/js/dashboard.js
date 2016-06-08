@@ -1,8 +1,6 @@
 
 // Javascript for the NGI Stockholm Internal Dashboard
 
-setTimeout(function(){ location.reload(); }, 300000); // 300 seconds - 5 minutes
-
 $(function () {
     
     try {
@@ -14,6 +12,17 @@ $(function () {
                 }
             }
         });
+        
+        // Header clock
+        updateClock();
+        
+        // Format KPI update number
+        $('#time_created').text(moment($('#time_created').text()).format("YYYY-MM-DD, HH:mm"));
+        
+        // Cron job runs on the hour, every hour. Get the web page to reload at 5 past the next hour
+        var reloadDelay = moment().add(1, 'hours').startOf('hour').add(5, 'minutes').diff();
+        setTimeout(function(){ location.reload(); }, reloadDelay );
+        console.log("Reloading page in "+Math.floor(reloadDelay/(1000*60))+" minutes");
         
         // Collect data into shorter variable names
         tat = data['turnaround_times']
@@ -74,37 +83,10 @@ $(function () {
     } catch(err){
         $('.main-page').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Error loading dashboard data</strong></p></div><pre style="margin: 100px 50px;"><code>'+err+'</code></pre>');
         console.log(err);
+        // Try reloading in a few minutes
+        setTimeout(function(){ location.reload(); }, 300000); // 5 minutes
     }
     
-    ///////////
-    // Hack the clock to make it work
-    // Report rendered date and time
-    var clockdate = moment(data['date_rendered'], "YYYY-MM-DD, HH:mm");
-    try {
-        $.get( "date.php", function( data ) {
-            clockdate = moment(data);
-            updateClock();
-        });
-    } catch(e){
-        console.log(e);
-        updateClock();
-    }
-    
-    // Header clock
-    function updateClock(){
-        var now = clockdate.add(1, 's'),
-            second = now.seconds() * 6,
-            minute = now.minutes() * 6 + second / 60,
-            hour = ((now.hours() % 12) / 12) * 360 + 90 + minute / 12;
-
-        $('#hour').css("transform", "rotate(" + hour + "deg)");
-        $('#minute').css("transform", "rotate(" + minute + "deg)");
-        $('#second').css("transform", "rotate(" + second + "deg)");
-        $('#clock_time').text( clockdate.format('HH:mm') );
-        $('#clock_date').text( clockdate.format('dddd Do MMMM') );
-        $('#report_age').text( clockdate.from(moment(data['date_generated']), true) );
-        setTimeout(updateClock, 1000);
-    }
 });
 
 
@@ -466,3 +448,21 @@ function make_success_plot(target, now){
         $(target).addClass('coming_soon').text('coming soon');
     }
 }
+
+function updateClock(){
+    var now = moment(),
+        second = now.seconds() * 6,
+        minute = now.minutes() * 6 + second / 60,
+        hour = ((now.hours() % 12) / 12) * 360 + 90 + minute / 12;
+
+    $('#hour').css("transform", "rotate(" + hour + "deg)");
+    $('#minute').css("transform", "rotate(" + minute + "deg)");
+    $('#second').css("transform", "rotate(" + second + "deg)");
+    $('#clock_time').text( moment().format('HH:mm') );
+    $('#clock_date').text( moment().format('dddd Do MMMM') );
+    
+    var updated = moment($('#time_created').data('original'));
+    $('#report_age').text( moment().from(updated, true) );
+    setTimeout(updateClock, 1000);
+}
+
