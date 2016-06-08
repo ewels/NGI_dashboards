@@ -142,8 +142,8 @@
 
 <footer class="container-fluid">
   <p class="dashboard-timestamps">
-    Generated: <span>{{ d.date_generated }}</span> &nbsp; / &nbsp; 
     Fetched: <span>{{ d.date_rendered }}</span> &nbsp; / &nbsp; 
+    Data Updated: <span id="time_created" data-original="{{ d.time_created }}">{{ d.time_created }}</span> &nbsp; / &nbsp; 
     Age: <span id="report_age"></span> &nbsp; / &nbsp; 
     Package Version: <span>v{{ d.p_version }}</span>
   </p>
