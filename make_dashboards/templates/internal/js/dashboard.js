@@ -67,7 +67,7 @@ $(function () {
             pl['hiseq_pooling_queue']+'<span style="color:#55BF3B">H</span>,'+
             pl['hiseqX_pooling_queue']+'<span style="color:#7cb5ec">X</span> samples in pooling';
         make_queue_plot('#lp_queue',      pl_l['library_prep'],   pl['library_prep_queue'],   pl['library_prep_queue']+' samples in queue');
-        make_queue_plot('#seq_queue',     pl_l['sequencing'],     [pl['miseq_sequencing_queue_l'].toFixed(2), pl['hiseq_sequencing_queue_l'].toFixed(2), pl['hiseqX_sequencing_queue_l'].toFixed(2)], sequencing_q_subtext);
+        make_queue_plot('#seq_queue',     pl_l['sequencing'],     [pl['miseq_sequencing_queue_l'], pl['hiseq_sequencing_queue_l'], pl['hiseqX_sequencing_queue_l']], sequencing_q_subtext);
         make_queue_plot('#bioinfo_queue', pl_l['bioinformatics'], pl['bioinformatics_queue'], pl['bioinformatics_queue']+' lanes in queue');
         
         // Middle Row - Balance plots

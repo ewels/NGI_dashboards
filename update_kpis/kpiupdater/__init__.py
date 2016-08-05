@@ -4,8 +4,9 @@ import re
 from genologics.entities import *
 from genologics.lims import Lims
 from genologics.config import BASEURI, USERNAME, PASSWORD
-lims = Lims(BASEURI, USERNAME, PASSWORD)
 from datetime import datetime, timedelta
+from decimal import Decimal
+lims = Lims(BASEURI, USERNAME, PASSWORD)
 
 
 class ProjectViewsIter:
@@ -69,9 +70,9 @@ class ProjectViewsIter:
 def estimate_lanes_per_pool(pool):
     lanes=0
     for sample in pool.samples:
-        lanes+=round(float(sample.project.udf['Sequence units ordered (lanes)']) / lims.get_sample_number(projectlimsid=sample.project.id),2)
+        lanes+=float(sample.project.udf['Sequence units ordered (lanes)']) / lims.get_sample_number(projectlimsid=sample.project.id)
 
-    return round(lanes, 2)
+    return round(Decimal(lanes), 2)
 
 def sequencing_load():
 
