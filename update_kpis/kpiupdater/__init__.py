@@ -69,7 +69,7 @@ class ProjectViewsIter:
 def estimate_lanes_per_pool(pool):
     lanes=0
     for sample in pool.samples:
-        lanes+=float(sample.project.udf['Sequence units ordered (lanes)']) / lims.get_sample_number(projectlimsid=sample.project.id)
+        lanes+=round(float(sample.project.udf['Sequence units ordered (lanes)']) / lims.get_sample_number(projectlimsid=sample.project.id),2)
 
     return round(lanes, 2)
 
