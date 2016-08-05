@@ -115,4 +115,4 @@ def sequencing_load():
         hiseqX_p+=len(q.artifacts)
         for art in q.artifacts:
             hiseqX_l+=estimate_lanes_per_pool(art)
-    return [miseq_s, miseq_p, miseq_l, hiseq_s, hiseq_p, hiseq_l, hiseqX_s, hiseqX_p, hiseqX_l]
+    return [miseq_s, miseq_p, int(miseq_l), hiseq_s, hiseq_p, int(hiseq_l), hiseqX_s, hiseqX_p, int(hiseqX_l)]
