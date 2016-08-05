@@ -68,17 +68,34 @@ class ProjectViewsIter:
 
 def sequencing_load():
 
-    # Sequencing (Thanks @Galithil)
-    lanes = 0
-    weekAgo = datetime.now() - timedelta(days=7)
-    process_types = ["Illumina Sequencing (Illumina SBS) 4.0",
-            "MiSeq Run (MiSeq) 4.0",
-            "Illumina Sequencing (HiSeq X) 1.0"]
-    seq = lims.get_processes(type=process_types, 
-        last_modified=weekAgo.strftime("%Y-%m-%dT00:00:00Z"))
-
-    for pro in seq:
-        if not "Finish Date" in pro.udf or not pro.udf['Finish Date']:
-            lanes += len(pro.all_inputs())
-
-    return lanes
+    q_miseq_s_ids=['52', '53', '54', '505']
+    q_miseq_p_ids=['55', '56', '253', '1002']
+    q_hiseq_s_ids=['252', '46', '47', '401']
+    q_hiseq_p_ids=['49', '125', '1001', '50']
+    q_hiseqX_s_ids=['751', '711', '712']
+    q_hiseqX_p_ids=['713', '714', '715', '716']
+    miseq_s=0
+    miseq_p=0
+    hiseq_s=0
+    hiseq_p=0
+    hiseqX_s=0
+    hiseqX_p=0
+    for s in q_miseq_s_ids:
+        q=Queue(lims, id=s)
+        miseq_s+=len(q.artifacts)
+    for s in q_miseq_p_ids:
+        q=Queue(lims, id=s)
+        miseq_p+=len(q.artifacts)
+    for s in q_hiseq_s_ids:
+        q=Queue(lims, id=s)
+        hiseq_s+=len(q.artifacts)
+    for s in q_hiseq_p_ids:
+        q=Queue(lims, id=s)
+        hiseq_p+=len(q.artifacts)
+    for s in q_hiseqX_s_ids:
+        q=Queue(lims, id=s)
+        hiseqX_s+=len(q.artifacts)
+    for s in q_hiseqX_p_ids:
+        q=Queue(lims, id=s)
+        hiseqX_p+=len(q.artifacts)
+    return [miseq_s, miseq_p, hiseq_s, hiseq_p, hiseqX_s, hiseqX_p]

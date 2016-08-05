@@ -63,8 +63,11 @@ $(function () {
         
         // Middle Row - Queue plots
         // Max - 5 * pulse
+        sequencing_q_subtext=pl['miseq_pooling_queue']+'<span style="color:#DF5353">M</span>,'+
+            pl['hiseq_pooling_queue']+'<span style="color:#55BF3B">H</span>,'+
+            pl['hiseqX_pooling_queue']+'<span style="color:#7cb5ec">X</span> samples in pooling';
         make_queue_plot('#lp_queue',      pl_l['library_prep'],   pl['library_prep_queue'],   pl['library_prep_queue']+' samples in queue');
-        make_queue_plot('#seq_queue',     pl_l['sequencing'],     pl['sequencing_queue'],     pl['sequencing_queue']+' lanes in queue');
+        make_queue_plot('#seq_queue',     pl_l['sequencing'],     [pl['miseq_sequencing_queue'], pl['hiseq_sequencing_queue'], pl['hiseqX_sequencing_queue']], sequencing_q_subtext);
         make_queue_plot('#bioinfo_queue', pl_l['bioinformatics'], pl['bioinformatics_queue'], pl['bioinformatics_queue']+' lanes in queue');
         
         // Middle Row - Balance plots
@@ -198,6 +201,19 @@ function make_queue_plot(target, aim, now, subtext){
         if(target === undefined){ throw 'Target missing'; }
         if(aim === undefined){ throw 'aim missing'; }
         if(now === undefined){ throw 'now missing'; }
+        if (!Array.isArray(now)){
+            series=[now];
+        }else{
+            chroma_colors=chroma.scale(['#DF5353','#55BF3B','#7cb5ec']).colors(now.length);
+            series=[];
+            for (i in now){
+                obj={name:'serie'+i,
+                    color : chroma_colors[i], 
+                    dataLabels: {enabled: true},
+                    y:now[i]};
+                series.push(obj);
+            }
+        }
         var max = aim * 5;
         $(target).highcharts({
             chart: {
@@ -245,7 +261,7 @@ function make_queue_plot(target, aim, now, subtext){
             tooltip: { enabled: false },
             series: [{
                 name: 'Queue',
-                data: [now]
+                data: series
             }]
         });
     } catch(err) {
