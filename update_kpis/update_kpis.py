@@ -93,18 +93,20 @@ def update_kpi(couch_user, password, couch_server):
     with open(limit_file, "rU") as f:
         out["limits"] = json.load(f)
     #GAH! Too much repetition! I should probably rewrite this part 
-    #Note : pooling queues are samples, sequencing queues are pools
     out["process_load"] = {
             "initial_qc_samples": kpis["pl_rcsamples"].summary(),
             "initial_qc_lanes": kpis["pl_rclanes"].summary(),
             "library_prep": kpis["pl_libprep"].summary(),
             "library_prep_queue": kpis["pl_libprepq"].summary(),
-            "miseq_pooling_queue": pl_seq[0],
-            "miseq_sequencing_queue": pl_seq[1],
-            "hiseq_pooling_queue": pl_seq[2],
-            "hiseq_sequencing_queue": pl_seq[3],
-            "hiseqX_pooling_queue": pl_seq[4],
-            "hiseqX_sequencing_queue": pl_seq[5]
+            "miseq_pooling_queue_s": pl_seq[0],
+            "miseq_sequencing_queue_p": pl_seq[1],
+            "miseq_sequencing_queue_l": pl_seq[2],
+            "hiseq_pooling_queue": pl_seq[3],
+            "hiseq_sequencing_queue_p": pl_seq[4],
+            "hiseq_sequencing_queue_l": pl_seq[5],
+            "hiseqX_pooling_queue": pl_seq[6],
+            "hiseqX_sequencing_queue_p": pl_seq[7],
+            "hiseqX_sequencing_queue_l": pl_seq[8]
     }
     out["success_rate"] = {
             "initial_qc": kpis["s_initqc"].summary(),
