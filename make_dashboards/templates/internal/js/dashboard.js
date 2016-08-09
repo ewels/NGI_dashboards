@@ -63,18 +63,22 @@ $(function () {
         
         // Middle Row - Queue plots
         // Max - 5 * pulse
-        sequencing_q_subtext=pl['miseq_pooling_queue']+'<span style="color:#DF5353">M</span>,'+
+        sequencing_q_subtext=pl['miseq_sequencing_queue_l']+'<span style="color:#DF5353">M</span>,'+
+            pl['hiseq_sequencing_queue_l']+'<span style="color:#55BF3B">H</span>,'+
+            pl['hiseqX_sequencing_queue_l']+'<span style="color:#7cb5ec">X</span> lanes in sequencing';
+        pooling_q_subtext=pl['miseq_pooling_queue']+'<span style="color:#DF5353">M</span>,'+
             pl['hiseq_pooling_queue']+'<span style="color:#55BF3B">H</span>,'+
             pl['hiseqX_pooling_queue']+'<span style="color:#7cb5ec">X</span> samples in pooling';
         make_queue_plot('#lp_queue',      pl_l['library_prep'],   pl['library_prep_queue'],   pl['library_prep_queue']+' samples in queue');
         make_queue_plot('#seq_queue',     pl_l['sequencing'],     [pl['miseq_sequencing_queue_l'], pl['hiseq_sequencing_queue_l'], pl['hiseqX_sequencing_queue_l']], sequencing_q_subtext);
+        make_queue_plot('#seq_balance',  pl_l['pooling'],     [pl['miseq_pooling_queue'], pl['hiseq_pooling_queue'], pl['hiseqX_pooling_queue']], pooling_q_subtext);
         make_queue_plot('#bioinfo_queue', pl_l['bioinformatics'], pl['bioinformatics_queue'], pl['bioinformatics_queue']+' lanes in queue');
         
         // Middle Row - Balance plots
         make_balance_plot('#rc_finished_balance', pl_l['initial_qc_lanes'],   pl['initial_qc_lanes'],   undefined, pl['initial_qc_lanes']+' lanes in progress');
         make_balance_plot('#rc_balance',          pl_l['initial_qc_samples'], pl['initial_qc_samples'], undefined, pl['initial_qc_samples']+' samples in progress');
         make_balance_plot('#lp_balance',          pl_l['library_prep'],       pl['library_prep'],       undefined, pl['library_prep']+' samples in progress');
-        make_balance_plot('#seq_balance',         pl_l['sequencing'],         pl['sequencing'],         undefined, pl['sequencing']+' lanes in progress');
+        //make_balance_plot('#seq_balance',         pl_l['sequencing'],         pl['sequencing'],         undefined, pl['sequencing']+' lanes in progress');
         make_balance_plot('#bioinfo_balance',     pl_l['bioinformatics'],     pl['bioinformatics'],     undefined, pl['bioinformatics']+' lanes in progress');
         
         // Bottom row
