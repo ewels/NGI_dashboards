@@ -3,6 +3,7 @@
        "initial_qc_samples": 200,
        "initial_qc_lanes": 80,
        "library_prep": 200,
+       "sequencing_queue": 100,
        "sequencing": 80,
        "pooling": 80,
        "bioinformatics": 80

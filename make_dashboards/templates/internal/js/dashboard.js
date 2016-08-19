@@ -63,22 +63,23 @@ $(function () {
         
         // Middle Row - Queue plots
         // Max - 5 * pulse
+        //
         sequencing_q_subtext=pl['miseq_sequencing_queue_l']+'<span style="color:#DF5353">M</span>,'+
             pl['hiseq_sequencing_queue_l']+'<span style="color:#55BF3B">H</span>,'+
-            pl['hiseqX_sequencing_queue_l']+'<span style="color:#7cb5ec">X</span> lanes in sequencing';
-        pooling_q_subtext=pl['miseq_pooling_queue']+'<span style="color:#DF5353">M</span>,'+
-            pl['hiseq_pooling_queue']+'<span style="color:#55BF3B">H</span>,'+
-            pl['hiseqX_pooling_queue']+'<span style="color:#7cb5ec">X</span> samples in pooling';
+            pl['hiseqX_sequencing_queue_l']+'<span style="color:#7cb5ec">X</span> lanes in queue';
         make_queue_plot('#lp_queue',      pl_l['library_prep'],   pl['library_prep_queue'],   pl['library_prep_queue']+' samples in queue');
-        make_queue_plot('#seq_queue',     pl_l['sequencing'],     [pl['miseq_sequencing_queue_l'], pl['hiseq_sequencing_queue_l'], pl['hiseqX_sequencing_queue_l']], sequencing_q_subtext);
-        make_queue_plot('#seq_balance',  pl_l['pooling'],     [pl['miseq_pooling_queue'], pl['hiseq_pooling_queue'], pl['hiseqX_pooling_queue']], pooling_q_subtext);
+        make_queue_plot('#seq_queue',     pl_l['sequencing_queue'],     [pl['miseq_sequencing_queue_l'], pl['hiseq_sequencing_queue_l'], pl['hiseqX_sequencing_queue_l']], sequencing_q_subtext);
         make_queue_plot('#bioinfo_queue', pl_l['bioinformatics'], pl['bioinformatics_queue'], pl['bioinformatics_queue']+' lanes in queue');
         
         // Middle Row - Balance plots
+        sequencing_subtext=pl['miseq_sequencing_l']+'<span style="color:#AF2323">M</span>,'+
+            pl['hiseq_sequencing_l']+'<span style="color:#258F0B">H</span>,'+
+            pl['hiseqX_sequencing_l']+'<span style="color:#4c85bc">X</span> lanes in progress';
         make_balance_plot('#rc_finished_balance', pl_l['initial_qc_lanes'],   pl['initial_qc_lanes'],   undefined, pl['initial_qc_lanes']+' lanes in progress');
+        console.log(pl['initial_qc_samples']);
         make_balance_plot('#rc_balance',          pl_l['initial_qc_samples'], pl['initial_qc_samples'], undefined, pl['initial_qc_samples']+' samples in progress');
         make_balance_plot('#lp_balance',          pl_l['library_prep'],       pl['library_prep'],       undefined, pl['library_prep']+' samples in progress');
-        //make_balance_plot('#seq_balance',         pl_l['sequencing'],         pl['sequencing'],         undefined, pl['sequencing']+' lanes in progress');
+        make_balance_plot('#seq_balance',         pl_l['sequencing'],         [pl['miseq_sequencing_l'], pl['hiseq_sequencing_l'], pl['hiseqX_sequencing_l']],         undefined, sequencing_subtext);
         make_balance_plot('#bioinfo_balance',     pl_l['bioinformatics'],     pl['bioinformatics'],     undefined, pl['bioinformatics']+' lanes in progress');
         
         // Bottom row
@@ -276,10 +277,32 @@ function make_queue_plot(target, aim, now, subtext){
 
 // Function to make the load balancing plots
 function make_balance_plot(target, aim, now, prev, subtext){
+    console.log(now);
     try {
         if(target === undefined){ throw 'Target missing'; }
         if(aim === undefined){ throw 'aim missing'; }
         if(now === undefined){ throw 'now missing'; }
+        if (!Array.isArray(now)){
+            my_plotlines=[{
+                    color: '#000',
+                    width: 2,
+                    value: now,
+                    zIndex: 1000
+                }];
+        }else{
+            my_plotlines=Array();
+            chroma_colors=chroma.scale(['#AF2323','#259F0B','#4c85cc']).colors(now.length);
+            pl=[];
+            for (i in now){
+                obj={name:'serie'+i,
+                    color : chroma_colors[i], 
+                    dataLabels: {enabled: true},
+                    width: 2,
+                    zIndex: 1000,
+                    value: now[i]};
+                my_plotlines.push(obj);
+            }
+        }
         $(target).highcharts({
             chart: {
                 type: 'bar',
@@ -309,12 +332,7 @@ function make_balance_plot(target, aim, now, prev, subtext){
                     from: aim,
                     to: aim * 4
                 }],
-                plotLines: [{
-                    color: '#000',
-                    width: 2,
-                    value: now,
-                    zIndex: 1000
-                }]
+                plotLines: my_plotlines
             },{
                 min: 0,
                 max: aim * 5,
@@ -325,12 +343,7 @@ function make_balance_plot(target, aim, now, prev, subtext){
                 },
                 labels: { enabled: false },
                 gridLineWidth: 0,
-                plotLines: [{
-                    color: '#999',
-                    width: 1,
-                    value: prev,
-                    zIndex: 1000
-                }]
+                plotLines: my_plotlines 
             }],
             title: { text: null },
             legend: { enabled: false },
@@ -341,6 +354,7 @@ function make_balance_plot(target, aim, now, prev, subtext){
             ]
         });
     } catch(err) {
+        console.log(err);
         $(target).addClass('coming_soon').text('coming soon');
     }
 }
@@ -403,6 +417,7 @@ function make_proj_open_close_plot(target, opened, closed, categories){
     } catch(err) {
         $(target).addClass('coming_soon').text('coming soon');
     }
+
 }
 
 // Make an arc plot to show percentage success

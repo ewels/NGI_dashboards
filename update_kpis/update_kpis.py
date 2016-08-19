@@ -106,7 +106,10 @@ def update_kpi(couch_user, password, couch_server):
             "hiseq_sequencing_queue_l": pl_seq[5],
             "hiseqX_pooling_queue": pl_seq[6],
             "hiseqX_sequencing_queue_p": pl_seq[7],
-            "hiseqX_sequencing_queue_l": pl_seq[8]
+            "hiseqX_sequencing_queue_l": pl_seq[8],
+            "hiseq_sequencing_l": pl_seq[9],
+            "hiseqX_sequencing_l": pl_seq[10],
+            "miseq_sequencing_l": pl_seq[11]
     }
     out["success_rate"] = {
             "initial_qc": kpis["s_initqc"].summary(),
