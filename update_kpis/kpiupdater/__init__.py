@@ -133,15 +133,15 @@ def sequencing_load():
     hiseq_pr=lims.get_processes(type="Illumina Sequencing (Illumina SBS) 4.0", last_modified=starting_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     for pro in hiseq_pr:
         if not pro.udf.get("Finish Date"):
-            hiseq_rl+=len(pro.all_outputs())
+            hiseq_rl+=len(pro.all_inputs())
     hiseqx_pr=lims.get_processes(type="Illumina Sequencing (HiSeq X) 1.0", last_modified=starting_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     for pro in hiseqx_pr:
         if not pro.udf.get("Finish Date"):
-            hiseqx_rl+=len(pro.all_outputs())
+            hiseqx_rl+=len(pro.all_inputs())
     miseq_pr=lims.get_processes(type="MiSeq Run (MiSeq) 4.0", last_modified=starting_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     for pro in miseq_pr:
         if not pro.udf.get("Finish Date"):
-            miseq_rl+=len(pro.all_outputs())
+            miseq_rl+=len(pro.all_inputs())
 
 
 
