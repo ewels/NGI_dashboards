@@ -301,7 +301,6 @@ function make_balance_plot(target, aim, now, prev, subtext){
                     value: now[i]};
                 my_plotlines.push(obj);
             }
-        console.log(my_plotlines);
         }
         $(target).highcharts({
             chart: {
