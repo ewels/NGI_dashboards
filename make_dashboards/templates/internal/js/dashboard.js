@@ -79,7 +79,7 @@ $(function () {
         console.log(pl['initial_qc_samples']);
         make_balance_plot('#rc_balance',          pl_l['initial_qc_samples'], pl['initial_qc_samples'], undefined, pl['initial_qc_samples']+' samples in progress');
         make_balance_plot('#lp_balance',          pl_l['library_prep'],       pl['library_prep'],       undefined, pl['library_prep']+' samples in progress');
-        make_balance_plot('#seq_balance',         pl_l['sequencing'],         [pl['miseq_sequencing_l'], pl['hiseq_sequencing_l'], pl['hiseqX_sequencing_l']],         undefined, sequencing_subtext);
+        make_balance_plot('#seq_balance',         pl_l['sequencing']/4,         [pl['miseq_sequencing_l'], pl['hiseq_sequencing_l'], pl['hiseqX_sequencing_l']],         undefined, sequencing_subtext);
         make_balance_plot('#bioinfo_balance',     pl_l['bioinformatics'],     pl['bioinformatics'],     undefined, pl['bioinformatics']+' lanes in progress');
         
         // Bottom row
@@ -277,7 +277,6 @@ function make_queue_plot(target, aim, now, subtext){
 
 // Function to make the load balancing plots
 function make_balance_plot(target, aim, now, prev, subtext){
-    console.log(now);
     try {
         if(target === undefined){ throw 'Target missing'; }
         if(aim === undefined){ throw 'aim missing'; }
@@ -302,6 +301,7 @@ function make_balance_plot(target, aim, now, prev, subtext){
                     value: now[i]};
                 my_plotlines.push(obj);
             }
+        console.log(my_plotlines);
         }
         $(target).highcharts({
             chart: {
@@ -343,7 +343,6 @@ function make_balance_plot(target, aim, now, prev, subtext){
                 },
                 labels: { enabled: false },
                 gridLineWidth: 0,
-                plotLines: my_plotlines 
             }],
             title: { text: null },
             legend: { enabled: false },
