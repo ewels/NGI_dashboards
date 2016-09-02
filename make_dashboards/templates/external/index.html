@@ -24,7 +24,7 @@
       <img src="img/NGI_logo.png">
     </div>
     <div class="col-xs-7">
-      <h1>NGI Stockholm - Dashboard</h1>
+      <h1>NGI Stockholm Status</h1>
     </div>
     <div class="col-xs-3 text-right">
       <span id="clock_time">00:00</span>
@@ -38,28 +38,26 @@
   </div>
 </header>
 
-<div class="container-fluid main-page">
+<div class="container-fluid mainrow">
 
   <div class="row">
     <div class="col-xs-4">
-      <h3 id="num_projects_heading"># Projects</h3>
-      <div id="num_projects_plot"></div>
+      <div id="num_projects_plot" class="external_plot"></div>
     </div>
     <div class="col-xs-4">
       <h3>Affiliations</h3>
     </div>
     <div class="col-xs-4">
-      <h3>Open Projects</h3>
+      <div id="open_projects_plot" class="external_plot"></div>
     </div>
   </div>
   
   <div class="row">
     <div class="col-xs-4">
-      <h3 id="num_samples_heading"># Samples</h3>
-      <div id="num_samples_plot"></div>
+      <div id="num_samples_plot" class="external_plot"></div>
     </div>
     <div class="col-xs-4">
-      <h3>Delivery Times</h3>
+      <div id="delivery_times_plot" class="external_plot"></div>
     </div>
     <div class="col-xs-4">
       <h3>Throughput</h3>
