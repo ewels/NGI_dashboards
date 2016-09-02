@@ -1,6 +1,8 @@
 
 // Javascript for the NGI Stockholm Internal Dashboard
 
+var plot_height = 415;
+
 $(function () {
     
     try {
@@ -41,6 +43,12 @@ $(function () {
         // Delivery times plot
         make_delivery_times_plot();
         
+        // Affiliations plot
+        make_affiliations_plot();
+        
+        // Throughput plot
+        make_throughput_plot();
+        
     } catch(err){
         $('.main-page').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Error loading dashboard data</strong></p></div><pre style="margin: 100px 50px;"><code>'+err+'</code></pre>');
         console.log(err);
@@ -75,7 +83,7 @@ function make_bar_plot(target, ydata, title){
         $(target).highcharts({
             chart: {
                 type: 'bar',
-                height: 300,
+                height: plot_height,
                 plotBackgroundColor: null,
             },
             title: {
@@ -124,7 +132,7 @@ function make_delivery_times_plot(){
             plotBackgroundColor: null,
             plotBorderWidth: 0,
             plotShadow: false,
-            height: 300,
+            height: plot_height,
         },
         title: {
             text: 'Delivery Times in '+years[0],
@@ -151,13 +159,14 @@ function make_delivery_times_plot(){
                 showInLegend: true,
                 startAngle: -90,
                 endAngle: 90,
-                size: '150%',
+                size: '120%',
                 center: ['50%', '75%']
             }
         },
         legend: {
             enabled: true,
-            floating: true
+            floating: true,
+            y: 60
         },
         series: [{
             type: 'pie',
@@ -165,6 +174,134 @@ function make_delivery_times_plot(){
             innerSize: '50%',
             data: pdata
         }]
+    });
+}
+
+
+function make_affiliations_plot(){
+    var years = Object.keys(data['project_user_affiliations']).sort().reverse();
+    var ydata = data['project_user_affiliations'][years[0]];
+    var ykeys = Object.keys(ydata).sort(function(a,b){return ydata[a]-ydata[b]}).reverse();
+    var pdata = Array();
+    for(i=0; i<ykeys.length; i++){
+        var thiskey = ykeys[i];
+        if(data['key_names'][thiskey] != undefined){
+            thiskey = data['key_names'][thiskey];
+        }
+        pdata.push([thiskey, ydata[ykeys[i]]]);
+        
+    }
+    
+    $('#affiliations_plot').highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            height: plot_height,
+            type:'pie'
+        },
+        title: {
+            text: 'Project Affiliations in '+years[0],
+            style: { 'font-size': '24px' }
+        },
+        tooltip: { enabled: false },
+        credits: { enabled: false },
+        plotOptions: {
+            pie: {
+                dataLabels: { enabled: false },
+                showInLegend: true,
+            }
+        },
+        legend: {
+            enabled: true,
+            layout: 'vertical',
+            align: 'right',
+            verticalAlign: 'top',
+            y: 100,
+            itemStyle: {
+                'font-size': '12px',
+                'font-weight': 'normal'
+            }
+        },
+        series: [{ data: pdata }]
+    });
+}
+
+
+function make_throughput_plot(){
+    var num_weeks = 8;
+    var weeks = Object.keys(data['bp_seq_per_week']).sort().reverse().slice(0,num_weeks+1).reverse();
+    var skeys = Array('HiseqX', 'Hiseq', 'Miseq');
+    // Collect all series types
+    for(i=0; i<num_weeks; i++){
+        var wkeys = Object.keys(data['bp_seq_per_week'][weeks[i]]);
+        for(j=0; j<wkeys.length; j++){
+            if(skeys.indexOf(wkeys[j]) == -1){
+                skeys.push(wkeys[j]);
+            }
+        }
+    }
+    // Collect the data
+    var sdata = Array();
+    for(j=0; j<skeys.length; j++){
+        var swdata = Array();
+        for(i=0; i<num_weeks; i++){
+            thisdata = data['bp_seq_per_week'][weeks[i]][skeys[j]];
+            swdata.push(thisdata == undefined ? 0 : thisdata);
+        }
+        sdata.push({
+            name: skeys[j],
+            data: swdata
+        });
+    }
+    
+    $('#throughput_plot').highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            height: plot_height,
+            type: 'area'
+        },
+        title: {
+            text: 'Sequencing Throughput'
+        },
+        subtitle: {
+            text: 'Past Eight Weeks'
+        },
+        xAxis: {
+            labels: {
+                formatter: function() {
+                    return weeks[this.value];
+                },
+                rotation: -30,
+            },
+            tickInterval: 1,
+            title: { enabled: false },
+        },
+        yAxis: {
+            title: { text: 'Base Pairs' },
+        },
+        tooltip: { enabled: false },
+        credits: { enabled: false },
+        plotOptions: {
+            area: {
+                stacking: 'normal',
+                lineColor: '#999999',
+                lineWidth: 1,
+                marker: { enabled: false }
+            }
+        },
+        legend: {
+            enabled: true,
+            floating: true,
+            layout: 'vertical',
+            align: 'left',
+            verticalAlign: 'top',
+            y: 50,
+            x: 70,
+            itemStyle: { 'font-weight': 'normal' },
+            borderWidth: 1,
+            backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
+            shadow: true
+        },
+        series: sdata
     });
 }
 
