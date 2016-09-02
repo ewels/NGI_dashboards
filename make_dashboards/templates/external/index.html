@@ -24,7 +24,7 @@
       <img src="img/NGI_logo.png">
     </div>
     <div class="col-xs-7">
-      <h1>NGI Stockholm - System Status</h1>
+      <h1>NGI Stockholm - Dashboard</h1>
     </div>
     <div class="col-xs-3 text-right">
       <span id="clock_time">00:00</span>
@@ -38,39 +38,30 @@
   </div>
 </header>
 
-<div class="container-fluid">
+<div class="container-fluid main-page">
 
   <div class="row">
     <div class="col-xs-4">
-      <h3>Library Prep Queue</h3>
-      <div class="queue_plot" id="lp_queue"></div>
+      <h3>Projects</h3>
+      <div id="num_projects_plot"></div>
     </div>
     <div class="col-xs-4">
-      <h3>Sequencing Queue</h3>
-      <div class="queue_plot" id="seq_queue"></div>
+      <h3>Affiliations</h3>
     </div>
     <div class="col-xs-4">
-      <h3>Analysis Queue</h3>
-      <div class="queue_plot" id="analysis_queue"></div>
+      <h3>Open Projects</h3>
     </div>
   </div>
   
   <div class="row">
-    <div class="col-xs-3">
-      <h3>User Affiliations</h3>
-      <div class="throughput_plot" id="user_affiliations"></div>
+    <div class="col-xs-4">
+      <h3>Samples</h3>
     </div>
-    <div class="col-xs-3">
-      <h3>Throughput</h3>
-      <div class="throughput_plot" id="throughput_plot"></div>
-    </div>
-    <div class="col-xs-3">
+    <div class="col-xs-4">
       <h3>Delivery Times</h3>
-      <div id="delivery_times"></div>
     </div>
-    <div class="col-xs-3">
-      <h3>Sequencing Yield</h3>
-      <div id="seq_yield"></div>
+    <div class="col-xs-4">
+      <h3>Throughput</h3>
     </div>
   </div>
 
@@ -87,6 +78,9 @@
 <script src="js/highcharts.js"></script>
 <script src="js/highcharts-more.js"></script>
 <script src="js/solid-gauge.js"></script>
+<script type="text/javascript">
+var data = {{ d.json }};
+</script>
 <script src="js/dashboard.js"></script>
 </body>
 </html>
