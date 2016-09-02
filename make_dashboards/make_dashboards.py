@@ -70,6 +70,10 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
     data_external = json.load(urllib.urlopen(external_url))
     data_external['date_rendered'] = datetime.now().strftime("%Y-%m-%d, %H:%M")
     data_external['p_version'] = p_version
+    # Translations for lowercase keys
+    with open("key_names.yaml", 'r') as f:
+        data_external['key_names'] = yaml.load(f)
+    
     data_external['json'] = json.dumps(data_external, indent=4)
 
     ### RENDER THE TEMPLATES

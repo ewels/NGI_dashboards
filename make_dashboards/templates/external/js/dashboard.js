@@ -24,46 +24,43 @@ $(function () {
         setTimeout(function(){ location.reload(); }, reloadDelay );
         console.log("Reloading page in "+Math.floor(reloadDelay/(1000*60))+" minutes");
         
-        // Projects plot
-        var num_years = 2;
-        var p_cutoff = 5;
+        // # Projects plot
         var years = Object.keys(data['num_projects']).sort().reverse();
-        num_projects_cats = Array();
-        num_projects_data = Array();
-        // Find the total counts for all years
-        var dtotal = Array();
-        for(var i=0; i<num_years; i++){
-            for(k in data['num_projects'][years[i]]){
-                if(dtotal[k] == undefined){
-                    dtotal[k] = data['num_projects'][years[i]][k];
-                } else {
-                    dtotal[k] += data['num_projects'][years[i]][k];
-                }
+        var ydata = data['num_projects'][years[0]];
+        var cats = Object.keys(ydata).sort(function(a,b){return ydata[a]-ydata[b]}).reverse();
+        var sorted_ydata = Array();
+        var num_projects_cats = Array();
+        for(j=0; j<cats.length; j++){
+            if(data['key_names'][cats[j]] == undefined){
+                num_projects_cats.push(cats[j]);
+            } else {
+                num_projects_cats.push(data['key_names'][cats[j]]);
             }
+            sorted_ydata.push(ydata[cats[j]]);
         }
-        var num_projects_cats = Object.keys(dtotal).sort(function(a,b){return dtotal[a]-dtotal[b]}).reverse();
-        // Get the data
-        for(var i=(num_years-1); i>=0; i--){
-            var year = years[i];
-            var yeardata = Array();
-            for(j=0; j<num_projects_cats.length; j++){
-                if(dtotal[num_projects_cats[j]] >= p_cutoff){
-                    if(data['num_projects'][year][num_projects_cats[j]] == undefined){
-                        yeardata.push(0);
-                    } else {
-                        yeardata.push(data['num_projects'][year][num_projects_cats[j]]);
-                    }
-                }
-            }
-            num_projects_data.push({
-                'name': year,
-                'data': yeardata,
-                'dataLabels': {
-                    'enabled': i == 0
-                }
-            });
-        }
+        var num_projects_data = [{ name: years[0], data: sorted_ydata }];
+        $('#num_projects_heading').text('# Projects in '+years[0]);
         make_bar_plot('#num_projects_plot', num_projects_cats, num_projects_data);
+        
+        // # Samples plot
+        var years = Object.keys(data['num_samples']).sort().reverse();
+        var ydata = data['num_samples'][years[0]];
+        var cats = Object.keys(ydata).sort(function(a,b){return ydata[a]-ydata[b]}).reverse();
+        var sorted_ydata = Array();
+        var num_samples_cats = Array();
+        for(j=0; j<cats.length; j++){
+            if(data['key_names'][cats[j]] == undefined){
+                num_samples_cats.push(cats[j]);
+            } else {
+                num_samples_cats.push(data['key_names'][cats[j]]);
+            }
+            sorted_ydata.push(ydata[cats[j]]);
+        }
+        var num_samples_data = [{ name: years[0], data: sorted_ydata }];
+        console.log(num_samples_cats);
+        console.log(num_samples_data);
+        $('#num_samples_heading').text('# Samples in '+years[0]);
+        make_bar_plot('#num_samples_plot', num_samples_cats, num_samples_data);
         
     } catch(err){
         $('.main-page').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Error loading dashboard data</strong></p></div><pre style="margin: 100px 50px;"><code>'+err+'</code></pre>');
@@ -83,8 +80,11 @@ function make_bar_plot(target, categories, data, title){
         $(target).highcharts({
             chart: {
                 type: 'bar',
-                height: 500,
+                height: 300,
                 backgroundColor:'rgba(255, 255, 255, 0.1)'
+            },
+            title: {
+                text: null
             },
             tooltip: { enabled: false },
             credits: { enabled: false },
@@ -93,23 +93,16 @@ function make_bar_plot(target, categories, data, title){
             },
             yAxis: {
                 min: 0,
+                title: { text: null }
             },
-            legend: {
-                reversed: true,
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'bottom',
-                x: -20,
-                y: -60,
-                floating: true,
-                borderWidth: 1,
-                backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
-                shadow: true
-            },
+            legend: { enabled: false },
             plotOptions: {
                 bar: {
-                    borderWidth: 0
-                }
+                    animation: false,
+                    borderWidth: 0,
+                    groupPadding: 0.1,
+                    dataLabels: { enabled: true }
+                },
             },
             series: data
         });
