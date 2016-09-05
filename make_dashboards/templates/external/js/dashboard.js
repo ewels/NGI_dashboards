@@ -166,7 +166,7 @@ function make_delivery_times_plot(){
         legend: {
             enabled: true,
             floating: true,
-            y: 60
+            y: -20
         },
         series: [{
             type: 'pie',
