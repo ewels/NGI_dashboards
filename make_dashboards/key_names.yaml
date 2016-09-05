@@ -1,0 +1,58 @@
+"epigenetics": "Epigenetics"
+"rna-seq": "RNA-Seq"
+"rna-seq (mrna)": "RNA-Seq"
+"rna-seq (total rna)": "RNA-Seq"
+"rna-seq (ribozero)": "RNA-Seq"
+"rna-seq smallrna": "smRNA-Seq"
+"mirna-seq": "miRNA-Seq"
+"metagenomics": "Metagenomcs"
+"metagenome": "Metagenomics"
+"exome capture": "Exome Capture"
+"de novo": "De-Novo"
+"amplicon": "Amplicon"
+"wg re-seq": "WG Re-Seq"
+"wg re-seq (ign)": "WG Re-Seq"
+"target re-seq": "Targeted Re-Seq"
+"chip-seq": "ChIP-Seq"
+"special": "Special"
+"finished library": "Finished Library"
+
+foreign: 'Foreign'
+industry: 'Industry'
+ki: 'Karolinska institutet'
+ks: 'Karolinska sjukhuset'
+su: 'Stockholms universitet'
+kth: 'Kungl. Tekniska högskolan'
+uu: 'Uppsala universitet'
+bth: 'Blekinge tekniska högskola'
+cth: 'Chalmers tekniska högskola'
+fhs: 'Försvarshögskolan'
+gih: 'Gymnastik och -idrottshögskolan'
+gu: 'Göteborgs universitet'
+hb: 'Högskolan i Borås'
+hda: 'Högskolan Dalarna'
+hh: 'Högskolan i Halmstad'
+hhs: 'Handelshögskolan i Stockholm'
+hig: 'Högskolan i Gävle'
+hj: 'Högskolan i Jönköping'
+hkr: 'Högskolan Kristianstad'
+hs: 'Högskolan i Skövde'
+hv: 'Högskolan Väst'
+kau: 'Karlstads universitet'
+liu: 'Linköpings universitet'
+lnu: 'Linnéuniversitetet'
+ltu: 'Luleå tekniska universitet'
+lu: 'Lunds universitet'
+mah: 'Malmö högskola'
+mdh: 'Mälardalens högskola'
+miu: 'Mittuniversitetet'
+nrm: 'Naturhistoriska riksmuseet'
+oru: 'Örebro universitet'
+sh: 'Södertörns högskola'
+slu-alnarp: 'Sveriges lantbruksuniversitet'
+slu-uppsala: 'Sveriges lantbruksuniversitet'
+slu-umea: 'Sveriges lantbruksuniversitet'
+slu: 'Sveriges lantbruksuniversitet'
+slu: 'Sveriges lantbruksuniversitet'
+slu: 'Sveriges lantbruksuniversitet'
+umu: 'Umeå universitet'
