@@ -139,6 +139,9 @@ function make_delivery_times_plot(){
             text: 'Delivery Times in '+years[0],
             style: { 'font-size': '24px' }
         },
+        subtitle: {
+            text: 'Projects started in 2016'
+        },
         tooltip: { enabled: false },
         credits: { enabled: false },
         plotOptions: {
@@ -228,7 +231,7 @@ function make_affiliations_plot(){
 
 
 function make_throughput_plot(){
-    var num_weeks = 8;
+    var num_weeks = 12;
     var weeks = Object.keys(data['bp_seq_per_week']).sort().reverse().slice(0,num_weeks+1).reverse();
     var skeys = Array('HiseqX', 'Hiseq', 'Miseq');
     // Collect all series types
@@ -264,7 +267,7 @@ function make_throughput_plot(){
             text: 'Sequencing Throughput'
         },
         subtitle: {
-            text: 'Past Eight Weeks'
+            text: 'Base pairs sequenced in the past twelve weeks'
         },
         xAxis: {
             labels: {
@@ -277,7 +280,12 @@ function make_throughput_plot(){
             title: { enabled: false },
         },
         yAxis: {
-            title: { text: 'Base Pairs' },
+            title: { text: null },
+            labels: {
+                formatter: function () {
+                    return this.value.toExponential();
+                }
+            }
         },
         tooltip: { enabled: false },
         credits: { enabled: false },
@@ -295,7 +303,7 @@ function make_throughput_plot(){
             layout: 'vertical',
             align: 'left',
             verticalAlign: 'top',
-            y: 50,
+            y: 60,
             x: 70,
             itemStyle: { 'font-weight': 'normal' },
             borderWidth: 1,
