@@ -137,7 +137,7 @@ function make_delivery_times_plot(){
             style: { 'font-size': '24px' }
         },
         subtitle: {
-            text: 'Projects started in 2016'
+            text: 'Projects started this year'
         },
         tooltip: { enabled: false },
         credits: { enabled: false },
