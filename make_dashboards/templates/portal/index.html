@@ -1,3 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NGI Stockholm Internal Dashboard">
+  <meta name="author" content="Phil Ewels">
+  <title>NGI Stockholm External Dashboard</title>
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <style type="text/css">
+  body {
+    padding-bottom: 30px;
+  }
+  h1 {
+      margin-top: 25px;
+  }
+  .navbar-brand {
+    padding: 9px;
+  }
+  .dashboard-timestamps {
+      margin: 40px 0 0 20px;
+      float:left;
+  }
+  .dashboard-timestamps span {
+      margin-left: 10px;
+  }
+  .external_plot {
+      margin-top: 20px;
+  }
+  </style>
+  <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+
+<body>
+  
+<nav class="navbar navbar-inverse navbar-static-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/">
+        <img src="https://ngisweden.scilifelab.se/site/favicon.png" title="NGI Sweden Order Portal" alt="NGI Sweden Order Portal">
+      </a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li><a href="https://ngisweden.scilifelab.se/"><span class="glyphicon glyphicon-home"></span></a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container mainrow">
+  
+  <h1>NGI Stockholm: Status</h1>
+
+  <div class="row">
+    <div class="col-sm-6">
+      <div id="open_projects_plot" class="external_plot"></div>
+    </div>
+    <div class="col-sm-6">
+      <div id="delivery_times_plot" class="external_plot"></div>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-sm-6">
+      <div id="throughput_plot" class="external_plot"></div>
+    </div>
+    <div class="col-sm-6">
+      <div id="affiliations_plot" class="external_plot"></div>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-sm-6">
+      <div id="num_projects_plot" class="external_plot"></div>
+    </div>
+    <div class="col-sm-6">
+      <div id="num_samples_plot" class="external_plot"></div>
+    </div>
+  </div>
+  
+  <p class="dashboard-timestamps">
+    Fetched: <span id="date_rendered">{{ d.date_rendered }}</span> &nbsp; / &nbsp; 
+    Age: <span id="report_age"></span> &nbsp; / &nbsp; 
+    Package Version: <span>v{{ d.p_version }}</span>
+  </p>
+
+</div><!-- /.container -->
+
+<script src="https://code.jquery.com/jquery-1.12.3.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/solid-gauge.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
+<script type="text/javascript">
+var data = {{ d.json }};
+
+
 
 // Javascript for the NGI Stockholm Internal Dashboard
 
@@ -103,7 +204,6 @@ function make_bar_plot(target, ydata, title){
             legend: { enabled: false },
             plotOptions: {
                 bar: {
-                    animation: false,
                     borderWidth: 0,
                     groupPadding: 0.1,
                     dataLabels: { enabled: true }
@@ -315,19 +415,12 @@ function make_throughput_plot(){
 
 
 function updateClock(){
-    var now = moment(),
-        second = now.seconds() * 6,
-        minute = now.minutes() * 6 + second / 60,
-        hour = ((now.hours() % 12) / 12) * 360 + 90 + minute / 12;
-
-    $('#hour').css("transform", "rotate(" + hour + "deg)");
-    $('#minute').css("transform", "rotate(" + minute + "deg)");
-    $('#second').css("transform", "rotate(" + second + "deg)");
-    $('#clock_time').text( moment().format('HH:mm') );
-    $('#clock_date').text( moment().format('dddd Do MMMM') );
-    
     var updated = moment($('#date_rendered').text());
     $('#report_age').text( moment().from(updated, true) );
     setTimeout(updateClock, 1000);
 }
 
+
+</script>
+</body>
+</html>

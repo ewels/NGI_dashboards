@@ -46,6 +46,7 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
     # Paths relative to make_dashboards/templates/
     internal_fn = os.path.join('internal','index.html')
     external_fn = os.path.join('external','index.html')
+    portal_fn = os.path.join('portal','index.html')
     
     
     ### GET THE INTERNAL DATA
@@ -86,12 +87,14 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
         env = jinja2.Environment(loader=jinja2.FileSystemLoader(templates_dir))
         internal_template = env.get_template(internal_fn)
         external_template = env.get_template(external_fn)
+        portal_template = env.get_template(portal_fn)
     except:
         raise IOError ("Could not load dashboard template files")
     
     # Render templates and save
     internal_output_fn = os.path.join(outdir, internal_fn)
     external_output_fn = os.path.join(outdir, external_fn)
+    portal_output_fn = os.path.join(outdir, portal_fn)
     
     # Internal template
     internal_output = internal_template.render(d = data_internal)
@@ -108,6 +111,14 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
             print(external_output, file=f)
     except IOError as e:
         raise IOError ("Could not print report to '{}' - {}".format(external_output_fn, IOError(e)))
+    
+    # Portal template
+    portal_output = portal_template.render(d = data_external)
+    try:
+        with open (os.path.join(outdir, portal_output_fn), 'w') as f:
+            print(portal_output, file=f)
+    except IOError as e:
+        raise IOError ("Could not print report to '{}' - {}".format(portal_output_fn, IOError(e)))
 
 
 
