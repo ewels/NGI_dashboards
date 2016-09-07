@@ -124,6 +124,7 @@ function make_delivery_times_plot(){
     var ykeys = Object.keys(ydata).sort(function(a,b){ return a.match(/\d+/)-b.match(/\d+/) });
     var pdata = Array();
     for(i=0; i<ykeys.length; i++){ pdata.push([ykeys[i], ydata[ykeys[i]]]); }
+    var d = new Date();
     
     $('#delivery_times_plot').highcharts({
         chart: {
@@ -137,7 +138,7 @@ function make_delivery_times_plot(){
             style: { 'font-size': '24px' }
         },
         subtitle: {
-            text: 'Projects started this year'
+            text: 'Projects started '+d.getFullYear()
         },
         tooltip: { enabled: false },
         credits: { enabled: false },
