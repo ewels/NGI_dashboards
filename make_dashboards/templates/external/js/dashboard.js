@@ -19,9 +19,6 @@ $(function () {
         // Header clock
         updateClock();
         
-        // Format KPI update number
-        $('#time_created').text(moment($('#time_created').text()).format("YYYY-MM-DD, HH:mm"));
-        
         // Cron job runs on the hour, every hour. Get the web page to reload at 5 past the next hour
         var reloadDelay = moment().add(1, 'hours').startOf('hour').add(5, 'minutes').diff();
         setTimeout(function(){ location.reload(); }, reloadDelay );
@@ -327,7 +324,7 @@ function updateClock(){
     $('#clock_time').text( moment().format('HH:mm') );
     $('#clock_date').text( moment().format('dddd Do MMMM') );
     
-    var updated = moment($('#time_created').data('original'));
+    var updated = moment($('#date_rendered').text());
     $('#report_age').text( moment().from(updated, true) );
     setTimeout(updateClock, 1000);
 }
