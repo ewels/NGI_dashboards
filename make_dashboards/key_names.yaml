@@ -1,22 +1,3 @@
-"epigenetics": "Epigenetics"
-"rna-seq": "RNA-Seq"
-"rna-seq (mrna)": "RNA-Seq"
-"rna-seq (total rna)": "RNA-Seq"
-"rna-seq (ribozero)": "RNA-Seq"
-"rna-seq smallrna": "smRNA-Seq"
-"mirna-seq": "miRNA-Seq"
-"metagenomics": "Metagenomcs"
-"metagenome": "Metagenomics"
-"exome capture": "Exome Capture"
-"de novo": "De-Novo"
-"amplicon": "Amplicon"
-"wg re-seq": "WG Re-Seq"
-"wg re-seq (ign)": "WG Re-Seq"
-"target re-seq": "Targeted Re-Seq"
-"chip-seq": "ChIP-Seq"
-"special": "Special"
-"finished library": "Finished Library"
-
 foreign: 'Foreign'
 industry: 'Industry'
 ki: 'Karolinska institutet'

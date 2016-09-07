@@ -19,9 +19,6 @@ $(function () {
         // Header clock
         updateClock();
         
-        // Format KPI update number
-        $('#time_created').text(moment($('#time_created').text()).format("YYYY-MM-DD, HH:mm"));
-        
         // Cron job runs on the hour, every hour. Get the web page to reload at 5 past the next hour
         var reloadDelay = moment().add(1, 'hours').startOf('hour').add(5, 'minutes').diff();
         setTimeout(function(){ location.reload(); }, reloadDelay );
@@ -127,6 +124,7 @@ function make_delivery_times_plot(){
     var ykeys = Object.keys(ydata).sort(function(a,b){ return a.match(/\d+/)-b.match(/\d+/) });
     var pdata = Array();
     for(i=0; i<ykeys.length; i++){ pdata.push([ykeys[i], ydata[ykeys[i]]]); }
+    var d = new Date();
     
     $('#delivery_times_plot').highcharts({
         chart: {
@@ -138,6 +136,9 @@ function make_delivery_times_plot(){
         title: {
             text: 'Delivery Times in '+years[0],
             style: { 'font-size': '24px' }
+        },
+        subtitle: {
+            text: 'Projects started '+d.getFullYear()
         },
         tooltip: { enabled: false },
         credits: { enabled: false },
@@ -228,7 +229,7 @@ function make_affiliations_plot(){
 
 
 function make_throughput_plot(){
-    var num_weeks = 8;
+    var num_weeks = 12;
     var weeks = Object.keys(data['bp_seq_per_week']).sort().reverse().slice(0,num_weeks+1).reverse();
     var skeys = Array('HiseqX', 'Hiseq', 'Miseq');
     // Collect all series types
@@ -264,7 +265,7 @@ function make_throughput_plot(){
             text: 'Sequencing Throughput'
         },
         subtitle: {
-            text: 'Past Eight Weeks'
+            text: 'Base pairs sequenced in the past twelve weeks'
         },
         xAxis: {
             labels: {
@@ -277,7 +278,12 @@ function make_throughput_plot(){
             title: { enabled: false },
         },
         yAxis: {
-            title: { text: 'Base Pairs' },
+            title: { text: null },
+            labels: {
+                formatter: function () {
+                    return this.value.toExponential();
+                }
+            }
         },
         tooltip: { enabled: false },
         credits: { enabled: false },
@@ -295,7 +301,7 @@ function make_throughput_plot(){
             layout: 'vertical',
             align: 'left',
             verticalAlign: 'top',
-            y: 50,
+            y: 60,
             x: 70,
             itemStyle: { 'font-weight': 'normal' },
             borderWidth: 1,
@@ -319,7 +325,7 @@ function updateClock(){
     $('#clock_time').text( moment().format('HH:mm') );
     $('#clock_date').text( moment().format('dddd Do MMMM') );
     
-    var updated = moment($('#time_created').data('original'));
+    var updated = moment($('#date_rendered').text());
     $('#report_age').text( moment().from(updated, true) );
     setTimeout(updateClock, 1000);
 }

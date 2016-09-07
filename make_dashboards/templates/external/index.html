@@ -42,19 +42,7 @@
 
   <div class="row">
     <div class="col-xs-4">
-      <div id="num_projects_plot" class="external_plot"></div>
-    </div>
-    <div class="col-xs-4">
-      <div id="affiliations_plot" class="external_plot"></div>
-    </div>
-    <div class="col-xs-4">
       <div id="open_projects_plot" class="external_plot"></div>
-    </div>
-  </div>
-  
-  <div class="row">
-    <div class="col-xs-4">
-      <div id="num_samples_plot" class="external_plot"></div>
     </div>
     <div class="col-xs-4">
       <div id="delivery_times_plot" class="external_plot"></div>
@@ -63,10 +51,27 @@
       <div id="throughput_plot" class="external_plot"></div>
     </div>
   </div>
+  
+  <div class="row">
+    <div class="col-xs-4">
+      <div id="num_projects_plot" class="external_plot"></div>
+    </div>
+    <div class="col-xs-4">
+      <div id="affiliations_plot" class="external_plot"></div>
+    </div>
+    <div class="col-xs-4">
+      <div id="num_samples_plot" class="external_plot"></div>
+    </div>
+  </div>
 
 </div><!-- /.container -->
 
 <footer class="container-fluid">
+  <p class="dashboard-timestamps">
+    Fetched: <span id="date_rendered">{{ d.date_rendered }}</span> &nbsp; / &nbsp; 
+    Age: <span id="report_age"></span> &nbsp; / &nbsp; 
+    Package Version: <span>v{{ d.p_version }}</span>
+  </p>
   <img class="pull-right" src="img/SLL_logo.png">
 </footer>
 
