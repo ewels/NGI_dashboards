@@ -22,9 +22,6 @@
       margin: 40px 0 0 20px;
       float:left;
   }
-  .dashboard-timestamps span {
-      margin-left: 10px;
-  }
   .external_plot {
       margin-top: 20px;
   }
@@ -82,8 +79,8 @@
   </div>
   
   <p class="dashboard-timestamps">
-    Fetched: <span id="date_rendered">{{ d.date_rendered }}</span> &nbsp; / &nbsp; 
-    Age: <span id="report_age"></span> &nbsp; / &nbsp; 
+    Fetched: <span id="date_rendered">{{ d.date_rendered }}</span> &nbsp;
+    <em>(<span id="report_age"></span>)</em> &nbsp; / &nbsp; 
     Package Version: <span>v{{ d.p_version }}</span>
   </p>
 
@@ -117,13 +114,9 @@ $(function () {
             }
         });
         
-        // Header clock
-        updateClock();
-        
-        // Cron job runs on the hour, every hour. Get the web page to reload at 5 past the next hour
-        var reloadDelay = moment().add(1, 'hours').startOf('hour').add(5, 'minutes').diff();
-        setTimeout(function(){ location.reload(); }, reloadDelay );
-        console.log("Reloading page in "+Math.floor(reloadDelay/(1000*60))+" minutes");
+        // Calculate how old the report is
+        var updated = moment($('#date_rendered').text(), 'YYYY-MM-DD, HH:mm');
+        $('#report_age').text(updated.from(moment()));
         
         // # Projects plot
         var years = Object.keys(data['num_projects']).sort().reverse();
@@ -412,14 +405,6 @@ function make_throughput_plot(){
         series: sdata
     });
 }
-
-
-function updateClock(){
-    var updated = moment($('#date_rendered').text());
-    $('#report_age').text( moment().from(updated, true) );
-    setTimeout(updateClock, 1000);
-}
-
 
 </script>
 </body>
