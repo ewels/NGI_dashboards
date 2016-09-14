@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,13 +19,11 @@
 
 <header class="container-fluid">
   <div class="row">
-    <div class="col-xs-2">
-      <img src="img/NGI_logo.png">
+    <div class="col-xs-7 header-logo">
+      <a href="https://ngisweden.scilifelab.se/"><img src="img/NGI_logo.png"></a>
+      <h1><a href="https://ngisweden.scilifelab.se/">NGI Stockholm Status</a></h1>
     </div>
-    <div class="col-xs-7">
-      <h1>NGI Stockholm Status</h1>
-    </div>
-    <div class="col-xs-3 text-right">
+    <div class="col-xs-5 text-right">
       <span id="clock_time">00:00</span>
       <span id="clock_date">Monday 01<sup>st</sup> January</span>
       <div class="hero-circle">
@@ -68,11 +65,11 @@
 
 <footer class="container-fluid">
   <p class="dashboard-timestamps">
-    Fetched: <span id="date_rendered">{{ d.date_rendered }}</span> &nbsp; / &nbsp; 
-    Age: <span id="report_age"></span> &nbsp; / &nbsp; 
+    Fetched: <span id="date_rendered">{{ d.date_rendered }}</span> &nbsp; / &nbsp;
+    Age: <span id="report_age"></span> &nbsp; / &nbsp;
     Package Version: <span>v{{ d.p_version }}</span>
   </p>
-  <img class="pull-right" src="img/SLL_logo.png">
+  <a href="https://www.scilifelab.se/platforms/ngi/"><img class="pull-right" src="img/SLL_logo.png"></a>
 </footer>
 
 <script src="js/jquery-1.12.0.min.js"></script>

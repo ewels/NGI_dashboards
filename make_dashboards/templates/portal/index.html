@@ -242,8 +242,11 @@ function make_delivery_times_plot(){
         subtitle: {
             text: 'Projects started '+d.getFullYear()
         },
-        tooltip: { enabled: false },
         credits: { enabled: false },
+        tooltip: {
+            headerFormat: '',
+            pointFormat: '<span style="color:{point.color}; font-weight:bold;">{point.name}eeks</span>: {point.y} projects'
+        },
         plotOptions: {
             pie: {
                 // dataLabels: { enabled: false },
@@ -306,8 +309,11 @@ function make_affiliations_plot(){
             text: 'Project Affiliations in '+years[0],
             style: { 'font-size': '24px' }
         },
-        tooltip: { enabled: false },
         credits: { enabled: false },
+        tooltip: {
+            headerFormat: '',
+            pointFormat: '<span style="color:{point.color}; font-weight:bold;">{point.name}</span>: {point.y} projects'
+        },
         plotOptions: {
             pie: {
                 dataLabels: { enabled: false },
@@ -345,17 +351,23 @@ function make_throughput_plot(){
     }
     // Collect the data
     var sdata = Array();
+    var total_count = 0;
     for(j=0; j<skeys.length; j++){
         var swdata = Array();
         for(i=0; i<num_weeks; i++){
             thisdata = data['bp_seq_per_week'][weeks[i]][skeys[j]];
             swdata.push(thisdata == undefined ? 0 : thisdata);
+            total_count += thisdata == undefined ? 0 : thisdata;
         }
         sdata.push({
             name: skeys[j],
             data: swdata
         });
     }
+    // Subtitle text
+    var bp_per_week = total_count / num_weeks;
+    var mbp_per_second = (bp_per_week / (60*60*24*7))/1000000;
+    var subtitle_text = 'Average per week: '+parseInt(bp_per_week/1000000000)+' Gbp ('+parseInt(mbp_per_second)+' million base pairs per second)';
     
     $('#throughput_plot').highcharts({
         chart: {
@@ -368,7 +380,7 @@ function make_throughput_plot(){
             style: { 'font-size': '24px' }
         },
         subtitle: {
-            text: 'Base pairs sequenced in the past twelve weeks'
+            text: subtitle_text
         },
         xAxis: {
             labels: {
@@ -381,15 +393,29 @@ function make_throughput_plot(){
             title: { enabled: false },
         },
         yAxis: {
-            title: { text: null },
+            title: { text: 'Base Pairs' },
             labels: {
                 formatter: function () {
                     return this.value.toExponential();
                 }
             }
         },
-        tooltip: { enabled: false },
         credits: { enabled: false },
+        tooltip: {
+            shared: true,
+            useHTML: true,
+            formatter: function(){
+                tt = '<strong>Week of '+weeks[this.x]+'</strong><br><table>';
+                for(i=0; i<this.points.length; i++){
+                    tt += '<tr><td style="padding-right: 15px;"><span style="color:'+this.points[i].color+';">'
+                    tt += this.points[i].series.name+'</span>:</td><td class="text-right">'
+                    tt += parseInt(this.points[i].y/1000000000)+' Gbp</td></tr>';
+                }
+                tt += '<tr style="border-top: 1px solid #333;"><td><strong>Total:</strong></td>';
+                tt += '<td>'+parseInt(this.points[0].total/1000000000)+' Gbp</td></tr></table>';
+                return tt;
+            }
+        },
         plotOptions: {
             area: {
                 stacking: 'normal',
@@ -405,7 +431,7 @@ function make_throughput_plot(){
             align: 'left',
             verticalAlign: 'top',
             y: 60,
-            x: 70,
+            x: 90,
             itemStyle: { 'font-weight': 'normal' },
             borderWidth: 1,
             backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
