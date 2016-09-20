@@ -263,9 +263,9 @@ function make_throughput_plot(){
         });
     }
     // Subtitle text
-    var bp_per_week = total_count / num_weeks;
-    var mbp_per_second = (bp_per_week / (60*60*24*7))/1000000;
-    var subtitle_text = 'Average per week: '+parseInt(bp_per_week/1000000000)+' Gbp ('+parseInt(mbp_per_second)+' million base pairs per second)';
+    var bp_per_day = total_count / (num_weeks * 7);
+    var genomes_per_minute = (bp_per_day / (24*60)) / 3236336281;
+    var subtitle_text = 'Average for past '+num_weeks+' weeks: '+parseInt(bp_per_day/1000000000)+' Gbp per day <br>('+genomes_per_minute.toFixed(2)+' Human genome equivalents every minute)';
     
     $('#throughput_plot').highcharts({
         chart: {
@@ -328,7 +328,7 @@ function make_throughput_plot(){
             layout: 'vertical',
             align: 'left',
             verticalAlign: 'top',
-            y: 60,
+            y: 80,
             x: 90,
             itemStyle: { 'font-weight': 'normal' },
             borderWidth: 1,
