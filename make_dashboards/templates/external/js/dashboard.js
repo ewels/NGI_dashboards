@@ -25,12 +25,24 @@ $(function () {
         setTimeout(function(){ location.reload(); }, reloadDelay );
         console.log("Reloading page in "+Math.floor(reloadDelay/(1000*60))+" minutes");
         
-        // # Projects plot
+        // Check that the returned data is ok
+        if ('error_status' in data){
+            $('.mainrow').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Error loading dashboard data (API)</strong><br>'+data['page_title']+': '+data['error_status']+' ('+data['error_reason']+')</p></div><pre style="margin: 100px 50px;"><code>'+data['error_exception']+'</code></pre>');
+            console.log(data['error_reason']);
+            console.log(data['error_status']);
+            console.log(data['page_title']);
+            console.log(data['error_exception']);
+            // Try reloading in a few minutes
+            setTimeout(function(){ location.reload(); }, 60000); // 1 minute
+            return false;
+        }
+        
+        // Projects plot
         var years = Object.keys(data['num_projects']).sort().reverse();
         var ydata = data['num_projects'][years[0]];
         make_bar_plot('#num_projects_plot', ydata, '# Projects in '+years[0]);
         
-        // # Samples plot
+        // Samples plot
         var years = Object.keys(data['num_samples']).sort().reverse();
         var ydata = data['num_samples'][years[0]];
         make_bar_plot('#num_samples_plot', ydata, '# Samples in '+years[0]);
@@ -49,10 +61,10 @@ $(function () {
         make_throughput_plot();
         
     } catch(err){
-        $('.main-page').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Error loading dashboard data</strong></p></div><pre style="margin: 100px 50px;"><code>'+err+'</code></pre>');
+        $('.mainrow').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Error loading dashboard data</strong></p></div><pre style="margin: 100px 50px;"><code>'+err+'</code></pre>');
         console.log(err);
         // Try reloading in a few minutes
-        setTimeout(function(){ location.reload(); }, 300000); // 5 minutes
+        setTimeout(function(){ location.reload(); }, 60000); // 1 minute
     }
     
 });
@@ -264,8 +276,8 @@ function make_throughput_plot(){
     }
     // Subtitle text
     var bp_per_day = total_count / (num_weeks * 7);
-    var genomes_per_minute = (bp_per_day / (24*60)) / 3236336281;
-    var subtitle_text = 'Average for past '+num_weeks+' weeks: '+parseInt(bp_per_day/1000000000)+' Gbp per day <br>('+genomes_per_minute.toFixed(2)+' Human genome equivalents every minute)';
+    var minutes_per_genome = 3236336281 / (bp_per_day / (24*60));
+    var subtitle_text = 'Average for past '+num_weeks+' weeks: '+parseInt(bp_per_day/1000000000)+' Gbp per day <br>(1 Human genome equivalent every '+minutes_per_genome.toFixed(2)+' minutes)';
     
     $('#throughput_plot').highcharts({
         chart: {

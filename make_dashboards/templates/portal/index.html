@@ -59,37 +59,39 @@
   
   <p>NGI Stockholm also has the <a href="https://www.scilifelab.se/facilities/genomics-applications/">Genomics Applications</a>
     facility which works with additional application types. Please get in touch for more information.</p>
-
-  <div class="row">
-    <div class="col-sm-6">
-      <div id="open_projects_plot" class="external_plot"></div>
-    </div>
-    <div class="col-sm-6">
-      <div id="delivery_times_plot" class="external_plot"></div>
-    </div>
-  </div>
   
-  <div class="row">
-    <div class="col-sm-6">
-      <div id="throughput_plot" class="external_plot"></div>
+  <div class="plots_content">
+    <div class="row">
+      <div class="col-sm-6">
+        <div id="open_projects_plot" class="external_plot"></div>
+      </div>
+      <div class="col-sm-6">
+        <div id="delivery_times_plot" class="external_plot"></div>
+      </div>
     </div>
-    <div class="col-sm-6">
-      <div id="affiliations_plot" class="external_plot"></div>
+    
+    <div class="row">
+      <div class="col-sm-6">
+        <div id="throughput_plot" class="external_plot"></div>
+      </div>
+      <div class="col-sm-6">
+        <div id="affiliations_plot" class="external_plot"></div>
+      </div>
     </div>
-  </div>
-  
-  <div class="row">
-    <div class="col-sm-6">
-      <div id="num_projects_plot" class="external_plot"></div>
-    </div>
-    <div class="col-sm-6">
-      <div id="num_samples_plot" class="external_plot"></div>
+    
+    <div class="row">
+      <div class="col-sm-6">
+        <div id="num_projects_plot" class="external_plot"></div>
+      </div>
+      <div class="col-sm-6">
+        <div id="num_samples_plot" class="external_plot"></div>
+      </div>
     </div>
   </div>
   
   <div class="dashboard-timestamps">
     Fetched: <span id="date_rendered">{{ d.date_rendered }}</span> &nbsp;
-    <em>(<span id="report_age"></span>)</em> &nbsp; / &nbsp; 
+    <em>(<span id="report_age"></span>)</em> &nbsp; / &nbsp;
     NGI Dashboards Package Version: <span>v{{ d.p_version }}</span>
   </div>
 
@@ -127,6 +129,18 @@ $(function () {
         var updated = moment($('#date_rendered').text(), 'YYYY-MM-DD, HH:mm');
         $('#report_age').text(updated.from(moment()));
         
+        // Check that the returned data is ok
+        if ('error_status' in data){
+          $('.plots_content').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Apologies, there was an error whilst loading this data (API).</strong> Please try again soon.</p></div>');
+          console.log(data['error_reason']);
+          console.log(data['error_status']);
+          console.log(data['page_title']);
+          console.log(data['error_exception']);
+          // Try reloading in a few minutes
+          setTimeout(function(){ location.reload(); }, 60000); // 1 minute
+          return false;
+        }
+        
         // # Projects plot
         var years = Object.keys(data['num_projects']).sort().reverse();
         var ydata = data['num_projects'][years[0]];
@@ -151,7 +165,7 @@ $(function () {
         make_throughput_plot();
         
     } catch(err){
-        $('.main-page').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Error loading dashboard data</strong></p></div><pre style="margin: 100px 50px;"><code>'+err+'</code></pre>');
+        $('.plots_content').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Apologies, there was an error whilst loading this data.</strong> Please try again soon.</p></div>');
         console.log(err);
         // Try reloading in a few minutes
         setTimeout(function(){ location.reload(); }, 300000); // 5 minutes
@@ -366,8 +380,8 @@ function make_throughput_plot(){
     }
     // Subtitle text
     var bp_per_day = total_count / (num_weeks * 7);
-    var genomes_per_minute = (bp_per_day / (24*60)) / 3236336281;
-    var subtitle_text = 'Average for past '+num_weeks+' weeks: '+parseInt(bp_per_day/1000000000)+' Gbp per day <br>('+genomes_per_minute.toFixed(2)+' Human genome equivalents every minute)';
+    var minutes_per_genome = 3236336281 / (bp_per_day / (24*60));
+    var subtitle_text = 'Average for past '+num_weeks+' weeks: '+parseInt(bp_per_day/1000000000)+' Gbp per day <br>(1 Human genome equivalent every '+minutes_per_genome.toFixed(2)+' minutes)';
     
     $('#throughput_plot').highcharts({
         chart: {
