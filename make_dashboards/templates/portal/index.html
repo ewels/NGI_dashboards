@@ -380,8 +380,8 @@ function make_throughput_plot(){
     }
     // Subtitle text
     var bp_per_day = total_count / (num_weeks * 7);
-    var genomes_per_minute = (bp_per_day / (24*60)) / 3236336281;
-    var subtitle_text = 'Average for past '+num_weeks+' weeks: '+parseInt(bp_per_day/1000000000)+' Gbp per day <br>('+genomes_per_minute.toFixed(2)+' Human genome equivalents every minute)';
+    var minutes_per_genome = 3236336281 / (bp_per_day / (24*60));
+    var subtitle_text = 'Average for past '+num_weeks+' weeks: '+parseInt(bp_per_day/1000000000)+' Gbp per day <br>(1 Human genome equivalent every '+minutes_per_genome.toFixed(2)+' minutes)';
     
     $('#throughput_plot').highcharts({
         chart: {
