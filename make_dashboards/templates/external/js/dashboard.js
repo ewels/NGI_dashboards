@@ -143,7 +143,7 @@ function make_delivery_times_plot(){
             plotBackgroundColor: null,
             plotBorderWidth: 0,
             plotShadow: false,
-            height: plot_height,
+            height: 380,
         },
         title: {
             text: 'Delivery Times in '+years[0],
