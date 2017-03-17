@@ -133,9 +133,17 @@ function make_bar_plot(target, ydata, title){
 function make_delivery_times_plot(){
     var years = Object.keys(data['delivery_times']).sort().reverse();
     var ydata = data['delivery_times'][years[0]];
+    var ydata_fl = data['delivery_times_finishedlib'][years[0]];
     var ykeys = Object.keys(ydata).sort(function(a,b){ return a.match(/\d+/)-b.match(/\d+/) });
     var pdata = Array();
-    for(i=0; i<ykeys.length; i++){ pdata.push([ykeys[i], ydata[ykeys[i]]]); }
+    for(i=0; i<ykeys.length; i++){
+        num_fl = ydata_fl[ykeys[i]];
+        num_inhouse = ydata[ykeys[i]] - num_fl;
+        pdata.push({
+            'name': ykeys[i],
+            'data': [num_fl, num_inhouse]
+        });
+    }
     var d = new Date();
     
     $('#delivery_times_plot').highcharts({
@@ -144,6 +152,7 @@ function make_delivery_times_plot(){
             plotBorderWidth: 0,
             plotShadow: false,
             height: plot_height,
+            type: 'bar'
         },
         title: {
             text: 'Delivery Times in '+years[0],
@@ -157,40 +166,27 @@ function make_delivery_times_plot(){
             headerFormat: '',
             pointFormat: '<span style="color:{point.color}; font-weight:bold;">{point.name}eeks</span>: {point.y} projects'
         },
+        yAxis: {
+            title: { text: '% of Projects' },
+            reversedStacks: false
+        },
+        xAxis: {
+            categories: ['Finished Libraries', 'In-house Library Prep']
+        },
         plotOptions: {
-            pie: {
-                // dataLabels: { enabled: false },
+            series: {
+                stacking: 'percent',
                 dataLabels: {
                     enabled: true,
-                    formatter: function() {
-                        return Math.round(this.percentage*100)/100 + ' %';
-                    },
-                    distance: -40,
-                    style: {
-                        fontWeight: 'bold',
-                        color: 'white',
-                        textShadow: '0px 1px 2px black',
-                        'font-size': '18px'
+                    formatter: function(){
+                        if(this.percentage > 60){
+                            return this.percentage.toFixed(0) + '%';
+                        }
                     }
-                },
-                showInLegend: true,
-                startAngle: -90,
-                endAngle: 90,
-                size: '120%',
-                center: ['50%', '75%']
+                }
             }
         },
-        legend: {
-            enabled: true,
-            floating: true,
-            y: -20
-        },
-        series: [{
-            type: 'pie',
-            name: 'Delivery Times',
-            innerSize: '50%',
-            data: pdata
-        }]
+        series: pdata
     });
 }
 

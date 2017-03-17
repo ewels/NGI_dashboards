@@ -47,8 +47,8 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
     internal_fn = os.path.join('internal','index.html')
     external_fn = os.path.join('external','index.html')
     portal_fn = os.path.join('portal','index.html')
-    
-    
+
+
     ### GET THE INTERNAL DATA
     if demo:
         logging.warn("Using demo data_internal")
@@ -65,7 +65,7 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
     data_internal['date_rendered'] = datetime.now().strftime("%Y-%m-%d, %H:%M")
     data_internal['p_version'] = p_version
     data_internal['json'] = json.dumps(data_internal, indent=4)
-    
+
     ### GET THE EXTERNAL DATA
     external_url = 'https://genomics-status.scilifelab.se/api/v1/stats'
     data_external = json.load(urllib.urlopen(external_url))
@@ -74,14 +74,14 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
     # Translations for lowercase keys
     with open("key_names.yaml", 'r') as f:
         data_external['key_names'] = yaml.load(f)
-    
+
     data_external['json'] = json.dumps(data_external, indent=4)
 
     ### RENDER THE TEMPLATES
-    
+
     # Copy across the templates - needed so that associated assets are there
     copy_tree(templates_dir, outdir)
-    
+
     # Load the templates
     try:
         env = jinja2.Environment(loader=jinja2.FileSystemLoader(templates_dir))
@@ -90,12 +90,12 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
         portal_template = env.get_template(portal_fn)
     except:
         raise IOError ("Could not load dashboard template files")
-    
+
     # Render templates and save
     internal_output_fn = os.path.join(outdir, internal_fn)
     external_output_fn = os.path.join(outdir, external_fn)
     portal_output_fn = os.path.join(outdir, portal_fn)
-    
+
     # Internal template
     internal_output = internal_template.render(d = data_internal)
     try:
@@ -103,7 +103,7 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
             print(internal_output, file=f)
     except IOError as e:
         raise IOError ("Could not print report to '{}' - {}".format(internal_output_fn, IOError(e)))
-    
+
     # External template
     external_output = external_template.render(d = data_external)
     try:
@@ -111,7 +111,7 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
             print(external_output, file=f)
     except IOError as e:
         raise IOError ("Could not print report to '{}' - {}".format(external_output_fn, IOError(e)))
-    
+
     # Portal template
     portal_output = portal_template.render(d = data_external)
     try:
@@ -131,5 +131,5 @@ if __name__ == '__main__':
         click.secho("Could not open the config file {}".format(conf_file), fg="red")
         config = {}
     make_dashboards(default_map=config)
-     
-     
+
+
