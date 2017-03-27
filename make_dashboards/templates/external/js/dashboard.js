@@ -1,12 +1,9 @@
-
 // Javascript for the NGI Stockholm Internal Dashboard
-
 var plot_height = 415;
-
 $(function () {
-    
+
     try {
-    
+
         Highcharts.setOptions({
             colors: ['#377eb8','#4daf4a','#984ea3','#ff7f00','#a65628','#f781bf','#999999','#e41a1c'],
             chart: {
@@ -16,15 +13,15 @@ $(function () {
             },
             plotOptions: { series: { animation: false } }
         });
-        
+
         // Header clock
         updateClock();
-        
+
         // Cron job runs on the hour, every hour. Get the web page to reload at 5 past the next hour
         var reloadDelay = moment().add(1, 'hours').startOf('hour').add(5, 'minutes').diff();
         setTimeout(function(){ location.reload(); }, reloadDelay );
         console.log("Reloading page in "+Math.floor(reloadDelay/(1000*60))+" minutes");
-        
+
         // Check that the returned data is ok
         if ('error_status' in data){
             $('.mainrow').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Error loading dashboard data (API)</strong><br>'+data['page_title']+': '+data['error_status']+' ('+data['error_reason']+')</p></div><pre style="margin: 100px 50px;"><code>'+data['error_exception']+'</code></pre>');
@@ -36,37 +33,40 @@ $(function () {
             setTimeout(function(){ location.reload(); }, 60000); // 1 minute
             return false;
         }
-        
+
         // Projects plot
         var years = Object.keys(data['num_projects']).sort().reverse();
         var ydata = data['num_projects'][years[0]];
         make_bar_plot('#num_projects_plot', ydata, '# Projects in '+years[0]);
-        
+
         // Samples plot
         var years = Object.keys(data['num_samples']).sort().reverse();
         var ydata = data['num_samples'][years[0]];
         make_bar_plot('#num_samples_plot', ydata, '# Samples in '+years[0]);
-        
+
         // Open Projects plot
         var ydata = data['open_projects'];
         make_bar_plot('#open_projects_plot', ydata, '# Open Projects ');
-        
+
         // Delivery times plot
         make_delivery_times_plot();
-        
+
+        // Finished Library turn-around-time plot
+        make_finished_lib_median_plot();
+
         // Affiliations plot
         make_affiliations_plot();
-        
+
         // Throughput plot
         make_throughput_plot();
-        
+
     } catch(err){
         $('.mainrow').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Error loading dashboard data</strong></p></div><pre style="margin: 100px 50px;"><code>'+err+'</code></pre>');
         console.log(err);
         // Try reloading in a few minutes
         setTimeout(function(){ location.reload(); }, 60000); // 1 minute
     }
-    
+
 });
 
 
@@ -76,7 +76,7 @@ function make_bar_plot(target, ydata, title){
         if(target === undefined){ throw 'Target missing'; }
         if(ydata === undefined){ throw 'Data missing'; }
         if(title === undefined){ title = null; }
-        
+
         var cats = Object.keys(ydata).sort(function(a,b){return ydata[a]-ydata[b]}).reverse();
         var sorted_ydata = Array();
         var nice_cats = Array();
@@ -90,7 +90,7 @@ function make_bar_plot(target, ydata, title){
             sorted_ydata.push(ydata[cats[j]]);
             total_count += ydata[cats[j]];
         }
-        
+
         $(target).highcharts({
             chart: {
                 type: 'bar',
@@ -137,13 +137,13 @@ function make_delivery_times_plot(){
     var pdata = Array();
     for(i=0; i<ykeys.length; i++){ pdata.push([ykeys[i], ydata[ykeys[i]]]); }
     var d = new Date();
-    
+
     $('#delivery_times_plot').highcharts({
         chart: {
             plotBackgroundColor: null,
             plotBorderWidth: 0,
             plotShadow: false,
-            height: plot_height,
+            height: plot_height * 0.7,
         },
         title: {
             text: 'Delivery Times in '+years[0],
@@ -176,8 +176,8 @@ function make_delivery_times_plot(){
                 showInLegend: true,
                 startAngle: -90,
                 endAngle: 90,
-                size: '120%',
-                center: ['50%', '75%']
+                size: '200%',
+                center: ['50%', '100%']
             }
         },
         legend: {
@@ -195,6 +195,83 @@ function make_delivery_times_plot(){
 }
 
 
+function make_finished_lib_median_plot(){
+    var years = Object.keys(data['delivery_times_finishedlib']).sort().reverse();
+    var ydata = parseFloat(data['delivery_times_finishedlib'][years[0]]);
+    $('#finished_lib_median_tat').highcharts({
+        chart: {
+            type: 'bar',
+            height: 80,
+            spacingLeft: 100,
+            spacingRight: 100,
+            spacingBottom: 10,
+            spacingTop: 0,
+            backgroundColor:'rgba(255, 255, 255, 0.1)',
+            plotBackgroundColor:'#ed8c83',
+            plotBorderColor: '#FFFFFF',
+            plotBorderWidth: 14
+        },
+        xAxis: {
+            categories: ['Queue'],
+            title: { text: null },
+            labels: { enabled: false },
+            tickWidth: 0,
+            lineWidth: 0
+        },
+        yAxis: [{
+            min: 0,
+            max: 30,
+            title: { text: null },
+            opposite: true,
+            labels: {
+                y: -3,
+            },
+            startOnTick: false,
+            tickPositions: [ 0, 7, 14, 21, 28, 35 ],
+            gridLineWidth: 0,
+            plotBands: [{
+                color: '#8AD88B',
+                from: 0,
+                to: 14
+            },{
+                color: '#EDD983',
+                from: 14,
+                to: 28
+            },{
+                color: '#ED8C83',
+                from: 28,
+                to: 200
+            }],
+            plotLines: [{
+                name: 'Finished Lib TaT',
+                color : '#000000',
+                dataLabels: { enabled: true },
+                width: 2,
+                zIndex: 1000,
+                value: ydata
+            }]
+        },{
+            min: 0,
+            max: 42,
+            title: {
+                text: '"Finished Library" median turn around time ('+years[0]+'): '+ydata+' days',
+                y: 5,
+                style: { 'font-size': 12 }
+            },
+            labels: { enabled: false },
+            gridLineWidth: 0
+        }],
+        title: { text: null },
+        legend: { enabled: false },
+        credits: { enabled: false },
+        series: [
+            { data: [0] },
+            { data: [0], yAxis: 1 }
+        ]
+    });
+}
+
+
 function make_affiliations_plot(){
     var years = Object.keys(data['project_user_affiliations']).sort().reverse();
     var ydata = data['project_user_affiliations'][years[0]];
@@ -206,9 +283,9 @@ function make_affiliations_plot(){
             thiskey = data['key_names'][thiskey];
         }
         pdata.push([thiskey, ydata[ykeys[i]]]);
-        
+
     }
-    
+
     $('#affiliations_plot').highcharts({
         chart: {
             plotBackgroundColor: null,
@@ -278,7 +355,7 @@ function make_throughput_plot(){
     var bp_per_day = total_count / (num_weeks * 7);
     var minutes_per_genome = 3236336281 / (bp_per_day / (24*60));
     var subtitle_text = 'Average for past '+num_weeks+' weeks: '+parseInt(bp_per_day/1000000000)+' Gbp per day <br>(1 Human genome equivalent every '+minutes_per_genome.toFixed(2)+' minutes)';
-    
+
     $('#throughput_plot').highcharts({
         chart: {
             plotBackgroundColor: null,
@@ -363,7 +440,7 @@ function updateClock(){
     $('#second').css("transform", "rotate(" + second + "deg)");
     $('#clock_time').text( moment().format('HH:mm') );
     $('#clock_date').text( moment().format('dddd Do MMMM') );
-    
+
     var updated = moment($('#date_rendered').text());
     $('#report_age').text( moment().from(updated, true) );
     setTimeout(updateClock, 1000);
