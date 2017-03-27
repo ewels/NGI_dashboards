@@ -143,7 +143,7 @@ function make_delivery_times_plot(){
             plotBackgroundColor: null,
             plotBorderWidth: 0,
             plotShadow: false,
-            height: plot_height * 0.7,
+            height: plot_height * 0.65,
         },
         title: {
             text: 'Delivery Times in '+years[0],
@@ -176,14 +176,14 @@ function make_delivery_times_plot(){
                 showInLegend: true,
                 startAngle: -90,
                 endAngle: 90,
-                size: '200%',
-                center: ['50%', '100%']
+                size: '230%',
+                center: ['50%', '120%']
             }
         },
         legend: {
             enabled: true,
             floating: true,
-            y: -20
+            y: 0
         },
         series: [{
             type: 'pie',
@@ -201,7 +201,7 @@ function make_finished_lib_median_plot(){
     $('#finished_lib_median_tat').highcharts({
         chart: {
             type: 'bar',
-            height: 80,
+            height: 100,
             spacingLeft: 100,
             spacingRight: 100,
             spacingBottom: 10,
@@ -254,7 +254,7 @@ function make_finished_lib_median_plot(){
             min: 0,
             max: 42,
             title: {
-                text: '"Finished Library" median turn around time ('+years[0]+'): '+ydata+' days',
+                text: 'Sequencing-only projects<br>Median turn around time ('+years[0]+'): <strong>'+ydata+' days</strong>',
                 y: 5,
                 style: { 'font-size': 12 }
             },

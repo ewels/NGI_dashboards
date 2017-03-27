@@ -213,7 +213,7 @@ function make_queue_plot(target, aim, now, subtext){
             series=[];
             for (i in now){
                 obj={name:'serie'+i,
-                    color : chroma_colors[i], 
+                    color : chroma_colors[i],
                     dataLabels: {enabled: true},
                     y:now[i]};
                 series.push(obj);
