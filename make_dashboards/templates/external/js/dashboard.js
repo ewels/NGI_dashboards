@@ -219,28 +219,39 @@ function make_finished_lib_median_plot(){
             lineWidth: 0
         },
         yAxis: [{
+            opposite: true,
+            min: 0,
+            max: 6,
+            title: {
+                text: 'Sequencing-only projects<br>Median turn around time ('+years[0]+'): <strong>'+ydata+' days</strong>',
+                y: -20,
+                style: { 'font-size': 12 }
+            },
+            labels: { enabled: false },
+            gridLineWidth: 0
+        },{
             min: 0,
             max: 30,
             title: { text: null },
-            opposite: true,
-            labels: {
-                y: -3,
-            },
             startOnTick: false,
-            tickPositions: [ 0, 7, 14, 21, 28, 35 ],
+            labels: {
+                format: '{value} w',
+                y: 15
+            },
+            tickPositions: [ 0, 1, 2, 3, 4, 5 ],
             gridLineWidth: 0,
             plotBands: [{
                 color: '#8AD88B',
                 from: 0,
-                to: 14
+                to: 2
             },{
                 color: '#EDD983',
-                from: 14,
-                to: 28
+                from: 2,
+                to: 4
             },{
                 color: '#ED8C83',
-                from: 28,
-                to: 200
+                from: 4,
+                to: 20
             }],
             plotLines: [{
                 name: 'Finished Lib TaT',
@@ -248,18 +259,8 @@ function make_finished_lib_median_plot(){
                 dataLabels: { enabled: true },
                 width: 2,
                 zIndex: 1000,
-                value: ydata
+                value: ydata/7
             }]
-        },{
-            min: 0,
-            max: 42,
-            title: {
-                text: 'Sequencing-only projects<br>Median turn around time ('+years[0]+'): <strong>'+ydata+' days</strong>',
-                y: 5,
-                style: { 'font-size': 12 }
-            },
-            labels: { enabled: false },
-            gridLineWidth: 0
         }],
         title: { text: null },
         legend: { enabled: false },
