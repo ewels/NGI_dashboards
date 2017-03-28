@@ -2,9 +2,9 @@
 // Javascript for the NGI Stockholm Internal Dashboard
 
 $(function () {
-    
+
     try {
-    
+
         Highcharts.setOptions({
             chart: {
                 style: {
@@ -12,18 +12,18 @@ $(function () {
                 }
             }
         });
-        
+
         // Header clock
         updateClock();
-        
+
         // Format KPI update number
         $('#time_created').text(moment($('#time_created').text()).format("YYYY-MM-DD, HH:mm"));
-        
+
         // Cron job runs on the hour, every hour. Get the web page to reload at 5 past the next hour
         var reloadDelay = moment().add(1, 'hours').startOf('hour').add(5, 'minutes').diff();
         setTimeout(function(){ location.reload(); }, reloadDelay );
         console.log("Reloading page in "+Math.floor(reloadDelay/(1000*60))+" minutes");
-        
+
         // Collect data into shorter variable names
         tat = data['turnaround_times']
         tat_l = data['limits']['turnaround_times'];
@@ -33,7 +33,7 @@ $(function () {
         pl = data['process_load']
         pl_l = data['limits']['process_load']
         suc = data['success_rate']
-        
+
         // Top row
         make_tat_plot('#finished_proj_tat', 'finished_library_project', tat_l, tat, 'Finished Lib<br>'+Math.round(tat['finished_library_project'])+' days');
         make_tat_plot('#lp_proj_tats', 'library_prep_project', tat_l, tat, 'Prep Projects<br>'+Math.round(tat['library_prep_project'])+' days');
@@ -41,7 +41,7 @@ $(function () {
         make_tat_plot('#lp_tat', 'library_prep', tat_l, tat);
         make_tat_plot('#seq_tat', 'sequencing', tat_l, tat);
         make_tat_plot('#bioinfo_tat', 'bioinformatics', tat_l, tat);
-        
+
         // Middle row, projects openend / closed
         try {
             make_proj_open_close_plot(
@@ -60,7 +60,7 @@ $(function () {
         } catch(err) {
             console.log('Could not get number of opened and closed projects.')
         }
-        
+
         // Middle Row - Queue plots
         // Max - 5 * pulse
         //
@@ -70,7 +70,7 @@ $(function () {
         make_queue_plot('#lp_queue',      pl_l['library_prep'],   pl['library_prep_queue'],   pl['library_prep_queue']+' samples in queue');
         make_queue_plot('#seq_queue',     pl_l['sequencing_queue'],     [pl['miseq_sequencing_queue_l'], pl['hiseq_sequencing_queue_l'], pl['hiseqX_sequencing_queue_l']], sequencing_q_subtext);
         make_queue_plot('#bioinfo_queue', pl_l['bioinformatics'], pl['bioinformatics_queue'], pl['bioinformatics_queue']+' lanes in queue');
-        
+
         // Middle Row - Balance plots
         sequencing_subtext=pl['miseq_sequencing_l']+'<span style="color:#AF2323">M</span>,'+
             pl['hiseq_sequencing_l']+'<span style="color:#258F0B">H</span>,'+
@@ -81,20 +81,20 @@ $(function () {
         make_balance_plot('#lp_balance',          pl_l['library_prep'],       pl['library_prep'],       undefined, pl['library_prep']+' samples in progress');
         make_balance_plot('#seq_balance',         pl_l['sequencing'],         [pl['miseq_sequencing_l'], pl['hiseq_sequencing_l'], pl['hiseqX_sequencing_l']],         undefined, sequencing_subtext);
         make_balance_plot('#bioinfo_balance',     pl_l['bioinformatics'],     pl['bioinformatics'],     undefined, pl['bioinformatics']+' lanes in progress');
-        
+
         // Bottom row
         make_success_plot('#rc_success', suc['initial_qc']*100);
         make_success_plot('#lp_success', suc['library_prep']*100);
         make_success_plot('#seq_success', suc['sequencing']*100);
         make_success_plot('#bioinfo_success', suc['bioinformatics']*100);
-        
+
     } catch(err){
         $('.main-page').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Error loading dashboard data</strong></p></div><pre style="margin: 100px 50px;"><code>'+err+'</code></pre>');
         console.log(err);
         // Try reloading in a few minutes
         setTimeout(function(){ location.reload(); }, 300000); // 5 minutes
     }
-    
+
 });
 
 
@@ -213,7 +213,7 @@ function make_queue_plot(target, aim, now, subtext){
             series=[];
             for (i in now){
                 obj={name:'serie'+i,
-                    color : chroma_colors[i], 
+                    color : chroma_colors[i],
                     dataLabels: {enabled: true},
                     y:now[i]};
                 series.push(obj);
@@ -223,9 +223,9 @@ function make_queue_plot(target, aim, now, subtext){
         $(target).highcharts({
             chart: {
                 type: 'bar',
-                height: 95,
-                spacingBottom: 10,
-                spacingTop: 0,
+                height: 96,
+                spacingBottom: 17,
+                spacingTop: 7,
                 backgroundColor:'rgba(255, 255, 255, 0.1)',
                 plotBackgroundColor:'#f2f2f2',
             },
@@ -310,12 +310,15 @@ function make_balance_plot(target, aim, now, prev, subtext){
                 spacingTop: 0,
                 backgroundColor:'rgba(255, 255, 255, 0.1)',
                 plotBackgroundColor:'#ed8c83',
+                plotBorderColor: '#FFFFFF',
+                plotBorderWidth: 14
             },
             xAxis: {
                 categories: ['Queue'],
                 title: { text: null },
                 labels: { enabled: false },
-                tickWidth: 0
+                tickWidth: 0,
+                lineWidth: 0
             },
             yAxis: [{
                 min: 0,
@@ -493,7 +496,7 @@ function updateClock(){
     $('#second').css("transform", "rotate(" + second + "deg)");
     $('#clock_time').text( moment().format('HH:mm') );
     $('#clock_date').text( moment().format('dddd Do MMMM') );
-    
+
     var updated = moment($('#time_created').data('original'));
     $('#report_age').text( moment().from(updated, true) );
     setTimeout(updateClock, 1000);
