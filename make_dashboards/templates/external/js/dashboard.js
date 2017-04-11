@@ -255,9 +255,9 @@ function make_finished_lib_median_plot(){
             }],
             plotLines: [{
                 name: 'Finished Lib TaT',
-                color : '#000000',
+                color : '#666666',
                 dataLabels: { enabled: true },
-                width: 2,
+                width: 4,
                 zIndex: 1000,
                 value: ydata/7
             }]
