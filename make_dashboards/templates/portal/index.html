@@ -303,6 +303,12 @@ function make_delivery_times_plot(){
 
 
 function make_finished_lib_median_plot(){
+    // Safari can do weird things when parsing this object
+    for (var k in data['delivery_times_finishedlib']) {
+        if (isNaN(data['delivery_times_finishedlib'][k])) {
+            delete data['delivery_times_finishedlib'][k];
+        }
+    }
     var years = Object.keys(data['delivery_times_finishedlib']).sort().reverse();
     var ydata = parseFloat(data['delivery_times_finishedlib'][years[0]]);
     $('#finished_lib_median_tat').highcharts({
@@ -350,10 +356,10 @@ function make_finished_lib_median_plot(){
             plotBands: [{
                 color: '#8AD88B',
                 from: 0,
-                to: 2
+                to: 3
             },{
                 color: '#EDD983',
-                from: 2,
+                from: 3,
                 to: 4
             },{
                 color: '#ED8C83',
