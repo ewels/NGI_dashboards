@@ -64,17 +64,17 @@ $(function () {
         // Middle Row - Queue plots
         // Max - 5 * pulse
         //
-        sequencing_q_subtext=pl['miseq_sequencing_queue_l']+'<span style="color:#DF5353">M</span>,'+
-            pl['hiseq_sequencing_queue_l']+'<span style="color:#55BF3B">H</span>,'+
-            pl['hiseqX_sequencing_queue_l']+'<span style="color:#7cb5ec">X</span> lanes in queue';
+        sequencing_q_subtext = '<span style="color:#DF5353">'+pl['miseq_sequencing_queue_l']+'M</span>, '+
+            '<span style="color:#55BF3B">'+pl['hiseq_sequencing_queue_l']+'H</span>, '+
+            '<span style="color:#7cb5ec">'+pl['hiseqX_sequencing_queue_l']+'X</span> lanes in queue';
         make_queue_plot('#lp_queue',      pl_l['library_prep'],   pl['library_prep_queue'],   pl['library_prep_queue']+' samples in queue');
         make_queue_plot('#seq_queue',     pl_l['sequencing_queue'],     [pl['miseq_sequencing_queue_l'], pl['hiseq_sequencing_queue_l'], pl['hiseqX_sequencing_queue_l']], sequencing_q_subtext);
         make_queue_plot('#bioinfo_queue', pl_l['bioinformatics'], pl['bioinformatics_queue'], pl['bioinformatics_queue']+' lanes in queue');
 
         // Middle Row - Balance plots
-        sequencing_subtext=pl['miseq_sequencing_l']+'<span style="color:#AF2323">M</span>,'+
-            pl['hiseq_sequencing_l']+'<span style="color:#258F0B">H</span>,'+
-            pl['hiseqX_sequencing_l']+'<span style="color:#4c85bc">X</span> lanes in progress';
+        sequencing_subtext = '<span style="color:#AF2323">'+pl['miseq_sequencing_l']+'M</span>, '+
+            '<span style="color:#258F0B">'+pl['hiseq_sequencing_l']+'H</span>, '+
+            '<span style="color:#4c85bc">'+pl['hiseqX_sequencing_l']+'X</span> lanes in progress';
         make_balance_plot('#rc_finished_balance', pl_l['initial_qc_lanes'],   pl['initial_qc_lanes'],   undefined, pl['initial_qc_lanes']+' lanes in progress');
         console.log(pl['initial_qc_samples']);
         make_balance_plot('#rc_balance',          pl_l['initial_qc_samples'], pl['initial_qc_samples'], undefined, pl['initial_qc_samples']+' samples in progress');
@@ -283,23 +283,24 @@ function make_balance_plot(target, aim, now, prev, subtext){
         if(now === undefined){ throw 'now missing'; }
         if (!Array.isArray(now)){
             my_plotlines=[{
-                    color: '#000',
-                    width: 2,
+                    color: '#666666',
+                    width: 4,
                     value: now,
                     zIndex: 1000
                 }];
         }else{
-            my_plotlines=Array();
-            chroma_colors=chroma.scale(['#AF2323','#259F0B','#4c85cc']).colors(now.length);
-            pl=[];
+            my_plotlines = Array();
+            chroma_colors = chroma.scale(['#AF2323','#259F0B','#4c85cc']).colors(now.length);
+            pl = [];
             for (i in now){
-                obj={name:'serie'+i,
-                    color : chroma_colors[i], 
+                my_plotlines.push({
+                    name:'serie'+i,
+                    color : chroma_colors[i],
                     dataLabels: {enabled: true},
-                    width: 2,
+                    width: 4,
                     zIndex: 1000,
-                    value: now[i]};
-                my_plotlines.push(obj);
+                    value: now[i]
+                });
             }
         }
         $(target).highcharts({
@@ -311,7 +312,7 @@ function make_balance_plot(target, aim, now, prev, subtext){
                 backgroundColor:'rgba(255, 255, 255, 0.1)',
                 plotBackgroundColor:'#ed8c83',
                 plotBorderColor: '#FFFFFF',
-                plotBorderWidth: 14
+                plotBorderWidth: 16
             },
             xAxis: {
                 categories: ['Queue'],
