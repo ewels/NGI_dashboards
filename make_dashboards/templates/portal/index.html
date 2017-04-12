@@ -166,7 +166,7 @@ $(function () {
 
         // Open Projects plot
         var ydata = data['open_projects'];
-        make_bar_plot('#open_projects_plot', ydata, '# Open Projects ');
+        make_bar_plot('#open_projects_plot', ydata, '# Currently Open Projects ');
 
     } catch(err){
         $('.plots_content').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Apologies, there was an error whilst loading this data.</strong> Please try again soon.</p></div>');
@@ -288,7 +288,7 @@ function make_delivery_times_plot(year){
             style: { 'font-size': '24px' }
         },
         subtitle: {
-            text: 'Projects started '+d.getFullYear()
+            text: 'Projects started '+year
         },
         credits: { enabled: false },
         tooltip: {
