@@ -319,6 +319,7 @@ class TaTBase(KPIBase):
         self.open_date = doc.get("open_date")
         self.close_date = doc.get("close_date")
         self.seq_date = doc.get("project_dates", {}).get("sequencing_start_date")
+        self.all_samples_sequenced = self.details.get("all_samples_sequenced")
         self.prep_date =  doc.get("project_dates", {}).get("library_prep_start")
         self.prep_finished = doc.get("project_dates", {}).get("qc_library_finished")
 
@@ -415,4 +416,27 @@ class TaTLibprep(TaTBase):
 class TaTLibprep_90th(TaTLibprep):
 
     def summary(self):
-        return _get_percentile(self.state, 90) 
+        return _get_percentile(self.state, 90)
+
+class TaTBioinformatics(TaTBase):
+    """Definition: all samples sequenced -> closed"""
+
+    def __call__(self, doc):
+        super(TaTBioinformatics, self).__call__(doc)
+        if self.ptype == "Production" and self.aborted is None:
+            try:
+                bioinfo_start = datetime.strptime(self.all_samples_sequenced, "%Y-%m-%d")
+                bioinfo_end = datetime.strptime(self.close_date, "%Y-%m-%d")
+                bioinfo_days = (bioinfo_end - bioinfo_start).days
+                if bioinfo_end > self.start_date:
+                    self.state.append(bioinfo_days)
+            except TypeError:
+                pass
+
+
+class TaTBioinfo_90th(TaTBioinformatics):
+
+    def summary(self):
+        print self.state
+        return _get_percentile(self.state, 90)
+
