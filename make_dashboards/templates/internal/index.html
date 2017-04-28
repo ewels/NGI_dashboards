@@ -46,7 +46,7 @@
       <div class="tat_plot_wrapper"><div class="tat_plot" id="lp_proj_tats"></div></div>
     </div>
     <div class="col-xs-10 mainrow">
-      <h2>Turn Around Times <small>Time spent for 90<sup>th</sup> percentile project (past 30 days)</small></h2>
+      <h2>Turn Around Times <small>Time spent for median project (past 30 days). <small>Short grey tick shows 90<sup>th</sup> percentile.</small></small></h2>
       <div class="row">
         <div class="col-xs-3">
           <h3>Reception Control</h3>
@@ -143,7 +143,8 @@
 <footer class="container-fluid">
   <p class="dashboard-timestamps">
     Fetched: <span>{{ d.date_rendered }}</span> &nbsp; / &nbsp; 
-    Generated: <span>{{ d.date_generated }}</span> &nbsp; / &nbsp; 
+    Data Updated: <span id="time_created" data-original="{{ d.time_created }}">{{ d.time_created }}</span> &nbsp; / &nbsp; 
+    Age: <span id="report_age"></span> &nbsp; / &nbsp; 
     Package Version: <span>v{{ d.p_version }}</span>
   </p>
   <img class="pull-right" src="img/SLL_logo.png">
@@ -151,6 +152,7 @@
 
 <script src="js/jquery-1.12.0.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="js/chroma.min.js"></script>
 <script src="js/moment.js"></script>
 <script src="js/highcharts.js"></script>
 <script src="js/highcharts-more.js"></script>

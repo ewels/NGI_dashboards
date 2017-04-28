@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Script to get data from KPI database and render dashboard HTML files.
+Script to get data_internal from KPI data_internalbase and render dashboard HTML files.
 """
 
 from __future__ import print_function
@@ -14,6 +14,7 @@ import logging
 import jinja2
 import json
 import os
+import urllib
 import yaml
 
 logging.basicConfig(level=logging.WARNING,
@@ -35,7 +36,7 @@ with open (os.path.join(os.path.dirname(script_dir), 'version.txt')) as f:
 @click.version_option(p_version)
 def make_dashboards(outdir, demo, couch_user, password, couch_server):
     """
-    Function to get data from KPI database and render dashboard HTML files.
+    Function to get data_internal from KPI data_internalbase and render dashboard HTML files.
     """
 
     ### CONFIGURATION VARS
@@ -45,57 +46,79 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
     # Paths relative to make_dashboards/templates/
     internal_fn = os.path.join('internal','index.html')
     external_fn = os.path.join('external','index.html')
-    
-    
-    ### GET THE DATA
+    portal_fn = os.path.join('portal','index.html')
+
+
+    ### GET THE INTERNAL DATA
     if demo:
-        logging.warn("Using demo data")
-        with open (os.path.join(script_dir, 'demo_data.json')) as f:
-            data = json.loads(f.read())
+        logging.warn("Using demo data_internal")
+        with open (os.path.join(script_dir, 'demo_data_internal.json')) as f:
+            data_internal = json.loads(f.read())
     else:
-        # Connect to the database
+        # Connect to the data_internalbase
         couch = couchdb.Server("http://{}:{}@{}".format(couch_user, password, couch_server))
-        data = couch["kpi"].view('dashboard/by_time', limit=1, descending=True).rows[0].value
+        data_internal = couch["kpi"].view('dashboard/by_time', limit=1, descending=True).rows[0].value
     try:
-        data['date_generated'] = datetime.strptime(data['time_created'], "%Y-%m-%dT%H:%M:%S.%f+0000").strftime("%Y-%m-%d, %H:%M")
+        data_internal['date_generated'] = datetime.strptime(data_internal['time_created'], "%Y-%m-%dT%H:%M:%S.%f+0000").strftime("%Y-%m-%d, %H:%M")
     except KeyError:
-        data['date_generated'] = 'Error'
-    data['date_rendered'] = datetime.now().strftime("%Y-%m-%d, %H:%M")
-    data['p_version'] = p_version
-    data['json'] = json.dumps(data, indent=4)
+        data_internal['date_generated'] = 'Error'
+    data_internal['date_rendered'] = datetime.now().strftime("%Y-%m-%d, %H:%M")
+    data_internal['p_version'] = p_version
+    data_internal['json'] = json.dumps(data_internal, indent=4)
+
+    ### GET THE EXTERNAL DATA
+    external_url = 'https://genomics-status.scilifelab.se/api/v1/stats'
+    data_external = json.load(urllib.urlopen(external_url))
+    data_external['date_rendered'] = datetime.now().strftime("%Y-%m-%d, %H:%M")
+    data_external['p_version'] = p_version
+    # Translations for lowercase keys
+    with open("key_names.yaml", 'r') as f:
+        data_external['key_names'] = yaml.load(f)
+
+    data_external['json'] = json.dumps(data_external, indent=4)
 
     ### RENDER THE TEMPLATES
-    
+
     # Copy across the templates - needed so that associated assets are there
     copy_tree(templates_dir, outdir)
-    
+
     # Load the templates
     try:
         env = jinja2.Environment(loader=jinja2.FileSystemLoader(templates_dir))
         internal_template = env.get_template(internal_fn)
         external_template = env.get_template(external_fn)
+        portal_template = env.get_template(portal_fn)
     except:
         raise IOError ("Could not load dashboard template files")
-    
+
     # Render templates and save
     internal_output_fn = os.path.join(outdir, internal_fn)
     external_output_fn = os.path.join(outdir, external_fn)
-    
+    portal_output_fn = os.path.join(outdir, portal_fn)
+
     # Internal template
-    internal_output = internal_template.render(d = data)
+    internal_output = internal_template.render(d = data_internal)
     try:
         with open (os.path.join(outdir, internal_output_fn), 'w') as f:
             print(internal_output, file=f)
     except IOError as e:
         raise IOError ("Could not print report to '{}' - {}".format(internal_output_fn, IOError(e)))
-    
-    # Internal template
-    external_output = external_template.render(d = data)
+
+    # External template
+    external_output = external_template.render(d = data_external)
     try:
         with open (os.path.join(outdir, external_output_fn), 'w') as f:
             print(external_output, file=f)
     except IOError as e:
         raise IOError ("Could not print report to '{}' - {}".format(external_output_fn, IOError(e)))
+
+    # Portal template
+    portal_output = portal_template.render(d = data_external)
+    try:
+        with open (os.path.join(outdir, portal_output_fn), 'w') as f:
+            print(portal_output, file=f)
+    except IOError as e:
+        raise IOError ("Could not print report to '{}' - {}".format(portal_output_fn, IOError(e)))
 
 
 
@@ -108,5 +131,5 @@ if __name__ == '__main__':
         click.secho("Could not open the config file {}".format(conf_file), fg="red")
         config = {}
     make_dashboards(default_map=config)
-     
-     
+
+

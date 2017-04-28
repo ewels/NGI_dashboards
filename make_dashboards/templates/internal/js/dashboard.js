@@ -1,12 +1,10 @@
 
 // Javascript for the NGI Stockholm Internal Dashboard
 
-setTimeout(function(){ location.reload(); }, 300000); // 300 seconds - 5 minutes
-
 $(function () {
-    
+
     try {
-    
+
         Highcharts.setOptions({
             chart: {
                 style: {
@@ -14,10 +12,18 @@ $(function () {
                 }
             }
         });
-        
+
         // Header clock
         updateClock();
-        
+
+        // Format KPI update number
+        $('#time_created').text(moment($('#time_created').text()).format("YYYY-MM-DD, HH:mm"));
+
+        // Cron job runs on the hour, every hour. Get the web page to reload at 5 past the next hour
+        var reloadDelay = moment().add(1, 'hours').startOf('hour').add(5, 'minutes').diff();
+        setTimeout(function(){ location.reload(); }, reloadDelay );
+        console.log("Reloading page in "+Math.floor(reloadDelay/(1000*60))+" minutes");
+
         // Collect data into shorter variable names
         tat = data['turnaround_times']
         tat_l = data['limits']['turnaround_times'];
@@ -27,15 +33,15 @@ $(function () {
         pl = data['process_load']
         pl_l = data['limits']['process_load']
         suc = data['success_rate']
-        
+
         // Top row
-        make_tat_plot('#finished_proj_tat', tat_l['finished_library_project'], tat['finished_library_project'],  'Finished Lib<br>'+Math.round(tat['finished_library_project'])+' days');
-        make_tat_plot('#lp_proj_tats',      tat_l['library_prep_project'], tat['library_prep_project'],      'Prep Projects<br>'+Math.round(tat['library_prep_project'])+' days');
-        make_tat_plot('#rc_tat',            tat_l['initial_qc'],     tat['initial_qc'],     Math.round(tat['initial_qc'])+' days');
-        make_tat_plot('#lp_tat',            tat_l['library_prep'],   tat['library_prep'],   Math.round(tat['library_prep'])+' days');
-        make_tat_plot('#seq_tat',           tat_l['sequencing'],     tat['sequencing'],     Math.round(tat['sequencing'])+' days');
-        make_tat_plot('#bioinfo_tat',       tat_l['bioinformatics'], tat['bioinformatics'], Math.round(tat['bioinformatics'])+' days');
-        
+        make_tat_plot('#finished_proj_tat', 'finished_library_project', tat_l, tat, 'Finished Lib<br>'+Math.round(tat['finished_library_project'])+' days');
+        make_tat_plot('#lp_proj_tats', 'library_prep_project', tat_l, tat, 'Prep Projects<br>'+Math.round(tat['library_prep_project'])+' days');
+        make_tat_plot('#rc_tat', 'initial_qc', tat_l, tat);
+        make_tat_plot('#lp_tat', 'library_prep', tat_l, tat);
+        make_tat_plot('#seq_tat', 'sequencing', tat_l, tat);
+        make_tat_plot('#bioinfo_tat', 'bioinformatics', tat_l, tat);
+
         // Middle row, projects openend / closed
         try {
             make_proj_open_close_plot(
@@ -54,40 +60,60 @@ $(function () {
         } catch(err) {
             console.log('Could not get number of opened and closed projects.')
         }
-        
+
         // Middle Row - Queue plots
         // Max - 5 * pulse
+        //
+        sequencing_q_subtext = '<span style="color:#DF5353">'+pl['miseq_sequencing_queue_l']+'M</span>, '+
+            '<span style="color:#55BF3B">'+pl['hiseq_sequencing_queue_l']+'H</span>, '+
+            '<span style="color:#7cb5ec">'+pl['hiseqX_sequencing_queue_l']+'X</span> lanes in queue';
         make_queue_plot('#lp_queue',      pl_l['library_prep'],   pl['library_prep_queue'],   pl['library_prep_queue']+' samples in queue');
-        make_queue_plot('#seq_queue',     pl_l['sequencing'],     pl['sequencing_queue'],     pl['sequencing_queue']+' lanes in queue');
+        make_queue_plot('#seq_queue',     pl_l['sequencing_queue'],     [pl['miseq_sequencing_queue_l'], pl['hiseq_sequencing_queue_l'], pl['hiseqX_sequencing_queue_l']], sequencing_q_subtext);
         make_queue_plot('#bioinfo_queue', pl_l['bioinformatics'], pl['bioinformatics_queue'], pl['bioinformatics_queue']+' lanes in queue');
-        
+
         // Middle Row - Balance plots
+        sequencing_subtext = '<span style="color:#AF2323">'+pl['miseq_sequencing_l']+'M</span>, '+
+            '<span style="color:#258F0B">'+pl['hiseq_sequencing_l']+'H</span>, '+
+            '<span style="color:#4c85bc">'+pl['hiseqX_sequencing_l']+'X</span> lanes in progress';
         make_balance_plot('#rc_finished_balance', pl_l['initial_qc_lanes'],   pl['initial_qc_lanes'],   undefined, pl['initial_qc_lanes']+' lanes in progress');
+        console.log(pl['initial_qc_samples']);
         make_balance_plot('#rc_balance',          pl_l['initial_qc_samples'], pl['initial_qc_samples'], undefined, pl['initial_qc_samples']+' samples in progress');
         make_balance_plot('#lp_balance',          pl_l['library_prep'],       pl['library_prep'],       undefined, pl['library_prep']+' samples in progress');
-        make_balance_plot('#seq_balance',         pl_l['sequencing'],         pl['sequencing'],         undefined, pl['sequencing']+' lanes in progress');
+        make_balance_plot('#seq_balance',         pl_l['sequencing'],         [pl['miseq_sequencing_l'], pl['hiseq_sequencing_l'], pl['hiseqX_sequencing_l']],         undefined, sequencing_subtext);
         make_balance_plot('#bioinfo_balance',     pl_l['bioinformatics'],     pl['bioinformatics'],     undefined, pl['bioinformatics']+' lanes in progress');
-        
+
         // Bottom row
         make_success_plot('#rc_success', suc['initial_qc']*100);
         make_success_plot('#lp_success', suc['library_prep']*100);
         make_success_plot('#seq_success', suc['sequencing']*100);
         make_success_plot('#bioinfo_success', suc['bioinformatics']*100);
-        
+
     } catch(err){
         $('.main-page').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Error loading dashboard data</strong></p></div><pre style="margin: 100px 50px;"><code>'+err+'</code></pre>');
         console.log(err);
+        // Try reloading in a few minutes
+        setTimeout(function(){ location.reload(); }, 300000); // 5 minutes
     }
+
 });
 
 
 // Make a speedometer plot to show turnaround times
-function make_tat_plot(target, aim, now, title){
+function make_tat_plot(target, k, tat_l, tat, title){
     try {
         var overTop = false;
         if(target === undefined){ throw 'Target missing'; }
+        if(k === undefined){ throw 'Key missing'; }
+        if(tat_l === undefined){ throw 'tat_l missing'; }
+        if(tat === undefined){ throw 'tat missing'; }
+        aim = tat_l[k];
+        now = tat[k];
+        ninetieth = tat[k+'_90th'];
         if(aim === undefined){ throw 'aim missing'; }
         if(now === undefined){ throw 'now missing'; }
+        if(title === undefined){
+            title = Math.round(now)+' days'
+        }
         if(now > aim * 2.5){
             now = aim * 2.6;
             overTop = true;
@@ -151,6 +177,9 @@ function make_tat_plot(target, aim, now, title){
                 }
             },
             series: [{
+                name: '90th Percentile',
+                data: [ninetieth],
+            },{
                 name: 'Turn Around Time',
                 data: [now],
             }]
@@ -177,13 +206,26 @@ function make_queue_plot(target, aim, now, subtext){
         if(target === undefined){ throw 'Target missing'; }
         if(aim === undefined){ throw 'aim missing'; }
         if(now === undefined){ throw 'now missing'; }
+        if (!Array.isArray(now)){
+            series=[now];
+        }else{
+            chroma_colors=chroma.scale(['#DF5353','#55BF3B','#7cb5ec']).colors(now.length);
+            series=[];
+            for (i in now){
+                obj={name:'serie'+i,
+                    color : chroma_colors[i],
+                    dataLabels: {enabled: true},
+                    y:now[i]};
+                series.push(obj);
+            }
+        }
         var max = aim * 5;
         $(target).highcharts({
             chart: {
                 type: 'bar',
-                height: 95,
-                spacingBottom: 10,
-                spacingTop: 0,
+                height: 96,
+                spacingBottom: 17,
+                spacingTop: 7,
                 backgroundColor:'rgba(255, 255, 255, 0.1)',
                 plotBackgroundColor:'#f2f2f2',
             },
@@ -224,7 +266,7 @@ function make_queue_plot(target, aim, now, subtext){
             tooltip: { enabled: false },
             series: [{
                 name: 'Queue',
-                data: [now]
+                data: series
             }]
         });
     } catch(err) {
@@ -239,6 +281,28 @@ function make_balance_plot(target, aim, now, prev, subtext){
         if(target === undefined){ throw 'Target missing'; }
         if(aim === undefined){ throw 'aim missing'; }
         if(now === undefined){ throw 'now missing'; }
+        if (!Array.isArray(now)){
+            my_plotlines=[{
+                    color: '#666666',
+                    width: 4,
+                    value: now,
+                    zIndex: 1000
+                }];
+        }else{
+            my_plotlines = Array();
+            chroma_colors = chroma.scale(['#AF2323','#259F0B','#4c85cc']).colors(now.length);
+            pl = [];
+            for (i in now){
+                my_plotlines.push({
+                    name:'serie'+i,
+                    color : chroma_colors[i],
+                    dataLabels: {enabled: true},
+                    width: 4,
+                    zIndex: 1000,
+                    value: now[i]
+                });
+            }
+        }
         $(target).highcharts({
             chart: {
                 type: 'bar',
@@ -247,12 +311,15 @@ function make_balance_plot(target, aim, now, prev, subtext){
                 spacingTop: 0,
                 backgroundColor:'rgba(255, 255, 255, 0.1)',
                 plotBackgroundColor:'#ed8c83',
+                plotBorderColor: '#FFFFFF',
+                plotBorderWidth: 16
             },
             xAxis: {
                 categories: ['Queue'],
                 title: { text: null },
                 labels: { enabled: false },
-                tickWidth: 0
+                tickWidth: 0,
+                lineWidth: 0
             },
             yAxis: [{
                 min: 0,
@@ -268,12 +335,7 @@ function make_balance_plot(target, aim, now, prev, subtext){
                     from: aim,
                     to: aim * 4
                 }],
-                plotLines: [{
-                    color: '#000',
-                    width: 2,
-                    value: now,
-                    zIndex: 1000
-                }]
+                plotLines: my_plotlines
             },{
                 min: 0,
                 max: aim * 5,
@@ -284,12 +346,6 @@ function make_balance_plot(target, aim, now, prev, subtext){
                 },
                 labels: { enabled: false },
                 gridLineWidth: 0,
-                plotLines: [{
-                    color: '#999',
-                    width: 1,
-                    value: prev,
-                    zIndex: 1000
-                }]
             }],
             title: { text: null },
             legend: { enabled: false },
@@ -300,6 +356,7 @@ function make_balance_plot(target, aim, now, prev, subtext){
             ]
         });
     } catch(err) {
+        console.log(err);
         $(target).addClass('coming_soon').text('coming soon');
     }
 }
@@ -362,6 +419,7 @@ function make_proj_open_close_plot(target, opened, closed, categories){
     } catch(err) {
         $(target).addClass('coming_soon').text('coming soon');
     }
+
 }
 
 // Make an arc plot to show percentage success
@@ -439,5 +497,9 @@ function updateClock(){
     $('#second').css("transform", "rotate(" + second + "deg)");
     $('#clock_time').text( moment().format('HH:mm') );
     $('#clock_date').text( moment().format('dddd Do MMMM') );
+
+    var updated = moment($('#time_created').data('original'));
+    $('#report_age').text( moment().from(updated, true) );
     setTimeout(updateClock, 1000);
 }
+

@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,13 +19,11 @@
 
 <header class="container-fluid">
   <div class="row">
-    <div class="col-xs-2">
-      <img src="img/NGI_logo.png">
+    <div class="col-xs-7 header-logo">
+      <a href="https://ngisweden.scilifelab.se/"><img src="img/NGI_logo.png"></a>
+      <h1><a href="https://ngisweden.scilifelab.se/">NGI Stockholm Status</a></h1>
     </div>
-    <div class="col-xs-7">
-      <h1>NGI Stockholm - System Status</h1>
-    </div>
-    <div class="col-xs-3 text-right">
+    <div class="col-xs-5 text-right">
       <span id="clock_time">00:00</span>
       <span id="clock_date">Monday 01<sup>st</sup> January</span>
       <div class="hero-circle">
@@ -38,46 +35,42 @@
   </div>
 </header>
 
-<div class="container-fluid">
+<div class="container-fluid mainrow">
 
   <div class="row">
     <div class="col-xs-4">
-      <h3>Library Prep Queue</h3>
-      <div class="queue_plot" id="lp_queue"></div>
+      <div id="open_projects_plot" class="external_plot"></div>
     </div>
     <div class="col-xs-4">
-      <h3>Sequencing Queue</h3>
-      <div class="queue_plot" id="seq_queue"></div>
+      <div id="delivery_times_plot" class="external_plot"></div>
+      <div id="finished_lib_median_tat" class="external_plot"></div>
     </div>
     <div class="col-xs-4">
-      <h3>Analysis Queue</h3>
-      <div class="queue_plot" id="analysis_queue"></div>
+      <div id="throughput_plot" class="external_plot"></div>
     </div>
   </div>
-  
+
   <div class="row">
-    <div class="col-xs-3">
-      <h3>User Affiliations</h3>
-      <div class="throughput_plot" id="user_affiliations"></div>
+    <div class="col-xs-4">
+      <div id="num_projects_plot" class="external_plot"></div>
     </div>
-    <div class="col-xs-3">
-      <h3>Throughput</h3>
-      <div class="throughput_plot" id="throughput_plot"></div>
+    <div class="col-xs-4">
+      <div id="affiliations_plot" class="external_plot"></div>
     </div>
-    <div class="col-xs-3">
-      <h3>Delivery Times</h3>
-      <div id="delivery_times"></div>
-    </div>
-    <div class="col-xs-3">
-      <h3>Sequencing Yield</h3>
-      <div id="seq_yield"></div>
+    <div class="col-xs-4">
+      <div id="num_samples_plot" class="external_plot"></div>
     </div>
   </div>
 
 </div><!-- /.container -->
 
 <footer class="container-fluid">
-  <img class="pull-right" src="img/SLL_logo.png">
+  <p class="dashboard-timestamps">
+    Fetched: <span id="date_rendered">{{ d.date_rendered }}</span> &nbsp; / &nbsp;
+    Age: <span id="report_age"></span> &nbsp; / &nbsp;
+    Package Version: <span>v{{ d.p_version }}</span>
+  </p>
+  <a href="https://www.scilifelab.se/platforms/ngi/"><img class="pull-right" src="img/SLL_logo.png"></a>
 </footer>
 
 <script src="js/jquery-1.12.0.min.js"></script>
@@ -87,6 +80,9 @@
 <script src="js/highcharts.js"></script>
 <script src="js/highcharts-more.js"></script>
 <script src="js/solid-gauge.js"></script>
+<script type="text/javascript">
+var data = {{ d.json }};
+</script>
 <script src="js/dashboard.js"></script>
 </body>
 </html>

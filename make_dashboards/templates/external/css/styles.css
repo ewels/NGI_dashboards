@@ -1,47 +1,91 @@
 
 /* Styles for NGI Internal Dashboard */
 
-@import url(https://fonts.googleapis.com/css?family=Roboto:400,100,300,700,400italic);
+/* @import url(https://fonts.googleapis.com/css?family=Roboto:400,300,700); */
 body {
     font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    font-weight: 300;
+    font-weight: 400;
     background-color: #f2f2f2;
+}
+.header-logo img, .header-logo h1 {
+    float: left;
+}
+.header-logo h1 {
+    margin-left: 20px;
+}
+.header-logo a {
+    color: #333;
+    text-decoration: none;
 }
 
 h1 {
     margin-top: 25px;
-    font-weight: 200;
-}
-h2 {
     font-weight: 300;
 }
+h2 {
+    font-weight: 400;
+}
 h2 small {
-    font-weight: 100;
+    font-weight: 300;
     margin-left: 15px;
 }
 h3 {
     text-align: center;
-    font-weight: 300;
+    font-weight: 400;
 }
 
 header {
-    font-weight: 200;
+    font-weight: 300;
 }
 .mainrow {
     background-color: #fff;
 }
 footer img {
     padding: 15px;
+    margin-top: 5px;
+    height: 100px;
+}
+
+.dashboard-timestamps {
+    margin: 40px 0 0 20px;
+    float:left;
+}
+.dashboard-timestamps span {
+    margin-left: 10px;
+}
+
+.external_plot {
+    margin-top: 20px;
 }
 
 .coming_soon {
     background-color: #f2f2f2;
-    height: 140px;
-    line-height: 140px;
+    border: 1px dashed #ccc;
+    /*height: 140px;
+    line-height: 140px;*/
+    height: auto !important;
+    padding: 20px !important;
+    margin: auto 0;
     text-align: center;
     font-weight: 700;
     color: rgba(0,0,0,0.2);
     font-size: 26px;
+}
+.tat_plot.coming_soon { margin: 15px 0; }
+.queue_plot.coming_soon { margin: 22px 0; }
+.balance_plot.coming_soon { margin: 22px 0; }
+.success_plot.coming_soon { margin: 35px 0; }
+
+.tat_plot .highcharts-container svg .highcharts-series-group .highcharts-series-0 path {
+    fill: #ccc;
+}
+.tat_plot .highcharts-container svg .highcharts-series-group .highcharts-series-0 circle {
+    fill: #fff;
+    r: 120;
+}
+#finished_proj_tat svg .highcharts-series-group .highcharts-series-0 circle,
+#lp_proj_tats svg .highcharts-series-group .highcharts-series-0 circle {
+    fill: #f2f2f2
 }
 
 #clock_time, #clock_date {
@@ -60,7 +104,7 @@ footer img {
 }
 
 .mid-left p {
-    font-size: 18px;
+    font-size: 16px;
 }
 .container-fluid > .row {
     border-bottom: 1px solid #999;
@@ -80,17 +124,40 @@ footer img {
     padding: 5px;
     margin: 3px;
     float: right;
-    width: 100px;
+    width: 120px;
     display: inline-block;
 }
 .server-statuses li .glyphicon {
     top: 2px;
-    color: #3c763d;
+    color: #999999;
 }
+.server-statuses li.success .glyphicon { color: #3c763d; }
 .server-statuses li.warning { background-color: #faebcc; }
 .server-statuses li.warning .glyphicon { color: #8a6d3b; }
 .server-statuses li.danger { background-color: #f7c8c4; }
 .server-statuses li.danger .glyphicon { color: #a94442; }
+
+.queue_plot {
+    padding: 5px 0 8px;
+    height: 112px;
+}
+.balance_plot {
+    height: 100px;
+}
+#rc_finished_balance_wrapper {
+    border: 1px solid #ccc;
+    padding: 5px 5px 5px 15px;
+    margin-left: -16px;
+    margin-right: -6px;
+}
+#rc_finished_balance_wrapper span {
+    display:inline-block;
+    position: absolute;
+    left: -10px;
+    line-height: 90px;
+    -webkit-transform: rotate(-90deg);
+    transform: rotate(-90deg);
+}
 
 /* Header Clock */
 .hero-circle {
@@ -124,8 +191,10 @@ footer img {
     width: 0;
     height: 0;
     position: absolute;
-    top: calc(50% - 2px);
-    left: calc(50% + 1px);
+    /*top: calc(50% - 2px);
+    left: calc(50% + 1px);*/
+    top: 37px;
+    left: 40px;
     margin: 1px 0 -1px -25%;
     padding: 1px 0 1px 25%;
     background: #666;
