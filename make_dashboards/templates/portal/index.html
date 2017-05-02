@@ -51,13 +51,8 @@
 <div class="container mainrow">
 
   <h1>NGI Stockholm: Status</h1>
+  <p>Data shown for the Genomics Production facility at <a href="https://www.scilifelab.se/facilities/ngi-stockholm/">NGI Stockholm</a>, who perform high-throughput sequencing followed by data processing and best practice bioinformatics analyses.</p>
 
-  <p>Data shown for the Genomics Production facility at <a href="https://www.scilifelab.se/facilities/ngi-stockholm/">NGI Stockholm</a>,
-    who perform high-throughput sequencing followed by data processing and best practice bioinformatics analyses.
-    Our automated protocols allow us to process hundreds of samples per week and produce high quality sequencing data.
-    The facility is Swedac accredited, which ensure that projects are completed in accordance with rigorous quality standards.</p>
-
-  <p>NGI Stockholm also has the Genomics Applications facility which works with additional application types. Please get in touch for more information.</p>
 
   <form class="form-horizontal">
       <div class="form-group">
@@ -71,7 +66,18 @@
   <div class="plots_content">
     <div class="row">
       <div class="col-sm-6">
-        <div id="open_projects_plot" class="external_plot"></div>
+        <div id="delivery_time_histograms" class="external_plot">
+            <table id="delivery_time_histograms_table" class="table table-condensed">
+                <thead>
+                    <tr>
+                        <th>Application Type</th>
+                        <th>Delivery Times Histogram (weeks)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
       </div>
       <div class="col-sm-6">
         <div id="delivery_times_plot" class="external_plot"></div>
@@ -96,6 +102,12 @@
         <div id="num_samples_plot" class="external_plot"></div>
       </div>
     </div>
+
+    <div class="row">
+      <div class="col-sm-6">
+        <div id="open_projects_plot" class="external_plot"></div>
+      </div>
+    </div>
   </div>
 
   <div class="dashboard-timestamps">
@@ -114,7 +126,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
 <script type="text/javascript">
 var data = {{ d.json }};
-
+var deliverytimes_data = {{ dt_data }};
 
 
 // Javascript for the NGI Stockholm Internal Dashboard
@@ -185,6 +197,9 @@ function plot_everything(year){
         // # Samples plot
         var ydata = data['num_samples'][year];
         make_bar_plot('#num_samples_plot', ydata, '# Samples in '+year);
+
+        // Delivery times plot
+        delivery_times_histograms(year);
 
         // Delivery times plot
         make_delivery_times_plot(year);
@@ -569,6 +584,107 @@ function make_throughput_plot(year, num_weeks){
         },
         series: sdata
     });
+}
+
+
+/**
+ * Get histogram data out of xy data
+ * @param   {Array} data  Array of tuples [x, y]
+ * @param   {Number} step Resolution for the histogram
+ * @returns {Array}       Histogram data
+ * Adapted from: https://www.highcharts.com/demo/combo-histogram
+ */
+function histogram(data, step) {
+    var histo = {}, x, i, arr = [], maxx = 0;
+
+    // Group down
+    for (i = 0; i < data.length; i++) {
+        x = Math.floor(data[i] / step);
+        if (!histo[x]) {
+            histo[x] = 0;
+        }
+        histo[x]++;
+        maxx = Math.max(x, maxx);
+    }
+
+    // Make the histo group into an array
+    // for (x in histo) {
+    for (var x = 0; x <= maxx; x++){
+        if (histo.hasOwnProperty((x))) {
+            arr.push([parseFloat(x), histo[x]]);
+        } else {
+            arr.push([parseFloat(x),0]);
+        }
+    }
+
+    // Finally, sort the array
+    arr.sort(function (a, b) {
+        return a[0] - b[0];
+    });
+
+    return arr;
+}
+
+function delivery_times_histograms(year){
+    $('#delivery_time_histograms_table tbody').html('');
+    var applications = Object.keys(deliverytimes_data[year]);
+    var misc_applications = [];
+    var misc_app_data = [];
+    var hist_data = {};
+    var max_y = 0;
+    for(var i = 0; i < applications.length; i++){
+        var application = applications[i];
+        var ydata = deliverytimes_data[year][application];
+        if(ydata.length >= 10){
+            hist_data[application] = histogram(ydata, 7);
+            var arr_max = Math.max.apply(null, ydata) / 7;
+            max_y = Math.max(arr_max, max_y);
+        } else {
+            misc_applications.push(application);
+            misc_app_data = misc_app_data.concat(ydata);
+        }
+    }
+    if(misc_app_data.length > 0){
+        hist_data['Others ('+misc_applications.join(', ')+')'] = histogram(misc_app_data, 7);
+        var arr_max = Math.max.apply(null, misc_app_data) / 7;
+        max_y = Math.max(arr_max, max_y);
+    }
+    var hist_keys = Object.keys(hist_data);
+    for(var i = 0; i < hist_keys.length; i++){
+        var application = hist_keys[i];
+        var ydata = hist_data[application];
+        var hdiv = $('<div></div>');
+        hdiv.highcharts({
+            chart: {
+                type: 'area',
+                height: 100,
+                width: 400
+            },
+            title: { text: null },
+            xAxis: {
+                // title: { text: 'Days' },
+                min: 0,
+                max: max_y,
+                allowDecimals: false
+            },
+            yAxis: {
+                title: { text: null },
+                allowDecimals: false,
+                gridLineWidth: 0,
+            },
+            credits: { enabled: false },
+            legend: { enabled: false },
+            series: [{
+                name: application,
+                data: ydata,
+                marker: { enabled: false }
+            }]
+        });
+        var $tr = $('<tr><td>'+application+'</td><td class="dtime_plot"></td></tr>');
+        $tr.find('td.dtime_plot').append(hdiv);
+        $tr.appendTo('#delivery_time_histograms_table tbody');
+    }
+
 }
 
 </script>

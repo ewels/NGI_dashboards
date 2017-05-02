@@ -77,6 +77,11 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
 
     data_external['json'] = json.dumps(data_external, indent=4)
 
+    ### GET THE DELIVERY TIMES DATA
+    dtimes_url = 'https://genomics-status.scilifelab.se/api/v1/stats/year_deliverytime_application'
+    dtimes = json.load(urllib.urlopen(dtimes_url))
+    dtimes_json = json.dumps(dtimes, indent=4)
+
     ### RENDER THE TEMPLATES
 
     # Copy across the templates - needed so that associated assets are there
@@ -105,7 +110,7 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
         raise IOError ("Could not print report to '{}' - {}".format(internal_output_fn, IOError(e)))
 
     # External template
-    external_output = external_template.render(d = data_external)
+    external_output = external_template.render(d = data_external, dt_data = dtimes_json)
     try:
         with open (os.path.join(outdir, external_output_fn), 'w') as f:
             print(external_output, file=f)
@@ -113,7 +118,7 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
         raise IOError ("Could not print report to '{}' - {}".format(external_output_fn, IOError(e)))
 
     # Portal template
-    portal_output = portal_template.render(d = data_external)
+    portal_output = portal_template.render(d = data_external, dt_data = dtimes_json)
     try:
         with open (os.path.join(outdir, portal_output_fn), 'w') as f:
             print(portal_output, file=f)
