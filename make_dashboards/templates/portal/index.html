@@ -334,13 +334,7 @@ function make_delivery_times_plot(year){
 
 
 function make_finished_lib_median_plot(year){
-    // Safari can do weird things when parsing this object
-    for (var k in data['delivery_times_finishedlib']) {
-        if (isNaN(data['delivery_times_finishedlib'][k])) {
-            delete data['delivery_times_finishedlib'][k];
-        }
-    }
-    var ydata = parseFloat(data['delivery_times_finishedlib'][year]);
+    var ydata = parseFloat(data['delivery_times_median'][year]['Finished Library / Special']);
     $('#finished_lib_median_tat').highcharts({
         chart: {
             type: 'bar',

@@ -176,14 +176,14 @@ function make_delivery_times_plot(){
                 showInLegend: true,
                 startAngle: -90,
                 endAngle: 90,
-                size: '230%',
-                center: ['50%', '120%']
+                size: '210%',
+                center: ['50%', '100%']
             }
         },
         legend: {
             enabled: true,
             floating: true,
-            y: 0
+            y: 20
         },
         series: [{
             type: 'pie',
@@ -196,8 +196,8 @@ function make_delivery_times_plot(){
 
 
 function make_finished_lib_median_plot(){
-    var years = Object.keys(data['delivery_times_finishedlib']).sort().reverse();
-    var ydata = parseFloat(data['delivery_times_finishedlib'][years[0]]);
+    var years = Object.keys(data['delivery_times_median']).sort().reverse();
+    var ydata = parseFloat(data['delivery_times_median'][years[0]]['Finished Library / Special']);
     $('#finished_lib_median_tat').highcharts({
         chart: {
             type: 'bar',
