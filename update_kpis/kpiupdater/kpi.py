@@ -423,12 +423,12 @@ class TaTBioinformatics(TaTBase):
 
     def __call__(self, doc):
         super(TaTBioinformatics, self).__call__(doc)
-        if self.ptype == "Production" and self.aborted is None:
+        if self.ptype == "Production":
             try:
                 bioinfo_start = datetime.strptime(self.all_samples_sequenced, "%Y-%m-%d")
                 bioinfo_end = datetime.strptime(self.close_date, "%Y-%m-%d")
                 bioinfo_days = (bioinfo_end - bioinfo_start).days
-                if bioinfo_end > self.start_date:
+                if bioinfo_end > self.start_date and bioinfo_days >= 0:
                     self.state.append(bioinfo_days)
             except TypeError:
                 pass
@@ -437,6 +437,27 @@ class TaTBioinformatics(TaTBase):
 class TaTBioinfo_90th(TaTBioinformatics):
 
     def summary(self):
-        print self.state
+        return _get_percentile(self.state, 90)
+
+
+class TaTSequencing(TaTBase):
+    """Original definition was 'in queue library pooling - all samples sequenced'
+       Approximation: QC Library Finished - all samples sequenced"""
+
+    def __call__(self, doc):
+        super(TaTSequencing, self).__call__(doc)
+        if self.ptype == "Production":
+            try:
+                seq_start = datetime.strptime(self.prep_finished, "%Y-%m-%d")
+                seq_end = datetime.strptime(self.all_samples_sequenced, "%Y-%m-%d")
+                seq_days = (seq_end - seq_start).days
+                if seq_end > self.start_date and seq_days >= 0:
+                    self.state.append(seq_days)
+            except TypeError:
+                pass
+
+class TaTSequencing_90th(TaTSequencing):
+
+    def summary(self):
         return _get_percentile(self.state, 90)
 
