@@ -197,7 +197,7 @@ function make_delivery_times_plot(){
 
 function make_finished_lib_median_plot(){
     var years = Object.keys(data['delivery_times_median']).sort().reverse();
-    var ydata = parseFloat(data['delivery_times_median'][years[0]]['Finished Library / Special']);
+    var ydata = parseFloat(data['delivery_times_median'][years[0]]['Sequencing Only']);
     $('#finished_lib_median_tat').highcharts({
         chart: {
             type: 'bar',
