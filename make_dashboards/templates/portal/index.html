@@ -66,18 +66,7 @@
   <div class="plots_content">
     <div class="row">
       <div class="col-sm-6">
-        <div id="delivery_time_histograms" class="external_plot">
-            <table id="delivery_time_histograms_table" class="table table-condensed">
-                <thead>
-                    <tr>
-                        <th>Application Type</th>
-                        <th>Delivery Times Histogram (weeks)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
+        <div id="delivery_time_histograms" class="external_plot" style="min-height: 500px;"></div>
       </div>
       <div class="col-sm-6">
         <div id="delivery_times_plot" class="external_plot"></div>
@@ -349,7 +338,7 @@ function make_delivery_times_plot(year){
 
 
 function make_finished_lib_median_plot(year){
-    var ydata = parseFloat(data['delivery_times_median'][year]['Finished Library / Special']);
+    var ydata = parseFloat(data['delivery_times_median'][year]['Sequencing Only']);
     $('#finished_lib_median_tat').highcharts({
         chart: {
             type: 'bar',
@@ -626,65 +615,118 @@ function histogram(data, step) {
 }
 
 function delivery_times_histograms(year){
-    $('#delivery_time_histograms_table tbody').html('');
     var applications = Object.keys(deliverytimes_data[year]);
-    var misc_applications = [];
-    var misc_app_data = [];
-    var hist_data = {};
-    var max_y = 0;
+    // Sort by total count
+    var totals = [];
     for(var i = 0; i < applications.length; i++){
-        var application = applications[i];
+        totals.push([applications[i], deliverytimes_data[year][applications[i]].reduce(function(a, b) { return a + b; }, 0)]);
+    }
+    totals.sort(function(a, b) {
+        return b[1] - a[1];
+    });
+    function median_bar(data, hist) {
+        var yvals = [];
+        for(idx = 0; idx < hist.length; idx++){
+            yvals.push(hist[idx][1]);
+        }
+        data.sort( function(a,b) {return a - b;} );
+        var halfval = Math.floor(data.length/2);
+        var maxval = Math.max.apply(null, yvals);
+        if(data.length % 2) {
+            return [ data[halfval]/7, maxval ];
+        } else {
+            return [ ((data[halfval-1] + data[halfval]) / 2.0)/7, maxval ];
+        }
+    }
+    // Create y axes and series for plot
+    var yaxes = [], series = [], misc_applications = [], misc_app_data = [];
+    for(var i = 0; i < totals.length; i++){
+        var application = totals[i][0];
         var ydata = deliverytimes_data[year][application];
-        if(ydata.length >= 10){
-            hist_data[application] = histogram(ydata, 7);
-            var arr_max = Math.max.apply(null, ydata) / 7;
-            max_y = Math.max(arr_max, max_y);
+        if(i < 3){
+            var hist = histogram(ydata, 7);
+            yaxes.push({ title: { text: application } });
+            // Histogram data
+            series.push({
+                name: application,
+                data: hist,
+                marker: { enabled: false },
+                yAxis: yaxes.length - 1
+            });
+            // Median line
+            series.push({
+                name: 'Median: '+application,
+                type: 'column',
+                pointWidth: 2,
+                borderWidth: 0,
+                color: '#666',
+                data: [median_bar(ydata, hist)],
+                yAxis: yaxes.length - 1
+            });
         } else {
             misc_applications.push(application);
             misc_app_data = misc_app_data.concat(ydata);
         }
     }
     if(misc_app_data.length > 0){
-        hist_data['Others ('+misc_applications.join(', ')+')'] = histogram(misc_app_data, 7);
-        var arr_max = Math.max.apply(null, misc_app_data) / 7;
-        max_y = Math.max(arr_max, max_y);
-    }
-    var hist_keys = Object.keys(hist_data);
-    for(var i = 0; i < hist_keys.length; i++){
-        var application = hist_keys[i];
-        var ydata = hist_data[application];
-        var hdiv = $('<div></div>');
-        hdiv.highcharts({
-            chart: {
-                type: 'area',
-                height: 100,
-                width: 400
-            },
-            title: { text: null },
-            xAxis: {
-                // title: { text: 'Days' },
-                min: 0,
-                max: max_y,
-                allowDecimals: false
-            },
-            yAxis: {
-                title: { text: null },
-                allowDecimals: false,
-                gridLineWidth: 0,
-            },
-            credits: { enabled: false },
-            legend: { enabled: false },
-            series: [{
-                name: application,
-                data: ydata,
-                marker: { enabled: false }
-            }]
+        var hist = histogram(misc_app_data, 7);
+        yaxes.push({ title: { text: 'Others' } });
+        series.push({
+            name: 'Others ('+misc_applications.join(', ')+')',
+            data: hist,
+            marker: { enabled: false },
+            yAxis: yaxes.length - 1
         });
-        var $tr = $('<tr><td>'+application+'</td><td class="dtime_plot"></td></tr>');
-        $tr.find('td.dtime_plot').append(hdiv);
-        $tr.appendTo('#delivery_time_histograms_table tbody');
+        // Median line
+        series.push({
+            name: 'Median: Others',
+            type: 'column',
+            pointWidth: 2,
+            borderWidth: 0,
+            color: '#666',
+            data: [median_bar(misc_app_data, hist)],
+            yAxis: yaxes.length - 1
+        });
     }
-
+    console.log(yaxes);
+    console.log(series);
+    var axes_height = 80/yaxes.length;
+    var gap = 20/(yaxes.length-1);
+    for(i=0; i<yaxes.length; i++){
+        yaxes[i]['height'] = axes_height+'%';
+        var top = axes_height*i;
+        top += gap*i;
+        yaxes[i]['top'] = top+'%';
+        yaxes[i]['allowDecimals'] = false;
+        yaxes[i]['gridLineWidth'] = 0;
+        yaxes[i]['offset'] = 0;
+        yaxes[i]['lineWidth'] = 1;
+        yaxes[i]['title']['rotation'] = 0;
+        yaxes[i]['title']['margin'] = 30;
+        yaxes[i]['title']['style'] = { wordWrap:'break-word', width : "80px" };
+    }
+    // Make plot
+    $('#delivery_time_histograms').highcharts({
+        chart: {
+            type: 'area'
+        },
+        title: {
+            text: 'Turnaround Time by Application',
+            style: { 'font-size': '24px' }
+        },
+        subtitle: {
+            text: 'Samples passed QC > Data Delivered.<br>Showing projects started in '+year,
+        },
+        xAxis: {
+            title: { text: '# Weeks' },
+            min: 0,
+            allowDecimals: false
+        },
+        yAxis: yaxes,
+        credits: { enabled: false },
+        legend: { enabled: false },
+        series: series
+    });
 }
 
 </script>
