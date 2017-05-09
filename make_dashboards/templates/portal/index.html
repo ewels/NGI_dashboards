@@ -51,13 +51,8 @@
 <div class="container mainrow">
 
   <h1>NGI Stockholm: Status</h1>
+  <p>Data shown for the Genomics Production facility at <a href="https://www.scilifelab.se/facilities/ngi-stockholm/">NGI Stockholm</a>, who perform high-throughput sequencing followed by data processing and best practice bioinformatics analyses.</p>
 
-  <p>Data shown for the Genomics Production facility at <a href="https://www.scilifelab.se/facilities/ngi-stockholm/">NGI Stockholm</a>,
-    who perform high-throughput sequencing followed by data processing and best practice bioinformatics analyses.
-    Our automated protocols allow us to process hundreds of samples per week and produce high quality sequencing data.
-    The facility is Swedac accredited, which ensure that projects are completed in accordance with rigorous quality standards.</p>
-
-  <p>NGI Stockholm also has the Genomics Applications facility which works with additional application types. Please get in touch for more information.</p>
 
   <form class="form-horizontal">
       <div class="form-group">
@@ -71,7 +66,7 @@
   <div class="plots_content">
     <div class="row">
       <div class="col-sm-6">
-        <div id="open_projects_plot" class="external_plot"></div>
+        <div id="delivery_time_histograms" class="external_plot" style="min-height: 500px;"></div>
       </div>
       <div class="col-sm-6">
         <div id="delivery_times_plot" class="external_plot"></div>
@@ -96,6 +91,12 @@
         <div id="num_samples_plot" class="external_plot"></div>
       </div>
     </div>
+
+    <div class="row">
+      <div class="col-sm-6">
+        <div id="open_projects_plot" class="external_plot"></div>
+      </div>
+    </div>
   </div>
 
   <div class="dashboard-timestamps">
@@ -114,7 +115,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min.js"></script>
 <script type="text/javascript">
 var data = {{ d.json }};
-
+var deliverytimes_data = {{ dt_data }};
 
 
 // Javascript for the NGI Stockholm Internal Dashboard
@@ -185,6 +186,9 @@ function plot_everything(year){
         // # Samples plot
         var ydata = data['num_samples'][year];
         make_bar_plot('#num_samples_plot', ydata, '# Samples in '+year);
+
+        // Delivery times plot
+        delivery_times_histograms(year);
 
         // Delivery times plot
         make_delivery_times_plot(year);
@@ -334,7 +338,7 @@ function make_delivery_times_plot(year){
 
 
 function make_finished_lib_median_plot(year){
-    var ydata = parseFloat(data['delivery_times_median'][year]['Finished Library / Special']);
+    var ydata = parseFloat(data['delivery_times_median'][year]['Sequencing Only']);
     $('#finished_lib_median_tat').highcharts({
         chart: {
             type: 'bar',
@@ -568,6 +572,160 @@ function make_throughput_plot(year, num_weeks){
             shadow: true
         },
         series: sdata
+    });
+}
+
+
+/**
+ * Get histogram data out of xy data
+ * @param   {Array} data  Array of tuples [x, y]
+ * @param   {Number} step Resolution for the histogram
+ * @returns {Array}       Histogram data
+ * Adapted from: https://www.highcharts.com/demo/combo-histogram
+ */
+function histogram(data, step) {
+    var histo = {}, x, i, arr = [], maxx = 0;
+
+    // Group down
+    for (i = 0; i < data.length; i++) {
+        x = Math.floor(data[i] / step);
+        if (!histo[x]) {
+            histo[x] = 0;
+        }
+        histo[x]++;
+        maxx = Math.max(x, maxx);
+    }
+
+    // Make the histo group into an array
+    // for (x in histo) {
+    for (var x = 0; x <= maxx; x++){
+        if (histo.hasOwnProperty((x))) {
+            arr.push([parseFloat(x), histo[x]]);
+        } else {
+            arr.push([parseFloat(x),0]);
+        }
+    }
+
+    // Finally, sort the array
+    arr.sort(function (a, b) {
+        return a[0] - b[0];
+    });
+
+    return arr;
+}
+
+function delivery_times_histograms(year){
+    var applications = Object.keys(deliverytimes_data[year]);
+    // Sort by total count
+    var totals = [];
+    for(var i = 0; i < applications.length; i++){
+        totals.push([applications[i], deliverytimes_data[year][applications[i]].reduce(function(a, b) { return a + b; }, 0)]);
+    }
+    totals.sort(function(a, b) {
+        return b[1] - a[1];
+    });
+    function median_bar(data, hist) {
+        var yvals = [];
+        for(idx = 0; idx < hist.length; idx++){
+            yvals.push(hist[idx][1]);
+        }
+        data.sort( function(a,b) {return a - b;} );
+        var halfval = Math.floor(data.length/2);
+        var maxval = Math.max.apply(null, yvals);
+        if(data.length % 2) {
+            return [ data[halfval]/7, maxval ];
+        } else {
+            return [ ((data[halfval-1] + data[halfval]) / 2.0)/7, maxval ];
+        }
+    }
+    // Create y axes and series for plot
+    var yaxes = [], series = [], misc_applications = [], misc_app_data = [];
+    for(var i = 0; i < totals.length; i++){
+        var application = totals[i][0];
+        var ydata = deliverytimes_data[year][application];
+        if(i < 3){
+            var hist = histogram(ydata, 7);
+            yaxes.push({ title: { text: application } });
+            // Histogram data
+            series.push({
+                name: application,
+                data: hist,
+                marker: { enabled: false },
+                yAxis: yaxes.length - 1
+            });
+            // Median line
+            series.push({
+                name: 'Median: '+application,
+                type: 'column',
+                pointWidth: 2,
+                borderWidth: 0,
+                color: '#666',
+                data: [median_bar(ydata, hist)],
+                yAxis: yaxes.length - 1
+            });
+        } else {
+            misc_applications.push(application);
+            misc_app_data = misc_app_data.concat(ydata);
+        }
+    }
+    if(misc_app_data.length > 0){
+        var hist = histogram(misc_app_data, 7);
+        yaxes.push({ title: { text: 'Others' } });
+        series.push({
+            name: 'Others ('+misc_applications.join(', ')+')',
+            data: hist,
+            marker: { enabled: false },
+            yAxis: yaxes.length - 1
+        });
+        // Median line
+        series.push({
+            name: 'Median: Others',
+            type: 'column',
+            pointWidth: 2,
+            borderWidth: 0,
+            color: '#666',
+            data: [median_bar(misc_app_data, hist)],
+            yAxis: yaxes.length - 1
+        });
+    }
+    console.log(yaxes);
+    console.log(series);
+    var axes_height = 80/yaxes.length;
+    var gap = 20/(yaxes.length-1);
+    for(i=0; i<yaxes.length; i++){
+        yaxes[i]['height'] = axes_height+'%';
+        var top = axes_height*i;
+        top += gap*i;
+        yaxes[i]['top'] = top+'%';
+        yaxes[i]['allowDecimals'] = false;
+        yaxes[i]['gridLineWidth'] = 0;
+        yaxes[i]['offset'] = 0;
+        yaxes[i]['lineWidth'] = 1;
+        yaxes[i]['title']['rotation'] = 0;
+        yaxes[i]['title']['margin'] = 30;
+        yaxes[i]['title']['style'] = { wordWrap:'break-word', width : "80px" };
+    }
+    // Make plot
+    $('#delivery_time_histograms').highcharts({
+        chart: {
+            type: 'area'
+        },
+        title: {
+            text: 'Turnaround Time by Application',
+            style: { 'font-size': '24px' }
+        },
+        subtitle: {
+            text: 'Samples passed QC > Data Delivered.<br>Showing projects started in '+year,
+        },
+        xAxis: {
+            title: { text: '# Weeks' },
+            min: 0,
+            allowDecimals: false
+        },
+        yAxis: yaxes,
+        credits: { enabled: false },
+        legend: { enabled: false },
+        series: series
     });
 }
 
