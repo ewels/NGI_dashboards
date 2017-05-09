@@ -39,6 +39,7 @@ def update_kpi(couch_user, password, couch_server):
         projects_db = couch["projects"]
         worksets_db = couch["worksets"]
         kpi_db = couch["kpi"]
+        bioinfo_db = couch["bioinfo_analysis"]
     else:
         raise IOError("Cannot connect to couchdb")
 
@@ -46,6 +47,8 @@ def update_kpi(couch_user, password, couch_server):
     p_samples = projects_db.view('project/samples')
     p_dates = projects_db.view('project/summary_dates', group_level=1)
     w_proj = worksets_db.view('project/ws_proj')
+    #TODO bioinfo
+    #b_samples = bioinfo_db.view('latest_data/project_id')
 
     kpis = {}
     kpis["s_initqc"] = SuccessInitialQC()
@@ -66,10 +69,14 @@ def update_kpi(couch_user, password, couch_server):
     kpis["t_initqc"] = TaTInitialQC()
     kpis["t_libproj"] = TaTLibprepProj()
     kpis["t_finproj"] = TaTFinlibProj()
+    kpis["t_seq"] = TaTSequencing()
+    kpis["t_bioinfo"] = TaTBioinformatics()
     kpis["t_libprep_90th"] = TaTLibprep_90th()
     kpis["t_initqc_90th"] = TaTInitialQC_90th()
     kpis["t_libproj_90th"] = TaTLibprepProj_90th()
     kpis["t_finproj_90th"] = TaTFinlibProj_90th()
+    kpis["t_seq_90th"] = TaTSequencing_90th()
+    kpis["t_bioinfo_90th"] = TaTBioinfo_90th()
     
     logging.info("Generating KPIs")
     for proj_key, doc in ProjectViewsIter(p_summary, p_samples, p_dates, w_proj):
@@ -120,10 +127,14 @@ def update_kpi(couch_user, password, couch_server):
             "initial_qc": kpis["t_initqc"].summary(),
             "finished_library_project": kpis["t_finproj"].summary(),
             "library_prep_project": kpis["t_libproj"].summary(),
+            "bioinformatics": kpis["t_bioinfo"].summary(),
+            "sequencing": kpis["t_seq"].summary(),
             "library_prep_90th": kpis["t_libprep_90th"].summary(),
             "initial_qc_90th": kpis["t_initqc_90th"].summary(),
             "finished_library_project_90th": kpis["t_finproj_90th"].summary(),
-            "library_prep_project_90th": kpis["t_libproj_90th"].summary()
+            "library_prep_project_90th": kpis["t_libproj_90th"].summary(),
+            "bioinformatics_90th": kpis["t_bioinfo_90th"].summary(),
+            "sequencing_90th": kpis["t_seq_90th"].summary()
             
     }
     out["projects"] = {
@@ -137,7 +148,6 @@ def update_kpi(couch_user, password, couch_server):
             "library_prep": kpis["p_libprep"].summary()
     }
     kpi_db.create(out)
-
 
 if __name__ == '__main__':
     try:
