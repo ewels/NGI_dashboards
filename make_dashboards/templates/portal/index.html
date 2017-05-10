@@ -66,20 +66,11 @@
   <div class="plots_content">
     <div class="row">
       <div class="col-sm-6">
-        <div id="delivery_time_histograms" class="external_plot" style="min-height: 500px;"></div>
+        <div id="delivery_time_histograms" class="external_plot"></div>
       </div>
       <div class="col-sm-6">
         <div id="delivery_times_plot" class="external_plot"></div>
         <div id="finished_lib_median_tat" class="external_plot"></div>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="col-sm-6">
-        <div id="throughput_plot" class="external_plot"></div>
-      </div>
-      <div class="col-sm-6">
-        <div id="affiliations_plot" class="external_plot"></div>
       </div>
     </div>
 
@@ -93,8 +84,17 @@
     </div>
 
     <div class="row">
+      <div class="col-sm-12">
+        <div id="throughput_plot" class="external_plot"></div>
+      </div>
+    </div>
+
+    <div class="row">
       <div class="col-sm-6">
         <div id="open_projects_plot" class="external_plot"></div>
+      </div>
+      <div class="col-sm-6">
+        <div id="affiliations_plot" class="external_plot"></div>
       </div>
     </div>
   </div>
@@ -121,7 +121,6 @@ var deliverytimes_data = {{ dt_data }};
 // Javascript for the NGI Stockholm Internal Dashboard
 
 var plot_height = 415;
-throughput_weeks = 12;
 $(function () {
 
     try {
@@ -200,8 +199,7 @@ function plot_everything(year){
         make_affiliations_plot(year);
 
         // Throughput plot
-        make_throughput_plot(year, throughput_weeks);
-        throughput_weeks = 52; // defaults to 12 for first plot
+        make_throughput_plot(year, 52);
 
     } catch(err){
         $('.plots_content').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Apologies, there was an error whilst loading this data.</strong> Please try again soon.</p></div>');
@@ -499,14 +497,14 @@ function make_throughput_plot(year, num_weeks){
         });
     }
     // Subtitle text
-    var bp_per_day = total_count / (num_weeks * 7);
+    var bp_per_day = total_count / (weeks.length * 7);
     var minutes_per_genome = 3236336281 / (bp_per_day / (24*60));
-    var subtitle_text = 'Average for '+num_weeks+' weeks: '+parseInt(bp_per_day/1000000000)+' Gbp per day <br>(1 Human genome equivalent every '+minutes_per_genome.toFixed(2)+' minutes)';
+    var subtitle_text = 'Average for '+weeks.length+' weeks: '+parseInt(bp_per_day/1000000000)+' Gbp per day <br>(1 Human genome equivalent every '+minutes_per_genome.toFixed(2)+' minutes)';
 
     $('#throughput_plot').highcharts({
         chart: {
             plotBackgroundColor: null,
-            height: plot_height,
+            height: plot_height * 0.8,
             type: 'area'
         },
         title: {
@@ -564,7 +562,7 @@ function make_throughput_plot(year, num_weeks){
             layout: 'vertical',
             align: 'left',
             verticalAlign: 'top',
-            y: 80,
+            y: 0,
             x: 90,
             itemStyle: { 'font-weight': 'normal' },
             borderWidth: 1,
@@ -688,8 +686,6 @@ function delivery_times_histograms(year){
             yAxis: yaxes.length - 1
         });
     }
-    console.log(yaxes);
-    console.log(series);
     var axes_height = 80/yaxes.length;
     var gap = 20/(yaxes.length-1);
     for(i=0; i<yaxes.length; i++){
@@ -701,6 +697,11 @@ function delivery_times_histograms(year){
         yaxes[i]['gridLineWidth'] = 0;
         yaxes[i]['offset'] = 0;
         yaxes[i]['lineWidth'] = 1;
+        yaxes[i]['tickWidth'] = 1;
+        yaxes[i]['tickLength'] = 5;
+        yaxes[i]['minorGridLineWidth'] = 0;
+        yaxes[i]['minorTickInterval'] = 2;
+        yaxes[i]['minorTickWidth'] = 1;
         yaxes[i]['title']['rotation'] = 0;
         yaxes[i]['title']['margin'] = 30;
         yaxes[i]['title']['style'] = { wordWrap:'break-word', width : "80px" };
@@ -708,7 +709,8 @@ function delivery_times_histograms(year){
     // Make plot
     $('#delivery_time_histograms').highcharts({
         chart: {
-            type: 'area'
+            type: 'area',
+            height: plot_height
         },
         title: {
             text: 'Turnaround Time by Application',
