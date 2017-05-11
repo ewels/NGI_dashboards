@@ -66,6 +66,22 @@ class ProjectViewsIter:
 
         return (self.proj_key, self.value)
 
+def sequencing_success(num_days=30):
+    start_date = datetime.now() - timedelta(days=num_days)
+    flowcells = lims.get_containers(type=["Patterned Flow Cell", "Illumina Flow Cell", "MiSeq Reagent Cartridge"], 
+            last_modified=start_date.strftime("%Y-%m-%dT00:00:00Z"))
+    finished_lanes = 0.0
+    passed_lanes = 0.0
+    for fc in flowcells:
+        fc_arts = lims.get_artifacts(containername=fc.name)
+        for art in fc_arts:
+            if art.qc_flag != "UNKNOWN":
+                finished_lanes += 1
+                if art.qc_flag == "PASSED":
+                    passed_lanes += 1
+
+    return round(passed_lanes / finished_lanes,2)
+
 
 def estimate_lanes_per_artifact(art):
     lanes=0
