@@ -5,7 +5,7 @@ import os
 import logging
 from couchdb import Server
 from datetime import datetime
-from kpiupdater import ProjectViewsIter, sequencing_load
+from kpiupdater import ProjectViewsIter, sequencing_load, sequencing_success
 from kpiupdater.kpi import *
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -120,7 +120,8 @@ def update_kpi(couch_user, password, couch_server):
     }
     out["success_rate"] = {
             "initial_qc": kpis["s_initqc"].summary(),
-            "library_prep": kpis["s_libprep"].summary()
+            "library_prep": kpis["s_libprep"].summary(),
+            "sequencing": sequencing_success()
     }
     out["turnaround_times"] = {
             "library_prep": kpis["t_libprep"].summary(),
