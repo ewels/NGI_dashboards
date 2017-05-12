@@ -37,16 +37,16 @@ $(function () {
         // Projects plot
         var years = Object.keys(data['num_projects']).sort().reverse();
         var ydata = data['num_projects'][years[0]];
-        make_bar_plot('#num_projects_plot', ydata, '# Projects in '+years[0]);
+        make_bar_plot('#num_projects_plot', ydata, 'Projects in '+years[0], 'Number of Projects');
 
         // Samples plot
         var years = Object.keys(data['num_samples']).sort().reverse();
         var ydata = data['num_samples'][years[0]];
-        make_bar_plot('#num_samples_plot', ydata, '# Samples in '+years[0]);
+        make_bar_plot('#num_samples_plot', ydata, 'Samples in '+years[0], 'Number of Samples');
 
         // Open Projects plot
         var ydata = data['open_projects'];
-        make_bar_plot('#open_projects_plot', ydata, '# Open Projects ');
+        make_bar_plot('#open_projects_plot', ydata, 'Open Projects ', 'Number of Projects');
 
         // Delivery times plot
         make_delivery_times_plot();
@@ -71,11 +71,12 @@ $(function () {
 
 
 // Make a bar plot
-function make_bar_plot(target, ydata, title){
+function make_bar_plot(target, ydata, title, axisTitle){
     try {
         if(target === undefined){ throw 'Target missing'; }
         if(ydata === undefined){ throw 'Data missing'; }
         if(title === undefined){ title = null; }
+        if(axisTitle === undefined){ axisTitle = null; }
 
         var cats = Object.keys(ydata).sort(function(a,b){return ydata[a]-ydata[b]}).reverse();
         var sorted_ydata = Array();
@@ -111,7 +112,7 @@ function make_bar_plot(target, ydata, title){
             },
             yAxis: {
                 min: 0,
-                title: { text: null }
+                title: { text: axisTitle }
             },
             legend: { enabled: false },
             plotOptions: {
@@ -150,7 +151,7 @@ function make_delivery_times_plot(){
             style: { 'font-size': '24px' }
         },
         subtitle: {
-            text: 'Projects started '+d.getFullYear()
+            text: 'Projects started in '+d.getFullYear()
         },
         credits: { enabled: false },
         tooltip: {
@@ -241,7 +242,7 @@ function make_finished_lib_median_plot(){
             tickPositions: [ 0, 1, 2, 3, 4, 5 ],
             gridLineWidth: 0,
             plotBands: [{
-                color: '#8AD88B',
+                color: '#87BA7D',
                 from: 0,
                 to: 3
             },{
