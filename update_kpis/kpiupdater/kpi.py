@@ -28,6 +28,42 @@ def _is_ongoing(doc):
         return False
 
 
+def _agregate_status(statuses):
+        """
+        From https://github.com/SciLifeLab/genomics-status/blob/38e1b946b40cc4b25ff75621f4aa9ff63e0e7bb9/status/bioinfo_analysis.py#L195
+        Helper function, agregates status from the lower levels
+        """
+
+        # my guess here agregation is already done from flowcell status
+        # so this condition will most probably always be true
+        if len(set(statuses)) == 1:
+            status = statuses[0]
+        elif 'Sequencing' in statuses:
+            status = 'Sequencing'
+        elif 'Demultiplexing' in statuses:
+            status = 'Demulitplexing'
+        elif 'Transferring' in statuses:
+            status = 'Transferring'
+        elif 'New' in statuses:
+            status = 'New'
+        elif 'QC-ongoing' in statuses:
+            status = 'QC-ongoing'
+        elif 'QC-done' in statuses:
+            status = 'QC-done'
+        elif 'BP-ongoing' in statuses:
+            status = 'BP-ongoing'
+        elif 'BP-done' in statuses:
+            status = 'BP-done'
+        elif 'Failed' in statuses:
+            status = 'Failed'
+        elif 'Delivered' in statuses:
+            status = 'Delivered'
+        else:
+            pass
+            # unknown status, if happens it will fail
+        return status # may fail here, if somebody defined a new status without updating this function
+
+
 class KPIBase(object):
 
     def __init__(self):
@@ -105,8 +141,44 @@ class SuccessLibraryPrep(KPIBase):
                         self.prep_passed += 1.0
 
     def summary(self):
-        return round(self.prep_passed / self.prep_finished, 2)
+        if self.prep_finished > 0:
+            return round(self.prep_passed / self.prep_finished, 2)
+        else:
+            return None
 
+class SuccessBioinfo(KPIBase):
+    """
+    Definition: Samples passed in final report/total samples
+    Approximation Passed run-lane-samples passed / total run-lane-samples
+    """
+    def __init__(self):
+        super(SuccessBioinfo, self).__init__()
+        self.failed = 0.0
+        self.total = 0.0
+
+    def __call__(self, doc):
+        details = doc.get("details",{})
+        ptype = details.get("type", "")
+        for sample, run_lane in doc.get("bioinfo", []):
+            if sample.get("sample_status","") == "Delivered" and ptype == "Production":
+                deliver_date = datetime.strptime(sample["datadelivered"], "%Y-%m-%d")
+                if deliver_date > self.start_date:
+                    self.total += 1.0
+                    isfail = False
+                    for key, value in sample.get("qc", {}).items():
+                        if value == "Fail":
+                            isfail = True
+                    for key, value in sample.get("bp", {}).items():
+                        if value == "Fail":
+                            isfail = True
+                    if isfail:
+                        self.failed += 1.0
+
+    def summary(self):
+        if self.total > 0:
+            return round(1-(self.failed / self.total),2)
+        else:
+            return None
 
 ### Projects
 
@@ -301,6 +373,56 @@ class LoadLibraryPrep(ProcessLoadBase):
 
             self.state += sum(osamples.values())
 
+class LoadBioinfoQueue(ProcessLoadBase):
+    """
+    Definition: total number of lanes with lane QC, but no action in bioinformatic checklist
+    Approximation: # project-run-lanes with status `Demultiplexing`, `New` or `Transferring`
+    """
+
+    def __call__(self, doc):
+        super(LoadBioinfoQueue, self).__call__(doc)
+        run_lanes = {}
+        ongoing = 0
+        if _is_ongoing(doc) and self.ptype == "Production":
+            for sample, run_lane in doc.get("bioinfo", []):
+                status = sample.get(u'sample_status', None)
+                if run_lane in run_lanes.keys():
+                    run_lanes[run_lane].append(status)
+                else:
+                    run_lanes[run_lane] = [status]
+
+            for run_lane, statuses in run_lanes.items():
+                lane_status =  _agregate_status(statuses)
+                if lane_status in [u'Demultiplexing', u'New', u'Transferring']:
+                    ongoing += 1
+
+        self.state += ongoing
+
+
+class LoadBioinfo(ProcessLoadBase):
+    """
+    Definition: Total number of lanes with an action taken in bioinformatic checklist, in projects without close date.
+    Approximation: # project-run-lanes with status `BP-ongoing`, `BP-done`, `QC-ongoing`, `QC-done`
+    """
+
+    def __call__(self, doc):
+        super(LoadBioinfo, self).__call__(doc)
+        run_lanes = {}
+        ongoing = 0
+        if _is_ongoing(doc) and self.ptype == "Production":
+            for sample, run_lane in doc.get("bioinfo", []):
+                status = sample.get(u'sample_status', None)
+                if run_lane in run_lanes.keys():
+                    run_lanes[run_lane].append(status)
+                else:
+                    run_lanes[run_lane] = [status]
+
+            for run_lane, statuses in run_lanes.items():
+                lane_status =  _agregate_status(statuses)
+                if lane_status in [u'BP-ongoing', u'BP-done', u'QC-ongoing', u'QC-done']:
+                    ongoing += 1
+
+        self.state += ongoing
 
 ### Turn-around times
 

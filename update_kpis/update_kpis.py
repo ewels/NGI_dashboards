@@ -47,12 +47,12 @@ def update_kpi(couch_user, password, couch_server):
     p_samples = projects_db.view('project/samples')
     p_dates = projects_db.view('project/summary_dates', group_level=1)
     w_proj = worksets_db.view('project/ws_proj')
-    #TODO bioinfo
-    #b_samples = bioinfo_db.view('latest_data/project_id')
+    b_samples = bioinfo_db.view('genomics_dashboard/run_lane_sample_status')
 
     kpis = {}
     kpis["s_initqc"] = SuccessInitialQC()
     kpis["s_libprep"] = SuccessLibraryPrep()
+    kpis["s_bioinfo"] = SuccessBioinfo()
     kpis["p_finlib"] = ProjectsFinishedLib()
     kpis["p_libprep"] = ProjectsLibraryPrep()
     kpis["p_inprod"] = ProjectsInProduction()
@@ -65,6 +65,8 @@ def update_kpi(couch_user, password, couch_server):
     kpis["pl_rclanes"] = LoadInitialQCLanes()
     kpis["pl_libprepq"] = LoadLibraryPrepQueue()
     kpis["pl_libprep"] = LoadLibraryPrep()
+    kpis["pl_bioinfoq"] = LoadBioinfoQueue()
+    kpis["pl_bioinfo"] = LoadBioinfo()
     kpis["t_libprep"] = TaTLibprep()
     kpis["t_initqc"] = TaTInitialQC()
     kpis["t_libproj"] = TaTLibprepProj()
@@ -79,7 +81,7 @@ def update_kpi(couch_user, password, couch_server):
     kpis["t_bioinfo_90th"] = TaTBioinfo_90th()
     
     logging.info("Generating KPIs")
-    for proj_key, doc in ProjectViewsIter(p_summary, p_samples, p_dates, w_proj):
+    for proj_key, doc in ProjectViewsIter(p_summary, p_samples, p_dates, w_proj, b_samples):
         logging.debug("Processing project: {}".format(proj_key))
         for kpiobj in kpis.values():
             try:
@@ -105,6 +107,8 @@ def update_kpi(couch_user, password, couch_server):
             "initial_qc_lanes": kpis["pl_rclanes"].summary(),
             "library_prep": kpis["pl_libprep"].summary(),
             "library_prep_queue": kpis["pl_libprepq"].summary(),
+            "bioinformatics_queue": kpis["pl_bioinfoq"].summary(),
+            "bioinformatics": kpis["pl_bioinfo"].summary(),
             "miseq_pooling_queue": pl_seq[0],
             "miseq_sequencing_queue_p": pl_seq[1],
             "miseq_sequencing_queue_l": pl_seq[2],
@@ -121,7 +125,8 @@ def update_kpi(couch_user, password, couch_server):
     out["success_rate"] = {
             "initial_qc": kpis["s_initqc"].summary(),
             "library_prep": kpis["s_libprep"].summary(),
-            "sequencing": sequencing_success()
+            "sequencing": sequencing_success(),
+            "bioinformatics": kpis["s_bioinfo"].summary()
     }
     out["turnaround_times"] = {
             "library_prep": kpis["t_libprep"].summary(),
@@ -149,6 +154,7 @@ def update_kpi(couch_user, password, couch_server):
             "library_prep": kpis["p_libprep"].summary()
     }
     kpi_db.create(out)
+    #print out
 
 if __name__ == '__main__':
     try:
