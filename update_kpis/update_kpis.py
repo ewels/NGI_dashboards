@@ -154,7 +154,6 @@ def update_kpi(couch_user, password, couch_server):
             "library_prep": kpis["p_libprep"].summary()
     }
     kpi_db.create(out)
-    #print out
 
 if __name__ == '__main__':
     try:
