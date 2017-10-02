@@ -3,10 +3,11 @@ P0001:
     close_date: "2016-01-20"
     details:
         queued: "2016-01-12"
+        all_samples_sequenced: "2016-01-18"
         type: "Production"
         sample_type: "Finished Library"
     project_dates:
-        sequencing_start_date: "2016-01-15"
+        sequencing_start_date: "2016-01-15" 
 P0002:
     open_date: "2016-01-10"
     close_date: "2016-01-20"

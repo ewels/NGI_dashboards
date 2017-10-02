@@ -90,13 +90,20 @@ class TestSuccessKPI(unittest.TestCase):
         self.assertIsInstance(s_initqc.summary(), float)
 
     def test_libraryprep(self):
-        s_libprep =  SuccessLibraryPrep()
+        s_libprep = SuccessLibraryPrep()
         s_libprep.start_date = datetime(2016, 1, 1, 0, 0)
         for doc in self.p_iter:
             s_libprep(doc)
         self.assertEqual(3.0, s_libprep.prep_finished)
         self.assertEqual(2.0, s_libprep.prep_passed)
         self.assertIsInstance(s_libprep.summary(), float)
+
+    def test_bioinfo(self):
+        s_bioinfo = SuccessBioinfo()
+        s_bioinfo.start_date = datetime(2016, 1, 1, 0, 0)
+        for doc in self.p_iter:
+            s_bioinfo(doc)
+        self.assertEqual(0.5, s_bioinfo.summary())
 
 
 class TestProcessLoad(unittest.TestCase):
@@ -129,6 +136,18 @@ class TestProcessLoad(unittest.TestCase):
         for doc in self.p_iter:
             pl_libprep(doc)
         self.assertEqual(1, pl_libprep.summary())
+
+    def test_bioinfo_lanes(self):
+        pl_bioinfo = LoadBioinfo()
+        for doc in self.p_iter:
+            pl_bioinfo(doc)
+        self.assertEqual(1, pl_bioinfo.summary())
+
+    def test_bioinfo_queue(self):
+        pl_bioinfoq = LoadBioinfoQueue()
+        for doc in self.p_iter:
+            pl_bioinfoq(doc)
+        self.assertEqual(1, pl_bioinfoq.summary())
 
 
 class TestTurnAroundTimes(unittest.TestCase):
@@ -166,6 +185,14 @@ class TestTurnAroundTimes(unittest.TestCase):
         self.assertEqual([2], tat_libprep.state)
         self.assertIsInstance(tat_libprep.summary(), float)
         self.assertIsInstance(tat_libprep_90th.summary(), float)
+
+    def test_bioinfo(self):
+        tat_bioinfo = TaTBioinformatics()
+        tat_bioinfo.start_date = self.start_date
+        for doc in self.p_iter:
+            tat_bioinfo(doc)
+        self.assertEqual([2], tat_bioinfo.state)
+        self.assertIsInstance(tat_bioinfo.summary(), float)
 
     def test_libprep_project(self):
         tat_libprep_proj = TaTLibprepProj()
