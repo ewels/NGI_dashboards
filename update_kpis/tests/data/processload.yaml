@@ -33,6 +33,9 @@ P0001:
                     sequencing: "some_object"
                 P0001_103:
                     library_status: "FAILED"
+    bioinfo:
+        - !!python/tuple [{user: "taca", sample_status: "Demultiplexing"}, 170925_D12345_001_ABCD_1]
+        - !!python/tuple [{qc: {basesq30: "Pass", fastq_screen: "Fail"}, sample_status: "QC-ongoing", user: "Frank Grimes"}, 170925_D12345_001_ABCD_2]
 P0002:
     open_date: "2015-12-12"
     no_samples: 2

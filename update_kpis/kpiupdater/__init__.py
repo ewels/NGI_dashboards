@@ -19,10 +19,11 @@ class ProjectViewsIter:
             ...,
             project_dates:      projectsDB/project/summary_dates[summary.key],
             project_samples:    projectsDB/project/samples[summary.key],
-            worksets:           worksetsDB/project/ws_proj[summary.key]
+            worksets:           worksetsDB/project/ws_proj[summary.key],
+            bioinfo_lanes       Bioinfo_analysisDB/genomics-dashboard/project_status_counts[summary.key]
         }
     """
-    def __init__(self, project_summary, project_samples, project_dates, worksets_proj, ofptype=None):
+    def __init__(self, project_summary, project_samples, project_dates, worksets_proj, bioinfo_samples, ofptype=None):
         self.proj_key = None
         self.value = None
         self.ofptype = ofptype
@@ -30,6 +31,7 @@ class ProjectViewsIter:
         self.project_samples = project_samples
         self.project_dates = project_dates
         self.worksets_proj = worksets_proj
+        self.bioinfo_samples = bioinfo_samples
 
     def __iter__(self):
         return self
@@ -61,6 +63,13 @@ class ProjectViewsIter:
             self.value["worksets"] = {}
             for row in self.worksets_proj[self.proj_key].rows:
                 self.value["worksets"].update(row.value)
+        except:
+            pass
+
+        try:
+            self.value["bioinfo"] = []
+            for row in self.bioinfo_samples[[self.proj_key]:[self.proj_key, u'\ufff0']].rows:
+                self.value["bioinfo"].append((row["value"], row.key[1]))
         except:
             pass
 
