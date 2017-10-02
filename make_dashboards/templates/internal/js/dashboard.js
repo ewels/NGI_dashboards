@@ -290,7 +290,6 @@ function make_balance_plot(target, aim, now, prev, subtext){
         }else{
             my_plotlines = Array();
             chroma_colors = chroma.scale(['#AF2323','#259F0B','#4c85cc']).colors(now.length);
-            pl = [];
             for (i in now){
                 my_plotlines.push({
                     name:'serie'+i,
