@@ -3,6 +3,8 @@
 This code is for use in monitoring key performance indicators (KPIs)
 at the SciLifeLab National Genomics Infrastructure in Stockholm, Sweden.
 
+See the [documentation](http://ngi-dashboards.readthedocs.io/en/latest/) for a little more information.
+
 ### Method Outline
 
 1. A script polls `statusdb` for a range of KPI statistics.
