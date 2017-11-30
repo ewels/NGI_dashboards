@@ -171,7 +171,7 @@ $(function () {
 
         // Open Projects plot
         var ydata = data['open_projects'];
-        make_bar_plot('#open_projects_plot', ydata, '# Currently Open Projects ');
+        make_bar_plot('#open_projects_plot', ydata, 'Currently Open Projects', 'Number of Projects');
 
     } catch(err){
         $('.plots_content').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Apologies, there was an error whilst loading this data.</strong> Please try again soon.</p></div>');
@@ -260,11 +260,12 @@ function plot_everything(year){
 
 
 // Make a bar plot
-function make_bar_plot(target, ydata, title){
+function make_bar_plot(target, ydata, title, yAxis_title){
     try {
         if(target === undefined){ throw 'Target missing'; }
         if(ydata === undefined){ throw 'Data missing'; }
         if(title === undefined){ title = null; }
+        if(yAxis_title === undefined){ yAxis_title = null; }
 
         var cats = Object.keys(ydata).sort(function(a,b){return ydata[a]-ydata[b]}).reverse();
         var sorted_ydata = Array();
@@ -300,7 +301,7 @@ function make_bar_plot(target, ydata, title){
             },
             yAxis: {
                 min: 0,
-                title: { text: null }
+                title: { text: yAxis_title }
             },
             legend: { enabled: false },
             plotOptions: {
@@ -338,7 +339,7 @@ function make_delivery_times_plot(year){
             style: { 'font-size': '24px' }
         },
         subtitle: {
-            text: 'Projects started '+year
+            text: 'Projects started in '+year
         },
         credits: { enabled: false },
         tooltip: {
@@ -430,7 +431,7 @@ function make_finished_lib_median_plot(year){
             tickPositions: [ 0, 1, 2, 3, 4, 5 ],
             gridLineWidth: 0,
             plotBands: [{
-                color: '#8AD88B',
+                color: '#87BA7D',
                 from: 0,
                 to: 3
             },{
@@ -748,6 +749,7 @@ function delivery_times_histograms(year){
         yaxes[i]['allowDecimals'] = false;
         yaxes[i]['gridLineWidth'] = 0;
         yaxes[i]['offset'] = 0;
+        yaxes[i]['plotLines'] = [{ color: '#CAD8E9', width: 1, value: 0 }];
         yaxes[i]['lineWidth'] = 1;
         yaxes[i]['tickWidth'] = 1;
         yaxes[i]['tickLength'] = 5;
@@ -765,14 +767,14 @@ function delivery_times_histograms(year){
             height: plot_height
         },
         title: {
-            text: 'Turnaround Time by Application',
+            text: 'Turnaround Times in '+year,
             style: { 'font-size': '24px' }
         },
         subtitle: {
-            text: 'Samples passed QC > Data Delivered.<br>Showing projects started in '+year,
+            text: 'Projects started in '+year,
         },
         xAxis: {
-            title: { text: '# Weeks' },
+            title: { text: 'Number of Weeks' },
             min: 0,
             allowDecimals: false
         },
