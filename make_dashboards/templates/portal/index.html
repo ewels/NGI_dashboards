@@ -151,7 +151,12 @@ $(function () {
         }
 
         // Populate the years dropdown
-        var years = Object.keys(data['delivery_times']).sort().reverse();
+        var get_keys = function(m) {
+          var y = m.slice(0,4);
+          return y;
+        };
+        var tmp = Object.keys(data['delivery_times']).map(get_keys);
+        var years = Array.from(new Set(tmp)).sort().reverse();
         for (var i = 0; i < years.length; i++){
             $('#show_year').append('<option>'+years[i]+'</option>');
         }
@@ -176,14 +181,58 @@ $(function () {
     }
 });
 
+function collect_year(data, year) {
+    var months = Object.keys(data).sort().reverse();
+    year_m = months.filter(function(n) {
+        return n.startsWith(year)
+    });
+    var ydata = Object();
+    for (i=0; i<year_m.length; i++) {
+        var month = data[year_m[i]];
+        var mkeys = Object.keys(data[year_m[i]]);
+        for (j=0; j<mkeys.length; j++) {
+            var mdata = data[year_m[i]][mkeys[j]];
+            if (Array.isArray(mdata)) {
+                if (ydata.hasOwnProperty(mkeys[j])) {
+                    tmp = ydata[mkeys[j]].concat(mdata);
+                    ydata[mkeys[j]] = tmp;
+                }
+                else {
+                    ydata[mkeys[j]] = mdata;
+                }
+            }
+            else {
+                if (ydata.hasOwnProperty(mkeys[j])) {
+                    ydata[mkeys[j]] += mdata;
+                }
+                else {
+                    ydata[mkeys[j]] = mdata;
+                }
+            }
+        }
+    }
+    return ydata;
+}
+
+function get_median(arr) {
+    var median;
+    arr.sort( function(a,b) {return a - b;} );
+    var half = Math.floor(arr.length/2);
+    if(arr.length % 2)
+        median = arr[half];
+    else
+        median = (arr[half-1] + arr[half]) / 2.0;
+    return median;
+}
+
 function plot_everything(year){
     try {
         // # Projects plot
-        var ydata = data['num_projects'][year];
+        var ydata = collect_year(data['num_projects'], year);
         make_bar_plot('#num_projects_plot', ydata, '# Projects in '+year);
 
         // # Samples plot
-        var ydata = data['num_samples'][year];
+        var ydata = collect_year(data['num_samples'], year);
         make_bar_plot('#num_samples_plot', ydata, '# Samples in '+year);
 
         // Delivery times plot
@@ -200,7 +249,6 @@ function plot_everything(year){
 
         // Throughput plot
         make_throughput_plot(year, 52);
-
     } catch(err){
         $('.plots_content').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Apologies, there was an error whilst loading this data.</strong> Please try again soon.</p></div>');
         console.error(err);
@@ -272,7 +320,7 @@ function make_bar_plot(target, ydata, title){
 
 
 function make_delivery_times_plot(year){
-    var ydata = data['delivery_times'][year];
+    var ydata = collect_year(data['delivery_times'], year);
     var ykeys = Object.keys(ydata).sort(function(a,b){ return a.match(/\d+/)-b.match(/\d+/) });
     var pdata = Array();
     for(i=0; i<ykeys.length; i++){ pdata.push([ykeys[i], ydata[ykeys[i]]]); }
@@ -336,7 +384,9 @@ function make_delivery_times_plot(year){
 
 
 function make_finished_lib_median_plot(year){
-    var ydata = parseFloat(data['delivery_times_median'][year]['Sequencing Only']);
+    //var ydata = parseFloat(data['delivery_times_median'][year]['Sequencing Only']);
+    var ydata = collect_year(deliverytimes_data, year)['Sequencing Only'];
+    ydata = get_median(ydata);
     $('#finished_lib_median_tat').highcharts({
         chart: {
             type: 'bar',
@@ -413,7 +463,7 @@ function make_finished_lib_median_plot(year){
 
 
 function make_affiliations_plot(year){
-    var ydata = data['project_user_affiliations'][year];
+    var ydata = collect_year(data['project_user_affiliations'], year);
     var ykeys = Object.keys(ydata).sort(function(a,b){return ydata[a]-ydata[b]}).reverse();
     var pdata = Array();
     for(i=0; i<ykeys.length; i++){
@@ -613,11 +663,13 @@ function histogram(data, step) {
 }
 
 function delivery_times_histograms(year){
-    var applications = Object.keys(deliverytimes_data[year]);
+    var ydata = collect_year(deliverytimes_data, year);
+    var applications = Object.keys(ydata);
+
     // Sort by total count
     var totals = [];
     for(var i = 0; i < applications.length; i++){
-        totals.push([applications[i], deliverytimes_data[year][applications[i]].reduce(function(a, b) { return a + b; }, 0)]);
+        totals.push([applications[i], ydata[applications[i]].reduce(function(a, b) { return a + b; }, 0)]);
     }
     totals.sort(function(a, b) {
         return b[1] - a[1];
@@ -640,9 +692,9 @@ function delivery_times_histograms(year){
     var yaxes = [], series = [], misc_applications = [], misc_app_data = [];
     for(var i = 0; i < totals.length; i++){
         var application = totals[i][0];
-        var ydata = deliverytimes_data[year][application];
+        var app_data = ydata[application];
         if(i < 3){
-            var hist = histogram(ydata, 7);
+            var hist = histogram(app_data, 7);
             yaxes.push({ title: { text: application } });
             // Histogram data
             series.push({
@@ -658,12 +710,12 @@ function delivery_times_histograms(year){
                 pointWidth: 2,
                 borderWidth: 0,
                 color: '#666',
-                data: [median_bar(ydata, hist)],
+                data: [median_bar(app_data, hist)],
                 yAxis: yaxes.length - 1
             });
         } else {
             misc_applications.push(application);
-            misc_app_data = misc_app_data.concat(ydata);
+            misc_app_data = misc_app_data.concat(app_data);
         }
     }
     if(misc_app_data.length > 0){
