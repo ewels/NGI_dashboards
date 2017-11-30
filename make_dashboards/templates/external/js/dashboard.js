@@ -35,14 +35,12 @@ $(function () {
         }
 
         // Projects plot
-        var years = Object.keys(data['num_projects']).sort().reverse();
-        var ydata = data['num_projects'][years[0]];
-        make_bar_plot('#num_projects_plot', ydata, 'Projects in '+years[0], 'Number of Projects');
+        var ydata = collect_n_months(data['num_projects'], 6);
+        make_bar_plot('#num_projects_plot', ydata, '# Projects ');
 
         // Samples plot
-        var years = Object.keys(data['num_samples']).sort().reverse();
-        var ydata = data['num_samples'][years[0]];
-        make_bar_plot('#num_samples_plot', ydata, 'Samples in '+years[0], 'Number of Samples');
+        var ydata = collect_n_months(data['num_samples'], 6);
+        make_bar_plot('#num_samples_plot', ydata, '# Samples ');
 
         // Open Projects plot
         var ydata = data['open_projects'];
@@ -69,6 +67,24 @@ $(function () {
 
 });
 
+function collect_n_months(data, n) {
+    var months = Object.keys(data).sort().reverse();
+    var ndata = Object();
+    for (i=0; i<n; i++) {
+        var month = months[i];
+        var mkeys = Object.keys(data[months[i]]);
+        for (j=0; j<mkeys.length; j++) {
+            var mdata = data[months[i]][mkeys[j]];
+            if (ndata.hasOwnProperty(mkeys[j])) {
+                ndata[mkeys[j]] += mdata;
+            }
+            else {
+                ndata[mkeys[j]] = mdata;
+            }
+        }
+    }
+    return ndata;
+}
 
 // Make a bar plot
 function make_bar_plot(target, ydata, title, axisTitle){
@@ -132,8 +148,8 @@ function make_bar_plot(target, ydata, title, axisTitle){
 
 
 function make_delivery_times_plot(){
-    var years = Object.keys(data['delivery_times']).sort().reverse();
-    var ydata = data['delivery_times'][years[0]];
+    var ydata = collect_n_months(data['delivery_times'], 6);
+    var start_month = Object.keys(data['delivery_times']).sort().reverse()[5];
     var ykeys = Object.keys(ydata).sort(function(a,b){ return a.match(/\d+/)-b.match(/\d+/) });
     var pdata = Array();
     for(i=0; i<ykeys.length; i++){ pdata.push([ykeys[i], ydata[ykeys[i]]]); }
@@ -147,11 +163,11 @@ function make_delivery_times_plot(){
             height: plot_height * 0.65,
         },
         title: {
-            text: 'Delivery Times in '+years[0],
+            text: 'Delivery Times',
             style: { 'font-size': '24px' }
         },
         subtitle: {
-            text: 'Projects started in '+d.getFullYear()
+            text: 'Projects started since '+start_month,
         },
         credits: { enabled: false },
         tooltip: {
@@ -197,8 +213,24 @@ function make_delivery_times_plot(){
 
 
 function make_finished_lib_median_plot(){
-    var years = Object.keys(data['delivery_times_median']).sort().reverse();
-    var ydata = parseFloat(data['delivery_times_median'][years[0]]['Sequencing Only']);
+    var months = Object.keys(deliverytimes_data).sort().reverse().slice(0,5).reverse();
+    var ydata = [];
+    for (i=0; i<months.length; i++) {
+        try {
+            tmp = ydata.concat(deliverytimes_data[months[i]]['Sequencing Only']);
+            ydata = tmp;
+        } catch(err) {continue;}
+    }
+
+    var median;
+    ydata.sort( function(a,b) {return a - b;} );
+    var half = Math.floor(ydata.length/2);
+    if(ydata.length % 2)
+        median = ydata[half];
+    else
+        median = (ydata[half-1] + ydata[half]) / 2.0;
+
+
     $('#finished_lib_median_tat').highcharts({
         chart: {
             type: 'bar',
@@ -224,7 +256,7 @@ function make_finished_lib_median_plot(){
             min: 0,
             max: 6,
             title: {
-                text: 'Sequencing-only projects<br>Median turn around time ('+years[0]+'): <strong>'+ydata+' days</strong>',
+                text: 'Sequencing-only projects<br>Median turn around time since ('+months[0]+'): <strong>'+median+' days</strong>',
                 y: -20,
                 style: { 'font-size': 12 }
             },
@@ -260,7 +292,7 @@ function make_finished_lib_median_plot(){
                 dataLabels: { enabled: true },
                 width: 4,
                 zIndex: 1000,
-                value: ydata/7
+                value: median/7
             }]
         }],
         title: { text: null },
@@ -275,8 +307,7 @@ function make_finished_lib_median_plot(){
 
 
 function make_affiliations_plot(){
-    var years = Object.keys(data['project_user_affiliations']).sort().reverse();
-    var ydata = data['project_user_affiliations'][years[0]];
+    var ydata = collect_n_months(data['project_user_affiliations'], 6);
     var ykeys = Object.keys(ydata).sort(function(a,b){return ydata[a]-ydata[b]}).reverse();
     var pdata = Array();
     for(i=0; i<ykeys.length; i++){
@@ -295,8 +326,11 @@ function make_affiliations_plot(){
             type:'pie'
         },
         title: {
-            text: 'Project Affiliations in '+years[0],
+            text: 'Project Affiliations',
             style: { 'font-size': '24px' }
+        },
+        subtitle: {
+            text: 'The last 6 months',
         },
         credits: { enabled: false },
         tooltip: {
