@@ -36,11 +36,13 @@ $(function () {
 
         // Projects plot
         var ydata = collect_n_months(data['num_projects'], 6);
-        make_bar_plot('#num_projects_plot', ydata, '# Projects ');
+        var start_month = Object.keys(data['num_projects']).sort().reverse()[5];
+        make_bar_plot('#num_projects_plot', ydata, '# Projects ', undefined, start_month);
 
         // Samples plot
         var ydata = collect_n_months(data['num_samples'], 6);
-        make_bar_plot('#num_samples_plot', ydata, '# Samples ');
+        var start_month = Object.keys(data['num_samples']).sort().reverse()[5];
+        make_bar_plot('#num_samples_plot', ydata, '# Samples ', undefined, start_month);
 
         // Open Projects plot
         var ydata = data['open_projects'];
@@ -87,7 +89,7 @@ function collect_n_months(data, n) {
 }
 
 // Make a bar plot
-function make_bar_plot(target, ydata, title, axisTitle){
+function make_bar_plot(target, ydata, title, axisTitle, start_month){
     try {
         if(target === undefined){ throw 'Target missing'; }
         if(ydata === undefined){ throw 'Data missing'; }
@@ -107,7 +109,10 @@ function make_bar_plot(target, ydata, title, axisTitle){
             sorted_ydata.push(ydata[cats[j]]);
             total_count += ydata[cats[j]];
         }
-
+        var subtitle = 'Total: '+total_count;
+        if (typeof start_month !== 'undefined') {
+            subtitle = 'Total since '+start_month+': '+total_count;
+        }
         $(target).highcharts({
             chart: {
                 type: 'bar',
@@ -119,7 +124,7 @@ function make_bar_plot(target, ydata, title, axisTitle){
                 style: { 'font-size': '24px' }
             },
             subtitle: {
-                text: 'Total: '+total_count
+                text: subtitle,
             },
             tooltip: { enabled: false },
             credits: { enabled: false },
@@ -308,6 +313,7 @@ function make_finished_lib_median_plot(){
 
 function make_affiliations_plot(){
     var ydata = collect_n_months(data['project_user_affiliations'], 6);
+    var start_month = Object.keys(data['project_user_affiliations']).sort().reverse()[5]
     var ykeys = Object.keys(ydata).sort(function(a,b){return ydata[a]-ydata[b]}).reverse();
     var pdata = Array();
     for(i=0; i<ykeys.length; i++){
@@ -330,7 +336,7 @@ function make_affiliations_plot(){
             style: { 'font-size': '24px' }
         },
         subtitle: {
-            text: 'The last 6 months',
+            text: 'Projects started since '+start_month,
         },
         credits: { enabled: false },
         tooltip: {
