@@ -1,5 +1,8 @@
 // Javascript for the NGI Stockholm Internal Dashboard
 var plot_height = 415;
+var num_months = 6;
+var start_date = moment().subtract(num_months, 'months').format('YYYY-MM');
+
 $(function () {
 
     try {
@@ -35,12 +38,12 @@ $(function () {
         }
 
         // Projects plot
-        var ydata = collect_n_months(data['num_projects'], 6);
-        make_bar_plot('#num_projects_plot', ydata, '# Projects ');
+        var ydata = collect_n_months(data['num_projects'], num_months, start_date);
+        make_bar_plot('#num_projects_plot', ydata, '# Projects ', undefined, start_date);
 
         // Samples plot
-        var ydata = collect_n_months(data['num_samples'], 6);
-        make_bar_plot('#num_samples_plot', ydata, '# Samples ');
+        var ydata = collect_n_months(data['num_samples'], num_months, start_date);
+        make_bar_plot('#num_samples_plot', ydata, '# Samples ', undefined, start_date);
 
         // Open Projects plot
         var ydata = data['open_projects'];
@@ -67,7 +70,7 @@ $(function () {
 
 });
 
-function collect_n_months(data, n) {
+function collect_n_months(data, n, start_key) {
     var months = Object.keys(data).sort().reverse();
     var ndata = Object();
     for (i=0; i<n; i++) {
@@ -82,12 +85,16 @@ function collect_n_months(data, n) {
                 ndata[mkeys[j]] = mdata;
             }
         }
+        if (typeof start_key !== 'undefined' && month == start_key) {
+            break;
+        }
+
     }
     return ndata;
 }
 
 // Make a bar plot
-function make_bar_plot(target, ydata, title, axisTitle){
+function make_bar_plot(target, ydata, title, axisTitle, start_month){
     try {
         if(target === undefined){ throw 'Target missing'; }
         if(ydata === undefined){ throw 'Data missing'; }
@@ -107,7 +114,10 @@ function make_bar_plot(target, ydata, title, axisTitle){
             sorted_ydata.push(ydata[cats[j]]);
             total_count += ydata[cats[j]];
         }
-
+        var subtitle = 'Total: '+total_count;
+        if (typeof start_month !== 'undefined') {
+            subtitle = 'Total since '+start_month+': '+total_count;
+        }
         $(target).highcharts({
             chart: {
                 type: 'bar',
@@ -119,7 +129,7 @@ function make_bar_plot(target, ydata, title, axisTitle){
                 style: { 'font-size': '24px' }
             },
             subtitle: {
-                text: 'Total: '+total_count
+                text: subtitle,
             },
             tooltip: { enabled: false },
             credits: { enabled: false },
@@ -148,8 +158,7 @@ function make_bar_plot(target, ydata, title, axisTitle){
 
 
 function make_delivery_times_plot(){
-    var ydata = collect_n_months(data['delivery_times'], 6);
-    var start_month = Object.keys(data['delivery_times']).sort().reverse()[5];
+    var ydata = collect_n_months(data['delivery_times'], num_months, start_date);
     var ykeys = Object.keys(ydata).sort(function(a,b){ return a.match(/\d+/)-b.match(/\d+/) });
     var pdata = Array();
     for(i=0; i<ykeys.length; i++){ pdata.push([ykeys[i], ydata[ykeys[i]]]); }
@@ -167,7 +176,7 @@ function make_delivery_times_plot(){
             style: { 'font-size': '24px' }
         },
         subtitle: {
-            text: 'Projects started since '+start_month,
+            text: 'Projects started since '+start_date,
         },
         credits: { enabled: false },
         tooltip: {
@@ -307,7 +316,7 @@ function make_finished_lib_median_plot(){
 
 
 function make_affiliations_plot(){
-    var ydata = collect_n_months(data['project_user_affiliations'], 6);
+    var ydata = collect_n_months(data['project_user_affiliations'], num_months, start_date);
     var ykeys = Object.keys(ydata).sort(function(a,b){return ydata[a]-ydata[b]}).reverse();
     var pdata = Array();
     for(i=0; i<ykeys.length; i++){
@@ -330,7 +339,7 @@ function make_affiliations_plot(){
             style: { 'font-size': '24px' }
         },
         subtitle: {
-            text: 'The last 6 months',
+            text: 'Projects started since '+start_date,
         },
         credits: { enabled: false },
         tooltip: {
