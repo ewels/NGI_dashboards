@@ -265,7 +265,7 @@ function make_finished_lib_median_plot(){
             min: 0,
             max: 6,
             title: {
-                text: 'Sequencing-only projects<br>Median turn around time since ('+months[0]+'): <strong>'+median+' days</strong>',
+                text: 'Median turn around time for <br> sequencing-ready libraries (since '+months[0]+'): <strong>'+median+' days</strong>',
                 y: -20,
                 style: { 'font-size': 12 }
             },
@@ -490,4 +490,3 @@ function updateClock(){
     $('#report_age').text( moment().from(updated, true) );
     setTimeout(updateClock, 1000);
 }
-
