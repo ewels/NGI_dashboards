@@ -176,7 +176,7 @@ function make_delivery_times_plot(){
             style: { 'font-size': '24px' }
         },
         subtitle: {
-            text: 'Projects started since '+start_date,
+            text: 'Measured from sample QC pass to data delivery dates <br/>for projects started since '+start_date,
         },
         credits: { enabled: false },
         tooltip: {
