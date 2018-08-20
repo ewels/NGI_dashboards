@@ -39,15 +39,23 @@ $(function () {
 
         // Projects plot
         var ydata = collect_n_months(data['num_projects'], num_months, start_date);
-        make_bar_plot('#num_projects_plot', ydata, '# Projects ', undefined, start_date);
+        var ydata_seq = collect_n_months(data['num_seq_projects'], num_months, start_date);
+        var open_projs = Object.keys(data['open_projects']).map(function(a){return data['open_projects'][a]}).reduce(function(a,b){return a+b});
+        var all_projs = Object.keys(ydata).map(function(a){return ydata[a]}).reduce(function(a,b){return a+b}) +
+             Object.keys(ydata_seq).map(function(a){return ydata_seq[a]}).reduce(function(a,b){return a+b});
+        var subtitle = all_projs+' since '+start_date+', '+open_projs+' currently open'; 
+        make_bar_plot('#num_projects_plot', '# Projects ', undefined, subtitle, true, {'Library prep': ydata, 'Sequencing only': ydata_seq});
 
         // Samples plot
         var ydata = collect_n_months(data['num_samples'], num_months, start_date);
-        make_bar_plot('#num_samples_plot', ydata, '# Samples ', undefined, start_date);
+        var ydata_seq = collect_n_months(data['num_seq_samples'], num_months, start_date);
+        var all_samples = Object.keys(ydata).map(function(a){return ydata[a]}).reduce(function(a,b){return a+b}) +
+             Object.keys(ydata_seq).map(function(a){return ydata_seq[a]}).reduce(function(a,b){return a+b});
+        var subtitle = all_samples+' since '+start_date; 
+        make_bar_plot('#num_samples_plot', '# Samples ', undefined, subtitle, true, {'Library prep': ydata, 'Sequencing only': ydata_seq});
 
-        // Open Projects plot
-        var ydata = data['open_projects'];
-        make_bar_plot('#open_projects_plot', ydata, 'Open Projects ', 'Number of Projects');
+        // Species plot
+        //make_species_plot('#species_plot');
 
         // Delivery times plot
         make_delivery_times_plot();
@@ -93,32 +101,43 @@ function collect_n_months(data, n, start_key) {
     return ndata;
 }
 
+function make_species_plot(target) {
+    try {
+        throw 'Placeholder';
+    } catch(err) {
+        $(target).addClass('coming_soon').text('coming soon');
+        console.log(err);
+    }
+
+}
+
 // Make a bar plot
-function make_bar_plot(target, ydata, title, axisTitle, start_month){
+function make_bar_plot(target, title, axisTitle, subtitle ,enableLegend, ydata){
     try {
         if(target === undefined){ throw 'Target missing'; }
         if(ydata === undefined){ throw 'Data missing'; }
         if(title === undefined){ title = null; }
         if(axisTitle === undefined){ axisTitle = null; }
 
-        var cats = Object.keys(ydata).sort(function(a,b){return ydata[a]-ydata[b]}).reverse();
-        var sorted_ydata = Array();
-        var nice_cats = Array();
+        var iseries = [];
         var total_count = 0;
-        for(j=0; j<cats.length; j++){
-            if(data['key_names'][cats[j]] == undefined){
-                nice_cats.push(cats[j]);
-            } else {
-                nice_cats.push(data['key_names'][cats[j]]);
+        var set_cats = {};
+
+        for (var i=0; i<Object.keys(ydata).length; i++) {
+            var idata = ydata[Object.keys(ydata)[i]];
+            var cats = Object.keys(idata).sort(function(a,b){return idata[a]-idata[b]}).reverse();
+            var sorted_idata = [];
+            for(var j=0; j<cats.length; j++){
+                (set_cats[cats[j]] === undefined) ? set_cats[cats[j]]=idata[cats[j]] : set_cats[cats[j]]=set_cats[cats[j]]+idata[cats[j]];
+                sorted_idata.push(idata[cats[j]]);
+                total_count += idata[cats[j]];
             }
-            sorted_ydata.push(ydata[cats[j]]);
-            total_count += ydata[cats[j]];
+            iseries.push({"name": Object.keys(ydata)[i], "data": sorted_idata});
         }
-        var subtitle = 'Total: '+total_count;
-        if (typeof start_month !== 'undefined') {
-            subtitle = 'Total since '+start_month+': '+total_count;
-        }
+        var nice_cats = Object.keys(set_cats).sort(function(a,b){return set_cats[a]-set_cats[b]}).reverse();
+        subtitle = subtitle;
         $(target).highcharts({
+            colors: ['#315a7b', '#377eb8'],
             chart: {
                 type: 'bar',
                 height: plot_height,
@@ -140,15 +159,24 @@ function make_bar_plot(target, ydata, title, axisTitle, start_month){
                 min: 0,
                 title: { text: axisTitle }
             },
-            legend: { enabled: false },
+            legend: {
+                reversed: true,
+                floating: true,
+                y: -30,
+                x: 100,
+                enabled: enableLegend
+            },
             plotOptions: {
                 bar: {
                     borderWidth: 0,
                     groupPadding: 0.1,
                     dataLabels: { enabled: true }
                 },
+                series: {
+                    stacking: 'normal'
+                }
             },
-            series: [{ data: sorted_ydata }]
+            series: iseries
         });
     } catch(err) {
         $(target).addClass('coming_soon').text('coming soon');
@@ -371,7 +399,7 @@ function make_affiliations_plot(){
 function make_throughput_plot(){
     var num_weeks = 12;
     var weeks = Object.keys(data['bp_seq_per_week']).sort().reverse().slice(0,num_weeks+1).reverse();
-    var skeys = Array('HiseqX', 'Hiseq', 'Miseq');
+    var skeys = Array('HiseqX', 'NovaSeq', 'Hiseq', 'Miseq');
     // Collect all series types
     for(i=0; i<num_weeks; i++){
         var wkeys = Object.keys(data['bp_seq_per_week'][weeks[i]]);
@@ -459,15 +487,13 @@ function make_throughput_plot(){
         legend: {
             enabled: true,
             floating: true,
-            layout: 'vertical',
+            layout: 'horizontal',
             align: 'left',
             verticalAlign: 'top',
             y: 80,
             x: 90,
             itemStyle: { 'font-weight': 'normal' },
-            borderWidth: 1,
             backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
-            shadow: true
         },
         series: sdata
     });
