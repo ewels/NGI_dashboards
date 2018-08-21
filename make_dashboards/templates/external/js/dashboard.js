@@ -117,16 +117,6 @@ function collect_n_months(data, n, start_key) {
     return ndata;
 }
 
-function make_species_plot(target) {
-    try {
-        throw 'Placeholder';
-    } catch(err) {
-        $(target).addClass('coming_soon').text('coming soon');
-        console.log(err);
-    }
-
-}
-
 // Make a bar plot
 function make_bar_plot(target, title, axisTitle, subtitle ,enableLegend, ydata){
     try {
