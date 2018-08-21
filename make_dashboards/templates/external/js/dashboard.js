@@ -38,20 +38,36 @@ $(function () {
         }
 
         // Projects plot
+        // Get library prep projects the last num_months, subtract open library prep projects
         var ydata = collect_n_months(data['num_projects'], num_months, start_date);
+        ydata = Object.keys(ydata).concat(Object.keys(data['open_projects'])).reduce(function(obj, k) {
+          obj[k] = (ydata[k] || 0) - (data['open_projects'][k] || 0);
+          return obj;
+        }, {})
+        // Get sequencing projects the last num_months, subtract open sequencing projects
         var ydata_seq = collect_n_months(data['num_seq_projects'], num_months, start_date);
-        var open_projs = Object.keys(data['open_projects']).map(function(a){return data['open_projects'][a]}).reduce(function(a,b){return a+b});
+        ydata_seq = Object.keys(ydata_seq).concat(Object.keys(data['open_seq_projects'])).reduce(function(obj, k) {
+          obj[k] = (ydata_seq[k] || 0) - (data['open_seq_projects'][k] || 0);
+          return obj;
+        }, {})
+        // Add open sequencing projects to open library prep projects
+        var open = Object.keys(data['open_projects']).concat(Object.keys(data['open_seq_projects'])).reduce(function(obj, k) {
+          obj[k] = (data['open_projects'][k] || 0) + (data['open_seq_projects'][k] || 0);
+          return obj;
+        }, {})
+        // Sum projects count
+        var open_projs = Object.keys(open).map(function(a){return open[a]}).reduce(function(a,b){return a+b});
         var all_projs = Object.keys(ydata).map(function(a){return ydata[a]}).reduce(function(a,b){return a+b}) +
              Object.keys(ydata_seq).map(function(a){return ydata_seq[a]}).reduce(function(a,b){return a+b});
-        var subtitle = all_projs+' since '+start_date+', '+open_projs+' currently open'; 
-        make_bar_plot('#num_projects_plot', '# Projects ', undefined, subtitle, true, {'Library prep': ydata, 'Sequencing only': ydata_seq});
+        var subtitle = all_projs+' since '+start_date+', '+open_projs+' currently open';
+        make_bar_plot('#num_projects_plot', '# Projects ', undefined, subtitle, true, {'Library prep': ydata, 'Sequencing only': ydata_seq, 'Ongoing': open});
 
         // Samples plot
         var ydata = collect_n_months(data['num_samples'], num_months, start_date);
         var ydata_seq = collect_n_months(data['num_seq_samples'], num_months, start_date);
         var all_samples = Object.keys(ydata).map(function(a){return ydata[a]}).reduce(function(a,b){return a+b}) +
              Object.keys(ydata_seq).map(function(a){return ydata_seq[a]}).reduce(function(a,b){return a+b});
-        var subtitle = all_samples+' since '+start_date; 
+        var subtitle = all_samples+' since '+start_date;
         make_bar_plot('#num_samples_plot', '# Samples ', undefined, subtitle, true, {'Library prep': ydata, 'Sequencing only': ydata_seq});
 
         // Species plot
@@ -137,7 +153,7 @@ function make_bar_plot(target, title, axisTitle, subtitle ,enableLegend, ydata){
         var nice_cats = Object.keys(set_cats).sort(function(a,b){return set_cats[a]-set_cats[b]}).reverse();
         subtitle = subtitle;
         $(target).highcharts({
-            colors: ['#315a7b', '#377eb8'],
+            colors: ['#315a7b', '#377eb8', '#4daf4a'],
             chart: {
                 type: 'bar',
                 height: plot_height,
@@ -163,7 +179,8 @@ function make_bar_plot(target, title, axisTitle, subtitle ,enableLegend, ydata){
                 reversed: true,
                 floating: true,
                 y: -30,
-                x: 100,
+                x: 150,
+                layout: 'vertical',
                 enabled: enableLegend
             },
             plotOptions: {

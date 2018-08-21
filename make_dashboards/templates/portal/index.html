@@ -170,7 +170,11 @@ $(function () {
         plot_everything(years[0]);
 
         // Open Projects plot
-        var ydata = data['open_projects'];
+        // Add open sequencing and open lib prep projects
+        var ydata = Object.keys(data['open_projects']).concat(Object.keys(data['open_seq_projects'])).reduce(function(obj, k) {
+          obj[k] = (data['open_projects'][k] || 0) + (data['open_seq_projects'][k] || 0);
+          return obj;
+        }, {})
         make_bar_plot('#open_projects_plot', 'Currently Open Projects', 'Number of Projects', false, {'data': ydata});
 
     } catch(err){
@@ -626,17 +630,15 @@ function make_throughput_plot(year, num_weeks){
             }
         },
         legend: {
-            enabled: true,
-            floating: true,
-            layout: 'vertical',
-            align: 'left',
-            verticalAlign: 'top',
-            y: 0,
-            x: 90,
-            itemStyle: { 'font-weight': 'normal' },
-            borderWidth: 1,
-            backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
-            shadow: true
+          enabled: true,
+          floating: true,
+          layout: 'horizontal',
+          align: 'left',
+          verticalAlign: 'top',
+          y: 80,
+          x: 90,
+          itemStyle: { 'font-weight': 'normal' },
+          backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
         },
         series: sdata
     });
