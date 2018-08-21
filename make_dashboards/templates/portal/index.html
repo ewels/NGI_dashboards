@@ -175,7 +175,7 @@ $(function () {
           obj[k] = (data['open_projects'][k] || 0) + (data['open_seq_projects'][k] || 0);
           return obj;
         }, {})
-        make_bar_plot('#open_projects_plot', 'Currently Open Projects', 'Number of Projects', false, {'data': ydata});
+        make_bar_plot('#open_projects_plot', 'Currently Open Projects', 'Number of Projects', false, {'Projects': ydata});
 
     } catch(err){
         $('.plots_content').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Apologies, there was an error whilst loading this data.</strong> Please try again soon.</p></div>');
@@ -308,8 +308,9 @@ function make_bar_plot(target, title, yAxis_title, enableLegend, ydata){
                 text: 'Total: '+total_count
             },
             tooltip: {
+                shared: true,
                 headerFormat: '',
-                pointFormat: '<span style="color:{series.color}; font-weight:bold;">{series.name}</span>: {point.y}'
+                pointFormat: '<span style="color:{series.color}; font-weight:bold;">{series.name}</span>: {point.y}<br/>'
             },
             credits: { enabled: false },
             xAxis: {

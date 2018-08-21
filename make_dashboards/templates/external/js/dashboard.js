@@ -157,8 +157,9 @@ function make_bar_plot(target, title, axisTitle, subtitle ,enableLegend, ydata){
                 text: subtitle,
             },
             tooltip: {
+                shared: true,
                 headerFormat: '',
-                pointFormat: '<span style="color:{series.color}; font-weight:bold;">{series.name}</span>: {point.y}'
+                pointFormat: '<span style="color:{series.color}; font-weight:bold;">{series.name}</span>: {point.y}<br/>'
             },
             credits: { enabled: false },
             xAxis: {
