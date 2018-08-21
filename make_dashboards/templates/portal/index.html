@@ -802,7 +802,7 @@ function delivery_times_histograms(year){
             enabled: true,
             useHTML: true,
             formatter: function(){
-              tt = "<strong>"+(Number.isInteger(this.x)? this.x : this.x.toFixed(1))+" Weeks</strong><br>";
+              tt = "<strong>"+(Number.isInteger(this.x)? this.x : this.x.toFixed(1))+" week(s)</strong><br>";
               tt += '<span style="color:'+this.point.color+';">'
               tt += this.series.name+'</span>'
               return tt;
