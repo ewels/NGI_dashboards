@@ -307,7 +307,10 @@ function make_bar_plot(target, title, yAxis_title, enableLegend, ydata){
             subtitle: {
                 text: 'Total: '+total_count
             },
-            tooltip: { enabled: false },
+            tooltip: {
+                headerFormat: '',
+                pointFormat: '<span style="color:{series.color}; font-weight:bold;">{series.name}</span>: {point.y}'
+            },
             credits: { enabled: false },
             xAxis: {
                 categories: nice_cats

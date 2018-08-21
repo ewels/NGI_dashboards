@@ -156,7 +156,10 @@ function make_bar_plot(target, title, axisTitle, subtitle ,enableLegend, ydata){
             subtitle: {
                 text: subtitle,
             },
-            tooltip: { enabled: false },
+            tooltip: {
+                headerFormat: '',
+                pointFormat: '<span style="color:{series.color}; font-weight:bold;">{series.name}</span>: {point.y}'
+            },
             credits: { enabled: false },
             xAxis: {
                 categories: nice_cats
