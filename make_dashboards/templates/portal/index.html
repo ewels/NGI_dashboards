@@ -314,7 +314,8 @@ function make_bar_plot(target, title, yAxis_title, enableLegend, ydata){
             },
             yAxis: {
                 min: 0,
-                title: { text: yAxis_title }
+                title: { text: yAxis_title },
+                stackLabels: { enabled: true }
             },
             legend: {
                 reversed: true,
@@ -326,11 +327,10 @@ function make_bar_plot(target, title, yAxis_title, enableLegend, ydata){
             plotOptions: {
                 bar: {
                     borderWidth: 0,
-                    groupPadding: 0.1,
-                    dataLabels: { enabled: true }
+                    groupPadding: 0.1
                 },
                 series: {
-                    stacking: 'normal'
+                    stacking: 'normal',
                 }
             },
             series: iseries

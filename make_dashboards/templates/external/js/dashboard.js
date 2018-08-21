@@ -163,7 +163,8 @@ function make_bar_plot(target, title, axisTitle, subtitle ,enableLegend, ydata){
             },
             yAxis: {
                 min: 0,
-                title: { text: axisTitle }
+                title: { text: axisTitle },
+                stackLabels: { enabled: true }
             },
             legend: {
                 reversed: true,
@@ -177,7 +178,6 @@ function make_bar_plot(target, title, axisTitle, subtitle ,enableLegend, ydata){
                 bar: {
                     borderWidth: 0,
                     groupPadding: 0.1,
-                    dataLabels: { enabled: true }
                 },
                 series: {
                     stacking: 'normal'
