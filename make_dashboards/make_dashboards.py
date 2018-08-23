@@ -33,8 +33,9 @@ with open (os.path.join(os.path.dirname(script_dir), 'version.txt')) as f:
 @click.option('--couch_server', '-s', required=True)
 @click.option('--outdir', '-o', required=True, help = "Create dashboards in the specified output directory.")
 @click.option('--demo', is_flag=True)
+@click.option('--genstat_url', '-g', default="https://genomics-status.scilifelab.se")
 @click.version_option(p_version)
-def make_dashboards(outdir, demo, couch_user, password, couch_server):
+def make_dashboards(outdir, demo, couch_user, password, couch_server, genstat_url):
     """
     Function to get data_internal from KPI data_internalbase and render dashboard HTML files.
     """
@@ -67,7 +68,7 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
     data_internal['json'] = json.dumps(data_internal, indent=4)
 
     ### GET THE EXTERNAL DATA
-    external_url = 'https://genomics-status.scilifelab.se/api/v1/stats'
+    external_url = '{}/api/v1/stats'.format(genstat_url)
     data_external = json.load(urllib.urlopen(external_url))
     data_external['date_rendered'] = datetime.now().strftime("%Y-%m-%d, %H:%M")
     data_external['p_version'] = p_version
@@ -78,7 +79,7 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server):
     data_external['json'] = json.dumps(data_external, indent=4)
 
     ### GET THE DELIVERY TIMES DATA
-    dtimes_url = 'https://genomics-status.scilifelab.se/api/v1/stats/year_deliverytime_application'
+    dtimes_url = '{}/api/v1/stats/year_deliverytime_application'.format(genstat_url)
     dtimes = json.load(urllib.urlopen(dtimes_url))
     dtimes_json = json.dumps(dtimes, indent=4)
 

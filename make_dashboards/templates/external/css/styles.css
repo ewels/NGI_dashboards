@@ -61,8 +61,7 @@ footer img {
 .coming_soon {
     background-color: #f2f2f2;
     border: 1px dashed #ccc;
-    /*height: 140px;
-    line-height: 140px;*/
+    line-height: 400px;
     height: auto !important;
     padding: 20px !important;
     margin: auto 0;
