@@ -276,12 +276,21 @@ function make_bar_plot(target, title, yAxis_title, enableLegend, ydata){
         var total_count = 0;
         var set_cats = {};
 
+        // Do it once to get the catagories
         for (var i=0; i<Object.keys(ydata).length; i++) {
             var idata = ydata[Object.keys(ydata)[i]];
             var cats = Object.keys(idata).sort(function(a,b){return idata[a]-idata[b]}).reverse();
+            for(var j=0; j<cats.length; j++){
+              (set_cats[cats[j]] === undefined) ? set_cats[cats[j]]=idata[cats[j]] : set_cats[cats[j]]=set_cats[cats[j]]+idata[cats[j]];
+            }
+        }
+        // Do it twice to get the data or w.e
+        for (var i=0; i<Object.keys(ydata).length; i++) {
+            var idata = ydata[Object.keys(ydata)[i]];
+            var cats = Object.keys(set_cats).sort(function(a,b){return set_cats[a]-set_cats[b]}).reverse();
             var sorted_idata = [];
             for(var j=0; j<cats.length; j++){
-                (set_cats[cats[j]] === undefined) ? set_cats[cats[j]]=idata[cats[j]] : set_cats[cats[j]]=set_cats[cats[j]]+idata[cats[j]];
+                if (idata[cats[j]] === undefined) {idata[cats[j]] = 0;}
                 sorted_idata.push(idata[cats[j]]);
                 total_count += idata[cats[j]];
             }
@@ -715,33 +724,35 @@ function delivery_times_histograms(year){
     }
     // Create y axes and series for plot
     var yaxes = [], series = [], misc_applications = [], misc_app_data = [];
-    for(var i = 0; i < totals.length; i++){
-        var application = totals[i][0];
+    var top_total = totals.slice(0,3).sort();
+    var the_rest = totals.slice(3,);
+    for (var i = 0; i < the_rest.length; i++) {
+        misc_applications.push(the_rest[i][0]);
+        misc_app_data = misc_app_data.concat(ydata[the_rest[i][0]]);
+    }
+    for(var i = 0; i < top_total.length; i++){
+        var application = top_total[i][0];
         var app_data = ydata[application];
-        if(i < 3){
-            var hist = histogram(app_data, 7);
-            yaxes.push({ title: { text: application } });
-            // Histogram data
-            series.push({
-                name: application,
-                data: hist,
-                marker: { enabled: false },
-                yAxis: yaxes.length - 1
-            });
-            // Median line
-            series.push({
-                name: 'Median: '+application,
-                type: 'column',
-                pointWidth: 2,
-                borderWidth: 0,
-                color: '#666',
-                data: [median_bar(app_data, hist)],
-                yAxis: yaxes.length - 1
-            });
-        } else {
-            misc_applications.push(application);
-            misc_app_data = misc_app_data.concat(app_data);
-        }
+        var hist = histogram(app_data, 7);
+        yaxes.push({ title: { text: application } });
+        // Histogram data
+        series.push({
+            name: application,
+            data: hist,
+            marker: { enabled: false },
+            yAxis: yaxes.length - 1
+        });
+        // Median line
+        series.push({
+            name: 'Median: '+application,
+            type: 'column',
+            pointWidth: 2,
+            borderWidth: 0,
+            color: '#666',
+            data: [median_bar(app_data, hist)],
+            yAxis: yaxes.length - 1
+        });
+
     }
     if(misc_app_data.length > 0){
         var hist = histogram(misc_app_data, 7);
