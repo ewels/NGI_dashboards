@@ -90,10 +90,7 @@
     </div>
 
     <div class="row">
-      <div class="col-sm-6">
-        <div id="open_projects_plot" class="external_plot"></div>
-      </div>
-      <div class="col-sm-6">
+      <div class="col-sm-12">
         <div id="affiliations_plot" class="external_plot"></div>
       </div>
     </div>
@@ -171,11 +168,7 @@ $(function () {
 
         // Open Projects plot
         // Add open sequencing and open lib prep projects
-        var ydata = Object.keys(data['open_projects']).concat(Object.keys(data['open_seq_projects'])).reduce(function(obj, k) {
-          obj[k] = (data['open_projects'][k] || 0) + (data['open_seq_projects'][k] || 0);
-          return obj;
-        }, {})
-        make_bar_plot('#open_projects_plot', 'Currently Open Projects', 'Number of Projects', false, {'Projects': ydata});
+        //make_bar_plot('#open_projects_plot', 'Currently Open Projects', 'Number of Projects', false, {'Projects': ydata});
 
     } catch(err){
         $('.plots_content').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Apologies, there was an error whilst loading this data.</strong> Please try again soon.</p></div>');
@@ -231,15 +224,19 @@ function get_median(arr) {
 
 function plot_everything(year){
     try {
-        // # Projects plot
-        var ydata = collect_year(data['num_projects'], year);
-        var ydata_seq = collect_year(data['num_seq_projects'], year);
-        make_bar_plot('#num_projects_plot', '# Projects in '+year, undefined, true, {'Library prep': ydata, 'Sequencing only': ydata_seq});
-
         // # Samples plot
         var ydata = collect_year(data['num_samples'], year);
         var ydata_seq = collect_year(data['num_seq_samples'], year);
         make_bar_plot('#num_samples_plot', '# Samples in '+year, undefined, true, {'Library prep': ydata, 'Sequencing only': ydata_seq});
+
+        // # Projects plot
+        var ydata = collect_year(data['num_projects'], year);
+        var ydata_seq = collect_year(data['num_seq_projects'], year);
+        var open = Object.keys(data['open_projects']).concat(Object.keys(data['open_seq_projects'])).reduce(function(obj, k) {
+          obj[k] = (data['open_projects'][k] || 0) + (data['open_seq_projects'][k] || 0);
+          return obj;
+        }, {});
+        make_bar_plot('#num_projects_plot', '# Projects in '+year, undefined, true, {'Library prep': ydata, 'Sequencing only': ydata_seq, 'Ongoing': open});
 
         // Delivery times plot
         delivery_times_histograms(year);
@@ -296,11 +293,18 @@ function make_bar_plot(target, title, yAxis_title, enableLegend, ydata){
             }
             iseries.push({"name": Object.keys(ydata)[i], "data": sorted_idata});
         }
+        // Ugly hack requested by @ewels
+        if (title.indexOf((new Date()).getFullYear()) < 0) {
+            for (var i=0; i<iseries.length; i++) {
+              if (iseries[i]["name"] == "Ongoing") {iseries[i]["visible"] = false;};
+            }
+        }
+
         var nice_cats = Object.keys(set_cats).sort(function(a,b){return set_cats[a]-set_cats[b]}).reverse();
         var subtitle = 'Total: '+total_count;
         colours = ['#377eb8'];
         if (enableLegend) {
-          colours = ['#315a7b','#377eb8'];
+          colours = ['#315a7b', '#377eb8', '#4daf4a'];
         }
         $(target).highcharts({
             colors: colours,
