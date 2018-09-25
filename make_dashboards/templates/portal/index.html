@@ -424,7 +424,6 @@ function make_delivery_times_plot(year){
 
 
 function make_finished_lib_median_plot(year){
-    //var ydata = parseFloat(data['delivery_times_median'][year]['Sequencing Only']);
     var ydata = collect_year(deliverytimes_data, year)['Sequencing Only'];
     ydata = get_median(ydata);
     $('#finished_lib_median_tat').highcharts({
@@ -453,7 +452,7 @@ function make_finished_lib_median_plot(year){
             max: 6,
             title: {
                 text: 'Median turn around time for sequencing-ready libraries: <strong>'+ydata+' days</strong>',
-                y: -20,
+                y: -5,
                 style: { 'font-size': 12 }
             },
             labels: { enabled: false },
