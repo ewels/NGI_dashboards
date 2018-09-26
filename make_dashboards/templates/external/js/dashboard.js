@@ -129,12 +129,21 @@ function make_bar_plot(target, title, axisTitle, subtitle ,enableLegend, ydata){
         var total_count = 0;
         var set_cats = {};
 
+        // Do it once to get the catagories
         for (var i=0; i<Object.keys(ydata).length; i++) {
             var idata = ydata[Object.keys(ydata)[i]];
             var cats = Object.keys(idata).sort(function(a,b){return idata[a]-idata[b]}).reverse();
+            for(var j=0; j<cats.length; j++){
+              (set_cats[cats[j]] === undefined) ? set_cats[cats[j]]=idata[cats[j]] : set_cats[cats[j]]=set_cats[cats[j]]+idata[cats[j]];
+            }
+        }
+        // Do it twice to get the data or w.e
+        for (var i=0; i<Object.keys(ydata).length; i++) {
+            var idata = ydata[Object.keys(ydata)[i]];
+            var cats = Object.keys(set_cats).sort(function(a,b){return set_cats[a]-set_cats[b]}).reverse();
             var sorted_idata = [];
             for(var j=0; j<cats.length; j++){
-                (set_cats[cats[j]] === undefined) ? set_cats[cats[j]]=idata[cats[j]] : set_cats[cats[j]]=set_cats[cats[j]]+idata[cats[j]];
+                if (idata[cats[j]] === undefined) {idata[cats[j]] = 0;}
                 sorted_idata.push(idata[cats[j]]);
                 total_count += idata[cats[j]];
             }

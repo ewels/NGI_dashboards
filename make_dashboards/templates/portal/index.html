@@ -90,10 +90,7 @@
     </div>
 
     <div class="row">
-      <div class="col-sm-6">
-        <div id="open_projects_plot" class="external_plot"></div>
-      </div>
-      <div class="col-sm-6">
+      <div class="col-sm-12">
         <div id="affiliations_plot" class="external_plot"></div>
       </div>
     </div>
@@ -171,11 +168,7 @@ $(function () {
 
         // Open Projects plot
         // Add open sequencing and open lib prep projects
-        var ydata = Object.keys(data['open_projects']).concat(Object.keys(data['open_seq_projects'])).reduce(function(obj, k) {
-          obj[k] = (data['open_projects'][k] || 0) + (data['open_seq_projects'][k] || 0);
-          return obj;
-        }, {})
-        make_bar_plot('#open_projects_plot', 'Currently Open Projects', 'Number of Projects', false, {'Projects': ydata});
+        //make_bar_plot('#open_projects_plot', 'Currently Open Projects', 'Number of Projects', false, {'Projects': ydata});
 
     } catch(err){
         $('.plots_content').html('<div class="alert alert-danger text-center" style="margin: 100px 50px;"><p><strong>Apologies, there was an error whilst loading this data.</strong> Please try again soon.</p></div>');
@@ -231,15 +224,19 @@ function get_median(arr) {
 
 function plot_everything(year){
     try {
-        // # Projects plot
-        var ydata = collect_year(data['num_projects'], year);
-        var ydata_seq = collect_year(data['num_seq_projects'], year);
-        make_bar_plot('#num_projects_plot', '# Projects in '+year, undefined, true, {'Library prep': ydata, 'Sequencing only': ydata_seq});
-
         // # Samples plot
         var ydata = collect_year(data['num_samples'], year);
         var ydata_seq = collect_year(data['num_seq_samples'], year);
         make_bar_plot('#num_samples_plot', '# Samples in '+year, undefined, true, {'Library prep': ydata, 'Sequencing only': ydata_seq});
+
+        // # Projects plot
+        var ydata = collect_year(data['num_projects'], year);
+        var ydata_seq = collect_year(data['num_seq_projects'], year);
+        var open = Object.keys(data['open_projects']).concat(Object.keys(data['open_seq_projects'])).reduce(function(obj, k) {
+          obj[k] = (data['open_projects'][k] || 0) + (data['open_seq_projects'][k] || 0);
+          return obj;
+        }, {});
+        make_bar_plot('#num_projects_plot', '# Projects in '+year, undefined, true, {'Library prep': ydata, 'Sequencing only': ydata_seq, 'Ongoing': open});
 
         // Delivery times plot
         delivery_times_histograms(year);
@@ -276,22 +273,38 @@ function make_bar_plot(target, title, yAxis_title, enableLegend, ydata){
         var total_count = 0;
         var set_cats = {};
 
+        // Do it once to get the catagories
         for (var i=0; i<Object.keys(ydata).length; i++) {
             var idata = ydata[Object.keys(ydata)[i]];
             var cats = Object.keys(idata).sort(function(a,b){return idata[a]-idata[b]}).reverse();
+            for(var j=0; j<cats.length; j++){
+              (set_cats[cats[j]] === undefined) ? set_cats[cats[j]]=idata[cats[j]] : set_cats[cats[j]]=set_cats[cats[j]]+idata[cats[j]];
+            }
+        }
+        // Do it twice to get the data or w.e
+        for (var i=0; i<Object.keys(ydata).length; i++) {
+            var idata = ydata[Object.keys(ydata)[i]];
+            var cats = Object.keys(set_cats).sort(function(a,b){return set_cats[a]-set_cats[b]}).reverse();
             var sorted_idata = [];
             for(var j=0; j<cats.length; j++){
-                (set_cats[cats[j]] === undefined) ? set_cats[cats[j]]=idata[cats[j]] : set_cats[cats[j]]=set_cats[cats[j]]+idata[cats[j]];
+                if (idata[cats[j]] === undefined) {idata[cats[j]] = 0;}
                 sorted_idata.push(idata[cats[j]]);
                 total_count += idata[cats[j]];
             }
             iseries.push({"name": Object.keys(ydata)[i], "data": sorted_idata});
         }
+        // Ugly hack requested by @ewels
+        if (title.indexOf((new Date()).getFullYear()) < 0) {
+            for (var i=0; i<iseries.length; i++) {
+              if (iseries[i]["name"] == "Ongoing") {iseries[i]["visible"] = false;};
+            }
+        }
+
         var nice_cats = Object.keys(set_cats).sort(function(a,b){return set_cats[a]-set_cats[b]}).reverse();
         var subtitle = 'Total: '+total_count;
         colours = ['#377eb8'];
         if (enableLegend) {
-          colours = ['#315a7b','#377eb8'];
+          colours = ['#315a7b', '#377eb8', '#4daf4a'];
         }
         $(target).highcharts({
             colors: colours,
@@ -411,7 +424,6 @@ function make_delivery_times_plot(year){
 
 
 function make_finished_lib_median_plot(year){
-    //var ydata = parseFloat(data['delivery_times_median'][year]['Sequencing Only']);
     var ydata = collect_year(deliverytimes_data, year)['Sequencing Only'];
     ydata = get_median(ydata);
     $('#finished_lib_median_tat').highcharts({
@@ -440,7 +452,7 @@ function make_finished_lib_median_plot(year){
             max: 6,
             title: {
                 text: 'Median turn around time for sequencing-ready libraries: <strong>'+ydata+' days</strong>',
-                y: -20,
+                y: -5,
                 style: { 'font-size': 12 }
             },
             labels: { enabled: false },
@@ -715,33 +727,42 @@ function delivery_times_histograms(year){
     }
     // Create y axes and series for plot
     var yaxes = [], series = [], misc_applications = [], misc_app_data = [];
-    for(var i = 0; i < totals.length; i++){
-        var application = totals[i][0];
+    var top_total = totals.slice(0,3).sort();
+    var the_rest = totals.slice(3,);
+    // Put sequencing only first
+    for(var i=0; i < top_total.length; i++) {
+      if(top_total[i][0] == "Sequencing Only"){
+          top_total.splice(0, 0, top_total.splice(i, 1)[0]);
+      }
+    }
+
+    for (var i = 0; i < the_rest.length; i++) {
+        misc_applications.push(the_rest[i][0]);
+        misc_app_data = misc_app_data.concat(ydata[the_rest[i][0]]);
+    }
+    for(var i = 0; i < top_total.length; i++){
+        var application = top_total[i][0];
         var app_data = ydata[application];
-        if(i < 3){
-            var hist = histogram(app_data, 7);
-            yaxes.push({ title: { text: application } });
-            // Histogram data
-            series.push({
-                name: application,
-                data: hist,
-                marker: { enabled: false },
-                yAxis: yaxes.length - 1
-            });
-            // Median line
-            series.push({
-                name: 'Median: '+application,
-                type: 'column',
-                pointWidth: 2,
-                borderWidth: 0,
-                color: '#666',
-                data: [median_bar(app_data, hist)],
-                yAxis: yaxes.length - 1
-            });
-        } else {
-            misc_applications.push(application);
-            misc_app_data = misc_app_data.concat(app_data);
-        }
+        var hist = histogram(app_data, 7);
+        yaxes.push({ title: { text: application } });
+        // Histogram data
+        series.push({
+            name: application,
+            data: hist,
+            marker: { enabled: false },
+            yAxis: yaxes.length - 1
+        });
+        // Median line
+        series.push({
+            name: 'Median: '+application,
+            type: 'column',
+            pointWidth: 2,
+            borderWidth: 0,
+            color: '#666',
+            data: [median_bar(app_data, hist)],
+            yAxis: yaxes.length - 1
+        });
+
     }
     if(misc_app_data.length > 0){
         var hist = histogram(misc_app_data, 7);
