@@ -729,6 +729,13 @@ function delivery_times_histograms(year){
     var yaxes = [], series = [], misc_applications = [], misc_app_data = [];
     var top_total = totals.slice(0,3).sort();
     var the_rest = totals.slice(3,);
+    // Put sequencing only first
+    for(var i=0; i < top_total.length; i++) {
+      if(top_total[i][0] == "Sequencing Only"){
+          top_total.splice(0, 0, top_total.splice(i, 1)[0]);
+      }
+    }
+
     for (var i = 0; i < the_rest.length; i++) {
         misc_applications.push(the_rest[i][0]);
         misc_app_data = misc_app_data.concat(ydata[the_rest[i][0]]);
