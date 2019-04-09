@@ -419,7 +419,7 @@ function make_affiliations_plot(){
 function make_throughput_plot(){
     var num_weeks = 12;
     var weeks = Object.keys(data['bp_seq_per_week']).sort().reverse().slice(0,num_weeks+1).reverse();
-    var skeys = Array('HiseqX', 'NovaSeq', 'Hiseq', 'Miseq');
+    var skeys = Array('NovaSeq', 'HiseqX', 'Hiseq', 'Miseq');
     // Collect all series types
     for(i=0; i<num_weeks; i++){
         var wkeys = Object.keys(data['bp_seq_per_week'][weeks[i]]);
