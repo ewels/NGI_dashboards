@@ -107,19 +107,19 @@ def sequencing_load():
     #This handles the QUEUES only
     q_miseq_s_ids=['52', '53', '54', '505']
     q_miseq_p_ids=['55', '56', '253', '1002']
-    q_hiseq_s_ids=['252', '46', '47', '401']
-    q_hiseq_p_ids=['49', '125', '1001', '50']
     q_hiseqX_s_ids=['751', '711', '712']
     q_hiseqX_p_ids=['713', '714', '715', '716']
+    q_novaseq_s_ids=['1660', '1661', '1662', '1655', '1656']
+    q_novaseq_p_ids=['1663']
     miseq_s=0
     miseq_p=0
     miseq_l=0
-    hiseq_s=0
-    hiseq_p=0
-    hiseq_l=0
     hiseqX_s=0
     hiseqX_p=0
     hiseqX_l=0
+    novaseq_s=0
+    novaseq_p=0
+    novaseq_l=0
     for s in q_miseq_s_ids:
         q=Queue(lims, id=s)
         miseq_s+=len(q.artifacts)
@@ -130,16 +130,6 @@ def sequencing_load():
         miseq_p+=len(q.artifacts)
         for art in q.artifacts:
             miseq_l+=estimate_lanes_per_artifact(art)
-    for s in q_hiseq_s_ids:
-        q=Queue(lims, id=s)
-        hiseq_s+=len(q.artifacts)
-        for art in q.artifacts:
-            hiseq_l+=estimate_lanes_per_artifact(art)
-    for s in q_hiseq_p_ids:
-        q=Queue(lims, id=s)
-        hiseq_p+=len(q.artifacts)
-        for art in q.artifacts:
-            hiseq_l+=estimate_lanes_per_artifact(art)
     for s in q_hiseqX_s_ids:
         q=Queue(lims, id=s)
         hiseqX_s+=len(q.artifacts)
@@ -150,15 +140,21 @@ def sequencing_load():
         hiseqX_p+=len(q.artifacts)
         for art in q.artifacts:
             hiseqX_l+=estimate_lanes_per_artifact(art)
+    for s in q_novaseq_s_ids:
+        q=Queue(lims, id=s)
+        novaseq_s+=len(q.artifacts)
+        for art in q.artifacts:
+            novaseq_l+=estimate_lanes_per_artifact(art)
+    for s in q_novaseq_p_ids:
+        q=Queue(lims, id=s)
+        novaseq_p+=len(q.artifacts)
+        for art in q.artifacts:
+            novaseq_l+=estimate_lanes_per_artifact(art)
     #This handles what is currently running
-    hiseq_rl=0
     hiseqx_rl=0
     miseq_rl=0
+    novaseq_rl=0
     starting_date=datetime.now() - timedelta(5)
-    hiseq_pr=lims.get_processes(type="Illumina Sequencing (Illumina SBS) 4.0", last_modified=starting_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
-    for pro in hiseq_pr:
-        if not pro.udf.get("Finish Date"):
-            hiseq_rl+=len(pro.all_inputs())
     hiseqx_pr=lims.get_processes(type="Illumina Sequencing (HiSeq X) 1.0", last_modified=starting_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     for pro in hiseqx_pr:
         if not pro.udf.get("Finish Date"):
@@ -167,7 +163,10 @@ def sequencing_load():
     for pro in miseq_pr:
         if not pro.udf.get("Finish Date"):
             miseq_rl+=len(pro.all_inputs())
+    novaseq_pr=lims.get_processes(type="AUTOMATED - NovaSeq Run (NovaSeq 6000 v2.0)", last_modified=starting_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    for pro in novaseq_pr:
+        if not pro.date_run: #NovaSeq does not have the "Finish Date" tag, use date_run instead
+            novaseq_rl+=len(pro.all_inputs())
 
 
-
-    return [miseq_s, miseq_p, int(miseq_l), hiseq_s, hiseq_p, int(hiseq_l), hiseqX_s, hiseqX_p, int(hiseqX_l), int(hiseq_rl), int(hiseqx_rl), int(miseq_rl)]
+    return [miseq_s, miseq_p, int(miseq_l), hiseqX_s, hiseqX_p, int(hiseqX_l), int(hiseqx_rl), int(miseq_rl), novaseq_s, novaseq_p, int(novaseq_l), int(novaseq_rl)]

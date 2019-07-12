@@ -65,21 +65,23 @@ $(function () {
         // Max - 5 * pulse
         //
         sequencing_q_subtext = '<span style="color:#DF5353">'+pl['miseq_sequencing_queue_l']+'M</span>, '+
-            '<span style="color:#55BF3B">'+pl['hiseq_sequencing_queue_l']+'H</span>, '+
-            '<span style="color:#7cb5ec">'+pl['hiseqX_sequencing_queue_l']+'X</span> lanes in queue';
+            '<span style="color:#7cb5ec">'+pl['hiseqX_sequencing_queue_l']+'X</span>, '+
+            '<span style="color:#55BF3B">'+pl['novaseq_sequencing_queue_l']+'N</span> lanes in queue';
+
         make_queue_plot('#lp_queue',      pl_l['library_prep'],   pl['library_prep_queue'],   pl['library_prep_queue']+' samples in queue');
-        make_queue_plot('#seq_queue',     pl_l['sequencing_queue'],     [pl['miseq_sequencing_queue_l'], pl['hiseq_sequencing_queue_l'], pl['hiseqX_sequencing_queue_l']], sequencing_q_subtext);
+        make_queue_plot('#seq_queue',     pl_l['sequencing_queue'],     [pl['miseq_sequencing_queue_l'], pl['hiseqX_sequencing_queue_l'], pl['novaseq_sequencing_queue_l']], sequencing_q_subtext);
         make_queue_plot('#bioinfo_queue', pl_l['bioinformatics'], pl['bioinformatics_queue'], pl['bioinformatics_queue']+' lanes in queue');
 
         // Middle Row - Balance plots
         sequencing_subtext = '<span style="color:#AF2323">'+pl['miseq_sequencing_l']+'M</span>, '+
-            '<span style="color:#258F0B">'+pl['hiseq_sequencing_l']+'H</span>, '+
-            '<span style="color:#4c85bc">'+pl['hiseqX_sequencing_l']+'X</span> lanes in progress';
+            '<span style="color:#4c85bc">'+pl['hiseqX_sequencing_l']+'X</span>, '+
+            '<span style="color:#55BF3B">'+pl['novaseq_sequencing_l']+'N</span> lanes in progress';
+
         make_balance_plot('#rc_finished_balance', pl_l['initial_qc_lanes'],   pl['initial_qc_lanes'],   undefined, pl['initial_qc_lanes']+' lanes in progress');
         make_balance_plot('#rc_balance',          pl_l['initial_qc_samples'], pl['initial_qc_samples'], undefined, pl['initial_qc_samples']+' samples in progress');
         make_balance_plot('#lp_balance',          pl_l['library_prep'],       pl['library_prep'],       undefined, pl['library_prep']+' samples in progress');
         make_balance_plot('#bioinfo_balance',     pl_l['bioinformatics'],     pl['bioinformatics'],     undefined, pl['bioinformatics']+' lanes in progress');
-        make_balance_plot('#seq_balance',         pl_l['sequencing'],         [pl['miseq_sequencing_l'], pl['hiseq_sequencing_l'], pl['hiseqX_sequencing_l']],         undefined, sequencing_subtext);
+        make_balance_plot('#seq_balance',         pl_l['sequencing'],         [pl['miseq_sequencing_l'], pl['hiseqX_sequencing_l'], pl['novaseq_sequencing_l']],         undefined, sequencing_subtext);
 
         // Bottom row
         make_success_plot('#rc_success', suc['initial_qc']*100);
@@ -208,7 +210,7 @@ function make_queue_plot(target, aim, now, subtext){
         if (!Array.isArray(now)){
             series=[now];
         }else{
-            chroma_colors=chroma.scale(['#DF5353','#55BF3B','#7cb5ec']).colors(now.length);
+            chroma_colors=chroma.scale(['#DF5353','#7cb5ec','#55BF3B']).colors(now.length);
             series=[];
             for (i in now){
                 obj={name:'serie'+i,
@@ -289,7 +291,7 @@ function make_balance_plot(target, aim, now, prev, subtext){
                 }];
         }else{
             my_plotlines = Array();
-            chroma_colors = chroma.scale(['#AF2323','#259F0B','#4c85cc']).colors(now.length);
+            chroma_colors = chroma.scale(['#AF2323','#4c85cc','#259F0B']).colors(now.length);
             for (i in now){
                 my_plotlines.push({
                     name:'serie'+i,
