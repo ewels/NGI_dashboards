@@ -165,7 +165,7 @@ def sequencing_load():
             miseq_rl+=len(pro.all_inputs())
     novaseq_pr=lims.get_processes(type="AUTOMATED - NovaSeq Run (NovaSeq 6000 v2.0)", last_modified=starting_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     for pro in novaseq_pr:
-        if not pro.udf.get("Finish Date"):
+        if not pro.date_run: #NovaSeq does not have the "Finish Date" tag, use date_run instead
             novaseq_rl+=len(pro.all_inputs())
 
 
