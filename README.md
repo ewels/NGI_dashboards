@@ -30,6 +30,14 @@ The KPI targets are stored in a config file held in this repository.
 To change them, fork the repository and change the file. Submit a
 pull request and merge the changes. Then pull these changes to `tools`.
 
+### Installation
+
+```bash
+conda create -n dashboard python=2 matplotlib
+conda activate dashboard
+pip install -r requirements.txt
+```
+
 ### Contact
 This code was developed by Phil Ewels (@ewels) and
 Remi-Andre Olsen (@remiolsen). 
