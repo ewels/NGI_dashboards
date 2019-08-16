@@ -22,7 +22,7 @@ logging.basicConfig(level=logging.WARNING,
 @click.option("--couch_server", "-s", required=True)
 def update_kpi(couch_user, password, couch_server):
     """
-    Connect to StatusDB projects and flocell databases and 
+    Connect to StatusDB projects and flowcell databases and
     compute current KPIs to be added to a new document in the kpi database.
     This script should be run every hour, and it should have a yaml configuration 
     file in '$HOME/.dashbordrc' with program parameters:
