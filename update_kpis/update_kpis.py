@@ -159,7 +159,7 @@ if __name__ == '__main__':
     try:
         conf_file = os.path.join(os.environ.get('HOME'), '.dashboardrc')
         with open(conf_file, "r") as f:
-            config = yaml.load(f, Loader=yaml.FullLoader)
+            config = yaml.load(f, Loader=yaml.SafeLoader)
     except IOError:
         click.secho("Could not open the config file {}".format(conf_file), fg="red")
         config = {}

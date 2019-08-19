@@ -74,7 +74,7 @@ def make_dashboards(outdir, demo, couch_user, password, couch_server, genstat_ur
     data_external['p_version'] = p_version
     # Translations for lowercase keys
     with open("key_names.yaml", 'r') as f:
-        data_external['key_names'] = yaml.load(f)
+        data_external['key_names'] = yaml.load(f, Loader=yaml.SafeLoader)
 
     data_external['json'] = json.dumps(data_external, indent=4)
 
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     try:
         conf_file = os.path.join(os.environ.get('HOME'), '.dashboardrc')
         with open(conf_file, "r") as f:
-            config = yaml.load(f)
+            config = yaml.load(f, Loader=yaml.SafeLoader)
     except IOError:
         click.secho("Could not open the config file {}".format(conf_file), fg="red")
         config = {}
